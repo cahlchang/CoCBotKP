@@ -7,6 +7,7 @@ import boto3
 import re
 import random
 import urllib.parse
+import math
 
 # ログ設定
 logger = logging.getLogger()
@@ -100,8 +101,6 @@ def set_user_params(user_id, url):
                     
         if False == is_action_end:
             if is_action_now_parse:
-                print("aaa")
-                
                 if not action_now_parse in dict_action:
                     dict_action[action_now_parse] = []
                     
@@ -165,10 +164,11 @@ def set_user_params(user_id, url):
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
     body = event["body"]
-    
+    color = ""
     body_split = body.split("&")
-    print(body_split)
-    #evt_slack = body["event"]
+    #print(body_split)
+    lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
+    map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
     evt_slack = {}
     for datum in body_split:
         l = datum.split("=")
@@ -181,46 +181,82 @@ def lambda_handler(event: dict, context) -> str:
 
     url = "https://slack.com/api/chat.postMessage"
     channel = evt_slack["channel_id"]
-    print(evt_slack["text"])
-    txt_message = urllib.parse.unquote(evt_slack["text"])
-    print(txt_message)
-    message = txt_message
-    print(txt_message)
-    if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , txt_message):
+    message = urllib.parse.unquote(evt_slack["text"])
+    #message = message.upper()
+    print(message)
+
+    is_trigger_roll = False
+    
+    lst_trigger = lst_trigger_role + lst_trigger_status + lst_trigger_action + list(map_alias_trigger.keys())
+    print(lst_trigger)
+    for datum in lst_trigger:
+        msg_eval = message.upper()
+        datum = datum.upper()
+        if not -1 == msg_eval.find(datum):
+            print(datum)
+            is_trigger_roll = True
+    
+    
+    if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , message):
         logging.info("setting start")
 
-        match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", txt_message)
+        match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         return_message = set_user_params(user_id, match_url.group(1))
     elif "get" == message:
-        #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", txt_message)
+        #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", _message)
         return_message = get_user_params(user_id)
+    elif is_trigger_roll:
+        param = json.loads(get_user_params(user_id, ""))
+        #todo spaceが入っていてもなんとかしたい
+        message = urllib.parse.unquote(message)
+        print(message)
+        if message in map_alias_trigger.keys():
+            message = map_alias_trigger[message]
+        
+        proc = "^(.*)(\+|\-|\*|\/)(.*)$"
+        result_parse = re.match(proc, message)
+        is_correction = False
+        msg_correction = "+0"
+        if result_parse:
+            message = result_parse.group(1)
+            operant = result_parse.group(2)
+            args = result_parse.group(3)
+            msg_correction = operant + args
+            is_correction = True
+        
+        key = message.upper()
+        data = param[key]
+        
+        print(data)
+        num = int(random.randint(1,100))
+        msg_eval2 = message.upper()
+        if msg_eval2 in lst_trigger_status:
+            num_targ = data
+        else:
+            num_targ = data[-1]
+        
+        msg_num_targ = num_targ
+        if is_correction:
+            num_targ = eval('{}{}{}'.format(num_targ, operant, args))
+            num_targ = math.ceil(num_targ)
+            
+        print(data)
+        str_result = ""
+        if 0 <= int(num_targ) - num :
+            color = "#36a64f"
+            str_result = "成功"
+            if 0 >= num - 5:
+                color = "#EBB424"
+        else:
+            color = "#E01E5A"
+            str_result = "失敗"
+            if 0 <= num - 96:
+                color = "#3F0F3F"
+
+        return_message = "{} 【{}】 {}/{} ({}{})".format(str_result, message, num, num_targ, msg_num_targ, msg_correction)
     elif message in lst_trigger_param:
         param = json.loads(get_user_params(user_id, ""))
         return_message = "【{}】現在値{}".format(message, param[message])
-    elif message in lst_trigger_role:
-        param = json.loads(get_user_params(user_id, ""))
-        lst = param[message]
-        num = int(random.randint(1,100))
-        num_targ = lst[-1]
-        str_result = ""
-        if 0 <= int(num_targ) - num :
-            str_result = "成功"
-        else:
-            str_result = "失敗"
-
-        return_message = "{} 【{}】 {}/{} ({}+{})".format(str_result, message, num, lst[-1], lst[-1], 0)
-    elif message in lst_trigger_action:
-        param = json.loads(get_user_params(user_id, ""))
-        lst = param[message]
-        num = int(random.randint(1,100))
-        num_targ = lst[-1]
-        str_result = ""
-        if 0 <= int(num_targ) - num :
-            str_result = "成功"
-        else:
-            str_result = "失敗"
-
-        return_message = "{} 【{}】 {}/{} ({}+{})".format(str_result, message, num, lst[-1], lst[-1], 0)
     elif "景気づけ" == message:
         num = int(random.randint(1,100))
         return_message = "景気づけ：{}".format(num)
@@ -230,7 +266,9 @@ def lambda_handler(event: dict, context) -> str:
     elif "起床ガチャ" == message:
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
-
+    elif "roll" == message:
+        num = int(random.randint(1,100))
+        return_message = "1D100：{}".format(num)
     elif "能力値" == message:
         param = json.loads(get_user_params(user_id, ""))
         return_message = ""
@@ -242,10 +280,12 @@ def lambda_handler(event: dict, context) -> str:
                 return_message += "\n"
             elif cnt == 9:
                 break
-        
-    elif "ステータス" == message:
+    elif "pcname" == message:
+        pass
+    elif "ステータス" == message or "status" == message or "s" == message:
         param = json.loads(get_user_params(user_id, ""))
-        return_message = "【{}】\nHP {}/{}　　MP {}/{}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["現在SAN"],param["初期SAN"])
+        color = "#80D2DE"
+        return_message = "【{}】\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
 
     else:
         return build_response("@{} norm message".format(user_id))
@@ -257,6 +297,11 @@ def lambda_handler(event: dict, context) -> str:
         "body": json.dumps({
             "icon_emoji": "books",
             "response_type": "in_channel",
-            "text": return_message
+            "text": "<@{}>".format(user_id),
+            "attachments": [
+                {
+                    "text": return_message,
+                    "color": color
+                }
+            ]
         })
-    }
