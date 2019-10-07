@@ -14,6 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
+STATE_FILE_PATH = "./state.json"
 
 lst_trigger_param = ["name","STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","現在SAN","アイデア","幸運","知識"]
 lst_trigger_role = ["応急手当", "鍵開け", "隠す" , "隠れる", "聞き耳", "忍び歩き","写真術", "精神分析", "追跡", "登攀", "図書館", "目星", "運転", "機械修理", "重機械操作", "乗馬", "水泳", "製作.*?", "操縦.*?", "跳躍","電気修理", "ナビゲート", "変装", "言いくるめ", "信用", "説得", "値切り",  "母国語.*?", "医学", "オカルト", "化学", "クトゥルフ神話", "芸術.*?", "経理", "考古学", "コンピューター", "心理学", "人類学",  "生物学", "地質学", "電子工学",  "天文学",  "博物学","物理学", "法律", "薬学", "歴史", "製作.*?"]
@@ -29,7 +30,6 @@ def build_response(message):
             "text": "未対応のメッセージです。/coc helpで確認ください。"
         })
     }
-    
 
 def get_user_params(user_id, url = None):
     key = user_id + "/test_npc"
@@ -41,15 +41,27 @@ def get_user_params(user_id, url = None):
     body = response['Body'].read()
     return body.decode('utf-8')
     
-def set_user_params(user_id, url):
-    key = user_id + "/test_npc"
+def get_url_with_state(user_id):
+    key_state = user_id + STATE_FILE_PATH
+    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    obj = bucket.Object(key)
     
+    obj = bucket.Object(key_state)
+    response = obj.get()
+    body = response['Body'].read()
+    data = json.loads(body.decode('utf-8'))
+    print(data)
+
+    return data["url"]
+    
+def set_user_params(user_id, url, is_update=False):
+    logging.info("request start")
+
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as res:
         body = res.read().decode('utf-8')
+    logging.info("request end")
 
     name = ''
     dict_param = {}
@@ -72,56 +84,15 @@ def set_user_params(user_id, url):
     lst_action = ["回避", "キック", "組み付き", "こぶし.*", "頭突き", "投擲", "マーシャルアーツ", "拳銃", "サブマシンガン", "ショットガン", "マシンガン", "ライフル"]
     dict_action = {}
     
-    for line in body.splitlines():
-        if '' == name:
-            m_name = re.match('.*<input name="pc_name" class="str" id="pc_name" size="55" type="text" value="(.*)">.*', line)
-            if m_name:
-                name = m_name.group(1)
+    logging.info("regexp start")
+    lst = body.splitlines()
+    c0 = 0
+    c1 = 0
+    c2 = 0
+    c3 = 0
     
-        if False == is_role_end:
-            if is_role_now_parse:
-                if not role_now_parse in dict_param:
-                    dict_param[role_now_parse] = []
-                m = re.match('.*value="(.*?)".*', line)
-                if m:
-                    dict_param[role_now_parse].append(m.group(1))
-                else:
-                    dict_param[role_now_parse].append(0)
+    for line in lst:
     
-            m = re.match('.*sumTD.*', line) 
-            if m:
-                is_role_now_parse = False
-                role_now_parse = ""
-    
-            for role in lst_role:
-                m = re.match('.*<th>({})<\/th>.*'.format(role), line)
-                if m:
-                    is_role_now_parse = True
-                    role_now_parse = m.group(1)
-                    
-        if False == is_action_end:
-            if is_action_now_parse:
-                if not action_now_parse in dict_action:
-                    dict_action[action_now_parse] = []
-                    
-                m = re.match('.*value="(.*?)".*', line)
-                if m:
-                    dict_action[action_now_parse].append(m.group(1))
-                else:
-                    dict_action[action_now_parse].append(0)
-
-            m = re.match('.*sumTD.*', line)
-            if m:
-                is_action_now_parse = False
-                role_now_parse = ""
-
-            for action in lst_action:
-                m = re.match('.*<th>({})<\/th>.*'.format(action), line)
-                if m:
-                    is_action_now_parse = True
-                    action_now_parse = m.group(1)
-                
-        
         if False == is_param_end:
             if re.match('.*<div class="disp"><table class="pc_making">.*', line):
                 is_param_parse = True
@@ -140,35 +111,130 @@ def set_user_params(user_id, url):
                     for name_param in lst:
                         dict_param[name_param] = lst_tmp.pop(0)
                     is_param_end = True
-    
+                    c2 += 1
+                    logging.info("param end")
+
                 lst_param.append(line)
+            continue
         
         if re.match(".*SAN_Left.*", line):
+            is_param_end = True
             m = re.match('.*value="(.*?)".*', line)
             dict_param["現在SAN"] = m.group(1)
+            logging.info("san end")
+            continue
+            
+        if False == is_action_end:
+            if is_action_now_parse:
+                if not action_now_parse in dict_action:
+                    dict_action[action_now_parse] = []
+                    
+                m = re.match('.*value="(.*?)".*', line)
+                if m:
+                    dict_action[action_now_parse].append(m.group(1))
+                else:
+                    dict_action[action_now_parse].append(0)
 
+            m = re.match('.*TBAP.*', line)
+            if m:
+                is_action_now_parse = False
+                role_now_parse = ""
+                c1 += 1
+
+            for action in lst_action:
+                m = re.match('.*<th>({})<\/th>.*'.format(action), line)
+                if m:
+                    is_action_now_parse = True
+                    action_now_parse = m.group(1)
+            
+            m = re.match('.*btnDelLineBattleArts.*', line)
+            if m:
+                is_action_end = True
+            continue
+
+        if False == is_role_end:
+            if is_role_now_parse:
+                if not role_now_parse in dict_param:
+                    dict_param[role_now_parse] = []
+                m = re.match('.*value="(.*?)".*', line)
+                if m:
+                    dict_param[role_now_parse].append(m.group(1))
+                else:
+                    dict_param[role_now_parse].append(0)
+    
+            m = re.match('.*(TFAP|TAAP|TCAP|TKAP).*', line) 
+            if m:
+                is_role_now_parse = False
+                role_now_parse = ""
+                c0 += 1
+
+            for role in lst_role:
+                m = re.match('.*<th>({})<\/th>.*'.format(role), line)
+                if m:
+                    is_role_now_parse = True
+                    role_now_parse = m.group(1)
+            
+            m = re.match('.*btnDelLineKnowArts.*', line)
+            if m:
+                is_role_end = True
+            continue
+
+        if '' == name:
+            m_name = re.match('.*<input name="pc_name" class="str" id="pc_name" size="55" type="text" value="(.*)">.*', line)
+            if m_name:
+                name = m_name.group(1)
+            continue
+        
+
+    logging.info(f"c0 {c0}")
+    logging.info(f"c1 {c1}")
+    logging.info(f"c2 {c2}")
+    logging.info(f"c3 {c3}")
     dict_param.update(dict_role)
     dict_param.update(dict_action)
     dict_param["name"] = name
 
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    
+    logging.info("puts3 start")
+    key = user_id + "/test_npc"
+    obj = bucket.Object(key)
     body = json.dumps(dict_param, ensure_ascii=False)
-
     response = obj.put(
         Body=body.encode('utf-8'),
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
     
-    return "setting"
+    logging.info("puts3 end")
+    if is_update:
+        return dict_param
+    
+    key_state = user_id + STATE_FILE_PATH
+    dict_state = {
+        "url": url
+        }
+    logging.info("puts3 2 start")
+    obj_state = bucket.Object(key_state)
+    body_state = json.dumps(dict_state, ensure_ascii=False)
+    response = obj_state.put(
+        Body=body_state.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+    
+    logging.info("puts3 2 end")
+    return dict_param
 
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
+    random.seed()
     body = event["body"]
     color = ""
     body_split = body.split("&")
-    #print(body_split)
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
-    map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
+    map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANc": "現在SAN"}
     evt_slack = {}
     for datum in body_split:
         l = datum.split("=")
@@ -182,26 +248,31 @@ def lambda_handler(event: dict, context) -> str:
     url = "https://slack.com/api/chat.postMessage"
     channel = evt_slack["channel_id"]
     message = urllib.parse.unquote(evt_slack["text"])
-    #message = message.upper()
     print(message)
 
     is_trigger_roll = False
     
     lst_trigger = lst_trigger_role + lst_trigger_status + lst_trigger_action + list(map_alias_trigger.keys())
-    print(lst_trigger)
     for datum in lst_trigger:
         msg_eval = message.upper()
         datum = datum.upper()
         if not -1 == msg_eval.find(datum):
             print(datum)
             is_trigger_roll = True
-    
-    
+
     if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , message):
-        logging.info("setting start")
+        color = "#80D2DE"
+        logging.info("set start")
 
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
-        return_message = set_user_params(user_id, match_url.group(1))
+        param = set_user_params(user_id, match_url.group(1))
+        logging.info("set params")
+        return_message = "【{}】SET\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
+    elif "update" == message or "u" == message:
+        color = "#80D2DE"
+        url_from_state = get_url_with_state(user_id)
+        param = set_user_params(user_id, url_from_state, True)
+        return_message = "【{}】UPDATED\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
     elif "get" == message:
         #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", _message)
         return_message = get_user_params(user_id)
@@ -227,10 +298,9 @@ def lambda_handler(event: dict, context) -> str:
         key = message.upper()
         data = param[key]
         
-        print(data)
         num = int(random.randint(1,100))
         msg_eval2 = message.upper()
-        if msg_eval2 in lst_trigger_status:
+        if msg_eval2 in lst_trigger_status or "現在SAN" == key:
             num_targ = data
         else:
             num_targ = data[-1]
@@ -266,6 +336,9 @@ def lambda_handler(event: dict, context) -> str:
     elif "起床ガチャ" == message:
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
+    elif "お祈り" == message:
+        num = int(random.randint(1,100))
+        return_message = "お祈り：{}".format(num)
     elif "roll" == message:
         num = int(random.randint(1,100))
         return_message = "1D100：{}".format(num)
@@ -305,3 +378,4 @@ def lambda_handler(event: dict, context) -> str:
                 }
             ]
         })
+    }
