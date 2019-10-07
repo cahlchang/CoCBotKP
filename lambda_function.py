@@ -261,10 +261,13 @@ def lambda_handler(event: dict, context) -> str:
             is_trigger_roll = True
 
     if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , message):
-        logging.info("setting start")
+        color = "#80D2DE"
+        logging.info("set start")
 
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
-        return_message = set_user_params(user_id, match_url.group(1))
+        param = set_user_params(user_id, match_url.group(1))
+        logging.info("set params")
+        return_message = "【{}】SET\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
     elif "update" == message or "u" == message:
         color = "#80D2DE"
         url_from_state = get_url_with_state(user_id)
@@ -295,7 +298,6 @@ def lambda_handler(event: dict, context) -> str:
         key = message.upper()
         data = param[key]
         
-        print(data)
         num = int(random.randint(1,100))
         msg_eval2 = message.upper()
         if msg_eval2 in lst_trigger_status:
@@ -376,3 +378,4 @@ def lambda_handler(event: dict, context) -> str:
                 }
             ]
         })
+    }
