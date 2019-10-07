@@ -229,6 +229,7 @@ def set_user_params(user_id, url, is_update=False):
 
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
+    random.seed()
     body = event["body"]
     color = ""
     body_split = body.split("&")
