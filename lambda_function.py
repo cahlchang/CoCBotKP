@@ -14,6 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
+STATE_FILE_PATH = "./state.json"
 
 lst_trigger_param = ["name","STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","現在SAN","アイデア","幸運","知識"]
 lst_trigger_role = ["応急手当", "鍵開け", "隠す" , "隠れる", "聞き耳", "忍び歩き","写真術", "精神分析", "追跡", "登攀", "図書館", "目星", "運転", "機械修理", "重機械操作", "乗馬", "水泳", "製作.*?", "操縦.*?", "跳躍","電気修理", "ナビゲート", "変装", "言いくるめ", "信用", "説得", "値切り",  "母国語.*?", "医学", "オカルト", "化学", "クトゥルフ神話", "芸術.*?", "経理", "考古学", "コンピューター", "心理学", "人類学",  "生物学", "地質学", "電子工学",  "天文学",  "博物学","物理学", "法律", "薬学", "歴史", "製作.*?"]
@@ -43,13 +44,27 @@ def get_user_params(user_id, url = None):
     
 def set_user_params(user_id, url):
     key = user_id + "/test_npc"
+def get_url_with_state(user_id):
+    key_state = user_id + STATE_FILE_PATH
+    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    obj = bucket.Object(key)
     
+    obj = bucket.Object(key_state)
+    response = obj.get()
+    body = response['Body'].read()
+    data = json.loads(body.decode('utf-8'))
+    print(data)
+
+    return data["url"]
+    
+def set_user_params(user_id, url, is_update=False):
+    logging.info("request start")
+
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as res:
         body = res.read().decode('utf-8')
+    logging.info("request end")
 
     name = ''
     dict_param = {}
@@ -160,6 +175,23 @@ def set_user_params(user_id, url):
     )
     
     return "setting"
+    if is_update:
+        return dict_param
+    
+    key_state = user_id + STATE_FILE_PATH
+    dict_state = {
+        "url": url
+        }
+    obj_state = bucket.Object(key_state)
+    body_state = json.dumps(dict_state, ensure_ascii=False)
+    response = obj_state.put(
+        Body=body_state.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+    
+    logging.info("puts3 2 end")
+    return dict_param
 
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
@@ -202,6 +234,11 @@ def lambda_handler(event: dict, context) -> str:
 
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         return_message = set_user_params(user_id, match_url.group(1))
+    elif "update" == message or "u" == message:
+        color = "#80D2DE"
+        url_from_state = get_url_with_state(user_id)
+        param = set_user_params(user_id, url_from_state, True)
+        return_message = "【{}】UPDATED\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
     elif "get" == message:
         #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", _message)
         return_message = get_user_params(user_id)
