@@ -42,8 +42,6 @@ def get_user_params(user_id, url = None):
     body = response['Body'].read()
     return body.decode('utf-8')
     
-def set_user_params(user_id, url):
-    key = user_id + "/test_npc"
 def get_url_with_state(user_id):
     key_state = user_id + STATE_FILE_PATH
     
@@ -166,6 +164,12 @@ def set_user_params(user_id, url, is_update=False):
     dict_param.update(dict_action)
     dict_param["name"] = name
 
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    
+    logging.info("puts3 start")
+    key = user_id + "/test_npc"
+    obj = bucket.Object(key)
     body = json.dumps(dict_param, ensure_ascii=False)
 
     response = obj.put(
