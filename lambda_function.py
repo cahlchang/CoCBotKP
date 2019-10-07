@@ -234,7 +234,7 @@ def lambda_handler(event: dict, context) -> str:
     color = ""
     body_split = body.split("&")
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
-    map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
+    map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANc": "現在SAN"}
     evt_slack = {}
     for datum in body_split:
         l = datum.split("=")
@@ -300,7 +300,7 @@ def lambda_handler(event: dict, context) -> str:
         
         num = int(random.randint(1,100))
         msg_eval2 = message.upper()
-        if msg_eval2 in lst_trigger_status:
+        if msg_eval2 in lst_trigger_status or "現在SAN" == key:
             num_targ = data
         else:
             num_targ = data[-1]
