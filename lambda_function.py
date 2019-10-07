@@ -307,6 +307,9 @@ def lambda_handler(event: dict, context) -> str:
     elif "起床ガチャ" == message:
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
+    elif "お祈り" == message:
+        num = int(random.randint(1,100))
+        return_message = "お祈り：{}".format(num)
     elif "roll" == message:
         num = int(random.randint(1,100))
         return_message = "1D100：{}".format(num)
