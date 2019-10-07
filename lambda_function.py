@@ -92,7 +92,6 @@ def set_user_params(user_id, url, is_update=False):
     c3 = 0
     
     for line in lst:
-    
         if False == is_param_end:
             if re.match('.*<div class="disp"><table class="pc_making">.*', line):
                 is_param_parse = True
@@ -123,7 +122,8 @@ def set_user_params(user_id, url, is_update=False):
             dict_param["現在SAN"] = m.group(1)
             logging.info("san end")
             continue
-            
+        
+        #TODO もはや行動技能と探索技能の取得処理を分ける意味がないので一緒にする。トリガーの対応後。
         if False == is_action_end:
             if is_action_now_parse:
                 if not action_now_parse in dict_action:
@@ -184,7 +184,6 @@ def set_user_params(user_id, url, is_update=False):
             if m_name:
                 name = m_name.group(1)
             continue
-        
 
     logging.info(f"c0 {c0}")
     logging.info(f"c1 {c1}")
@@ -198,7 +197,9 @@ def set_user_params(user_id, url, is_update=False):
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     
     logging.info("puts3 start")
+    #TODO IDからキャラクターのIDを取得し、保存するjsonをわける　<span class="show_id">ID:2623854</span>
     key = user_id + "/test_npc"
+    #TODO 保存処理を関数に出す
     obj = bucket.Object(key)
     body = json.dumps(dict_param, ensure_ascii=False)
     response = obj.put(
@@ -233,6 +234,7 @@ def lambda_handler(event: dict, context) -> str:
     body = event["body"]
     color = ""
     body_split = body.split("&")
+    #TODO トリガーはjsonファイルから取り出す
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
     map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANc": "現在SAN"}
     evt_slack = {}
@@ -252,6 +254,8 @@ def lambda_handler(event: dict, context) -> str:
 
     is_trigger_roll = False
     
+    #TODO トリガーは毎回S3から取ってきたjsonのキーにする
+    #TODO str.upperをキーにもかませる？
     lst_trigger = lst_trigger_role + lst_trigger_status + lst_trigger_action + list(map_alias_trigger.keys())
     for datum in lst_trigger:
         msg_eval = message.upper()
@@ -273,6 +277,19 @@ def lambda_handler(event: dict, context) -> str:
         url_from_state = get_url_with_state(user_id)
         param = set_user_params(user_id, url_from_state, True)
         return_message = "【{}】UPDATED\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
+    elif "update TODO" == message:
+        #TODO stateファイルに差分を書く
+        PASS
+    elif "start session":
+        #TODO sessionフォルダに、チャンネルごとのjsonファイルを作る。
+        PASS
+    elif "add pc ID":
+        #TODO パーティ用のjsonを作る
+        PASS
+    elif "list":
+        #TODO 自分のキャラクタ一覧をリスト表示する
+    elif "kp add npc":
+        #NPCのキャラシを追加できるようにしたい
     elif "get" == message:
         #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", _message)
         return_message = get_user_params(user_id)
@@ -325,21 +342,27 @@ def lambda_handler(event: dict, context) -> str:
 
         return_message = "{} 【{}】 {}/{} ({}{})".format(str_result, message, num, num_targ, msg_num_targ, msg_correction)
     elif message in lst_trigger_param:
+        #TODO コマンド設計から考える
         param = json.loads(get_user_params(user_id, ""))
         return_message = "【{}】現在値{}".format(message, param[message])
     elif "景気づけ" == message:
         num = int(random.randint(1,100))
         return_message = "景気づけ：{}".format(num)
     elif "素振り" == message:
+        #TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
+        random.seed()
         num = int(random.randint(1,100))
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == message:
+        #TODO 現在時刻と合わせて少し変化を入れたい
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == message:
+        #TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1,100))
         return_message = "お祈り：{}".format(num)
     elif "roll" == message:
+        #TODO 1d100だけじゃなく、ダイス形式対応
         num = int(random.randint(1,100))
         return_message = "1D100：{}".format(num)
     elif "能力値" == message:
@@ -355,6 +378,8 @@ def lambda_handler(event: dict, context) -> str:
                 break
     elif "pcname" == message:
         pass
+    #TODO 関数化
+    #TODO stateファイルに記載された差分から値を算出するようにする
     elif "ステータス" == message or "status" == message or "s" == message:
         param = json.loads(get_user_params(user_id, ""))
         color = "#80D2DE"
