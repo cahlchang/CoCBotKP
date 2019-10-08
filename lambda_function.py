@@ -17,8 +17,6 @@ AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "./state.json"
 
 lst_trigger_param = ["name","STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","現在SAN","アイデア","幸運","知識"]
-lst_trigger_role = ["応急手当", "鍵開け", "隠す" , "隠れる", "聞き耳", "忍び歩き","写真術", "精神分析", "追跡", "登攀", "図書館", "目星", "運転", "機械修理", "重機械操作", "乗馬", "水泳", "製作.*?", "操縦.*?", "跳躍","電気修理", "ナビゲート", "変装", "言いくるめ", "信用", "説得", "値切り",  "母国語.*?", "医学", "オカルト", "化学", "クトゥルフ神話", "芸術.*?", "経理", "考古学", "コンピューター", "心理学", "人類学",  "生物学", "地質学", "電子工学",  "天文学",  "博物学","物理学", "法律", "薬学", "歴史", "製作.*?"]
-lst_trigger_action = ["回避", "キック", "組み付き", "こぶし（パンチ）", "頭突き", "投擲", "マーシャルアーツ", "拳銃", "サブマシンガン", "ショットガン", "マシンガン", "ライフル"]
 
 def build_response(message):
     return {
@@ -51,7 +49,6 @@ def get_url_with_state(user_id):
     response = obj.get()
     body = response['Body'].read()
     data = json.loads(body.decode('utf-8'))
-    print(data)
 
     return data["url"]
     
@@ -77,6 +74,7 @@ def set_user_params(user_id, url, is_update=False):
     is_role_now_parse = False
     role_now_parse = ""
 
+    #TODO 関数処理化してもう少し早くはできるが…
     logging.info("regexp start")
     lst = body.splitlines()
     for line in lst:
@@ -150,7 +148,32 @@ def set_user_params(user_id, url, is_update=False):
             continue
 
     logging.info("regexp end")
+    dict_temp = {}
+    lst_remove = []
+    dict_replace = {
+        "unten_bunya": "運転（{}）",
+        "geijutu_bunya": "芸術（{}）",
+        "seisaku_bunya": "製作（{}）",
+        "main_souju_norimono": "操縦（{}）",
+        "mylang_name": "母国語（{}）",
+        "Name\[\]": "{}"
+    }
+    for key in dict_param.keys():
+        for proc, key_new in dict_replace.items():
+            m = re.match('.*{}.*'.format(proc), key)
+            if m:
+                m2 = re.match(r'.*value="(.*?)" s.*', key)
+                if m2:
+                    key_new = key_new.format(m2.group(1))
+                    dict_temp[key_new] = dict_param[key]
+                
+                lst_remove.append(key)
 
+    dict_param.update(dict_temp)
+    
+    for key_remove in lst_remove:
+        del dict_param[key_remove]
+    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     
@@ -194,7 +217,7 @@ def lambda_handler(event: dict, context) -> str:
     body_split = body.split("&")
     #TODO トリガーはjsonファイルから取り出す
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
-    map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANc": "現在SAN"}
+    map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANC": "現在SAN"}
     evt_slack = {}
     for datum in body_split:
         l = datum.split("=")
@@ -208,19 +231,7 @@ def lambda_handler(event: dict, context) -> str:
     url = "https://slack.com/api/chat.postMessage"
     channel = evt_slack["channel_id"]
     message = urllib.parse.unquote(evt_slack["text"])
-    print(message)
-
-    is_trigger_roll = False
-    
-    #TODO トリガーは毎回S3から取ってきたjsonのキーにする
-    #TODO str.upperをキーにもかませる？
-    lst_trigger = lst_trigger_role + lst_trigger_status + lst_trigger_action + list(map_alias_trigger.keys())
-    for datum in lst_trigger:
-        msg_eval = message.upper()
-        datum = datum.upper()
-        if not -1 == msg_eval.find(datum):
-            print(datum)
-            is_trigger_roll = True
+    key = message.upper()
 
     if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , message):
         color = "#80D2DE"
@@ -230,7 +241,7 @@ def lambda_handler(event: dict, context) -> str:
         param = set_user_params(user_id, match_url.group(1))
         logging.info("set params")
         return_message = "【{}】SET\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
-    elif "update" == message or "u" == message:
+    elif "UPDATE" == key or "U" == key:
         color = "#80D2DE"
         url_from_state = get_url_with_state(user_id)
         param = set_user_params(user_id, url_from_state, True)
@@ -250,16 +261,61 @@ def lambda_handler(event: dict, context) -> str:
     elif "kp add npc" == message:
         PASS
         #NPCのキャラシを追加できるようにしたい
-    elif "get" == message:
-        #match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", _message)
+    elif "GET" == key:
         return_message = get_user_params(user_id)
-    elif is_trigger_roll:
+    elif message in lst_trigger_param:
+        #TODO コマンド設計から考える
         param = json.loads(get_user_params(user_id, ""))
+        return_message = "【{}】現在値{}".format(message, param[message])
+    elif "景気づけ" == key:
+        num = int(random.randint(1,100))
+        return_message = "景気づけ：{}".format(num)
+    elif "素振り" == key:
+        #TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
+        random.seed()
+        num = int(random.randint(1,100))
+        return_message = "素振り：{}".format(num)
+    elif "起床ガチャ" == key:
+        #TODO 現在時刻と合わせて少し変化を入れたい
+        num = int(random.randint(1,100))
+        return_message = "起床ガチャ：{}".format(num)
+    elif "お祈り" == key:
+        #TODO たまに変な効果を出すようにしたい
+        num = int(random.randint(1,100))
+        return_message = "お祈り：{}".format(num)
+    elif "roll" == key:
+        #TODO 1d100だけじゃなく、ダイス形式対応
+        num = int(random.randint(1,100))
+        return_message = "1D100：{}".format(num)
+    elif "能力値" == key:
+        param = json.loads(get_user_params(user_id, ""))
+        return_message = ""
+        cnt = 0
+        for p in lst_trigger_param:
+            cnt += 1
+            return_message += "{}:{} ".format(p, param[p])
+            if cnt == 1:
+                return_message += "\n"
+            elif cnt == 9:
+                break
+    elif "pcname" == message:
+        pass
+    #TODO 関数化
+    #TODO stateファイルに記載された差分から値を算出するようにする
+    elif "ステータス" == key or "STATUS" == key or "S" == key:
+        param = json.loads(get_user_params(user_id, ""))
+        color = "#80D2DE"
+        return_message = "【{}】\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
+    else:
+        logging.info("command start")
+        param = json.loads(get_user_params(user_id, ""))
+        logging.info("request end")
         #todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
-        print(message)
-        if message in map_alias_trigger.keys():
-            message = map_alias_trigger[message]
+        
+        if not 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys()))):
+            print(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys())))
+            message = map_alias_trigger[message.upper()]
         
         proc = "^(.*)(\+|\-|\*|\/)(.*)$"
         result_parse = re.match(proc, message)
@@ -267,17 +323,20 @@ def lambda_handler(event: dict, context) -> str:
         msg_correction = "+0"
         if result_parse:
             message = result_parse.group(1)
+            key = message.upper()
             operant = result_parse.group(2)
             args = result_parse.group(3)
             msg_correction = operant + args
             is_correction = True
         
-        key = message.upper()
-        data = param[key]
+        if 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), param.keys()))):
+            return build_response("@{} norm message".format(user_id))
+
+        data = param[message]
         
         num = int(random.randint(1,100))
         msg_eval2 = message.upper()
-        if msg_eval2 in lst_trigger_status or "現在SAN" == key:
+        if msg_eval2 in lst_trigger_status or "現在SAN" == message:
             num_targ = data
         else:
             num_targ = data[-1]
@@ -301,52 +360,7 @@ def lambda_handler(event: dict, context) -> str:
                 color = "#3F0F3F"
 
         return_message = "{} 【{}】 {}/{} ({}{})".format(str_result, message, num, num_targ, msg_num_targ, msg_correction)
-    elif message in lst_trigger_param:
-        #TODO コマンド設計から考える
-        param = json.loads(get_user_params(user_id, ""))
-        return_message = "【{}】現在値{}".format(message, param[message])
-    elif "景気づけ" == message:
-        num = int(random.randint(1,100))
-        return_message = "景気づけ：{}".format(num)
-    elif "素振り" == message:
-        #TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
-        random.seed()
-        num = int(random.randint(1,100))
-        return_message = "素振り：{}".format(num)
-    elif "起床ガチャ" == message:
-        #TODO 現在時刻と合わせて少し変化を入れたい
-        num = int(random.randint(1,100))
-        return_message = "起床ガチャ：{}".format(num)
-    elif "お祈り" == message:
-        #TODO たまに変な効果を出すようにしたい
-        num = int(random.randint(1,100))
-        return_message = "お祈り：{}".format(num)
-    elif "roll" == message:
-        #TODO 1d100だけじゃなく、ダイス形式対応
-        num = int(random.randint(1,100))
-        return_message = "1D100：{}".format(num)
-    elif "能力値" == message:
-        param = json.loads(get_user_params(user_id, ""))
-        return_message = ""
-        cnt = 0
-        for p in lst_trigger_param:
-            cnt += 1
-            return_message += "{}:{} ".format(p, param[p])
-            if cnt == 1:
-                return_message += "\n"
-            elif cnt == 9:
-                break
-    elif "pcname" == message:
-        pass
-    #TODO 関数化
-    #TODO stateファイルに記載された差分から値を算出するようにする
-    elif "ステータス" == message or "status" == message or "s" == message:
-        param = json.loads(get_user_params(user_id, ""))
-        color = "#80D2DE"
-        return_message = "【{}】\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
-
-    else:
-        return build_response("@{} norm message".format(user_id))
+        logging.info("command end")
 
     return {
         "isBase64Encoded": False,
