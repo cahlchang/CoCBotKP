@@ -85,11 +85,11 @@ def set_user_params(user_id, url, is_update=False):
                 is_param_parse = True
 
             if is_param_parse:
-                if re.match('.*<th colspan="2">現在値</th>.*', line):
+                if re.match(r'.*<th colspan="2">現在値</th>.*', line):
                     is_param_now_parse = True
                     
             if is_param_now_parse:
-                if re.match('/*</tr>.*', line):
+                if re.match(r'/*</tr>.*', line):
                     lst = ["STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","アイデア","幸運","知識"]
                     lst_tmp = []
                     for raw_param in lst_param:
@@ -118,7 +118,7 @@ def set_user_params(user_id, url, is_update=False):
             
             if is_role_now_parse:
                 if "" == role_now_parse:
-                    m = re.match('.*<th>(.*)<\/th>.*', line)
+                    m = re.match(r'.*<th>(.*)</th>.*', line)
                     if m:
                         role_now_parse = m.group(1)
                         continue
