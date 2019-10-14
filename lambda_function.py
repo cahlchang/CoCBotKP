@@ -444,21 +444,37 @@ def lambda_handler(event: dict, context) -> str:
                 break
     elif "pcname" == message:
         pass
-    #TODO 関数化
-    #TODO stateファイルに記載された差分から値を算出するようにする
     elif key in ("ステータス", "STATUS", "S"):
         param = get_user_params(user_id)
         color = "#80D2DE"
-        return_message = "【{}】\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
+        dict_state = get_dict_state(user_id)
+        return_message = get_status_message("STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
+    elif "SANC" == key:
+        param = get_user_params(user_id)
+        c_san = int(param["現在SAN"])
+        dict_state = get_dict_state(user_id)
+        if "SAN" in dict_state:
+            d_san = int(dict_state["SAN"])
+        else:
+            d_san = 0
+        sum_san = c_san + d_san
+
+        num_targ = int(random.randint(1, 100))
+        if sum_san >= num_targ:
+            color = "#36a64f"
+            str_result = "成功"
+        else:
+            color = "#E01E5A"
+            str_result = "失敗"
+
+        return_message = f"{str_result} 【SANチェック】 {num_targ}/{sum_san}"
     else:
         logging.info("command start")
-        param = json.loads(get_user_params(user_id, ""))
-        logging.info("request end")
-        #todo spaceが入っていてもなんとかしたい
+        param = get_user_params(user_id)
+        # todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
 
         if not 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys()))):
-            print(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys())))
             message = map_alias_trigger[message.upper()]
 
         proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
