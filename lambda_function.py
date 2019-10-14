@@ -27,7 +27,7 @@ def build_response(message):
         "headers": {},
         "body": json.dumps({
             "icon_emoji": "books",
-            "text": "未対応のメッセージです。/coc helpで確認ください。"
+            "text": "未対応のメッセージです。/cc helpで確認ください。"
         })
     }
 
