@@ -180,7 +180,7 @@ def set_user_params(user_id, url, is_update=False):
 
             if is_param_now_parse:
                 if re.match(r'/*</tr>.*', line):
-                    lst = ["STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","アイデア","幸運","知識"]
+                    lst = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP", "初期SAN", "アイデア", "幸運", "知識"]
                     lst_tmp = []
                     for raw_param in lst_param:
                         m = re.match('.*value="(.*?)".*', raw_param)
@@ -214,7 +214,7 @@ def set_user_params(user_id, url, is_update=False):
                         role_now_parse = m.group(1)
                         continue
 
-                if not role_now_parse in dict_param:
+                if role_now_parse not in dict_param:
                     dict_param[role_now_parse] = []
 
                 m = re.match('.*value="(.*?)".*', line)
@@ -338,9 +338,9 @@ def lambda_handler(event: dict, context) -> str:
     body = event["body"]
     color = ""
     body_split = body.split("&")
-    #TODO トリガーはjsonファイルから取り出す
-    lst_trigger_status = ["知識", "アイデア", "幸運", "STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP"]
-    map_alias_trigger = {"こぶし": "こぶし（パンチ）", "SANC": "現在SAN"}
+    # TODO トリガーはjsonファイルから取り出す
+    lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP"]
+    map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
     evt_slack = {}
     for datum in body_split:
         l = datum.split("=")
@@ -420,11 +420,11 @@ def lambda_handler(event: dict, context) -> str:
         num = int(random.randint(1,100))
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == key:
-        #TODO 現在時刻と合わせて少し変化を入れたい
+        # TODO 現在時刻と合わせて少し変化を入れたい
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == key:
-        #TODO たまに変な効果を出すようにしたい
+        # TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1,100))
         return_message = "お祈り：{}".format(num)
     elif "roll" == key:
@@ -435,9 +435,9 @@ def lambda_handler(event: dict, context) -> str:
         param = json.loads(get_user_params(user_id, ""))
         return_message = ""
         cnt = 0
-        for p in lst_trigger_param:
+        for trigger_param in lst_trigger_param:
             cnt += 1
-            return_message += "{}:{} ".format(p, param[p])
+            return_message += "{}:{} ".format(trigger_param, param[trigger_param])
             if cnt == 1:
                 return_message += "\n"
             elif cnt == 9:
@@ -446,8 +446,8 @@ def lambda_handler(event: dict, context) -> str:
         pass
     #TODO 関数化
     #TODO stateファイルに記載された差分から値を算出するようにする
-    elif "ステータス" == key or "STATUS" == key or "S" == key:
-        param = json.loads(get_user_params(user_id, ""))
+    elif key in ("ステータス", "STATUS", "S"):
+        param = get_user_params(user_id)
         color = "#80D2DE"
         return_message = "【{}】\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
     else:
@@ -456,12 +456,13 @@ def lambda_handler(event: dict, context) -> str:
         logging.info("request end")
         #todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
-        
+
         if not 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             print(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys())))
             message = map_alias_trigger[message.upper()]
-        
-        proc = "^(.*)(\+|\-|\*|\/)(.*)$"
+
+        proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
+
         result_parse = re.match(proc, message)
         is_correction = False
         msg_correction = "+0"
