@@ -31,19 +31,53 @@ def build_response(message):
         })
     }
 
-def get_user_params(user_id, url = None):
-    key = user_id + "/test_npc"
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    
+
+def get_user_params(user_id, pc_id = None):
+    key = ""
+    if pc_id is None:
+        dict_state = get_dict_state(user_id)
+        key = user_id + "/" + dict_state["pc_id"] + ".json"
+    else:
+        key = user_id + "/" + pc_id + ".json"
+    s3obj = boto3.resource('s3')
+    bucket = s3obj.Bucket(AWS_S3_BUCKET_NAME)
     obj = bucket.Object(key)
     response = obj.get()
     body = response['Body'].read()
-    return body.decode('utf-8')
-    
-def get_url_with_state(user_id):
+    return json.loads(body.decode('utf-8'))
+
+
+def get_dict_state(user_id):
+    """
+    get_dict_state function is get state file.
+    """
+
     key_state = user_id + STATE_FILE_PATH
-    
+
+    s3obj = boto3.resource('s3')
+    bucket = s3obj.Bucket(AWS_S3_BUCKET_NAME)
+
+    obj = bucket.Object(key_state)
+    response = obj.get()
+    body = response['Body'].read()
+    return json.loads(body.decode('utf-8'))
+
+
+def set_state(user_id, dict_state):
+    key_state = user_id + STATE_FILE_PATH
+
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+
+    obj_state = bucket.Object(key_state)
+    body_state = json.dumps(dict_state, ensure_ascii=False)
+    response = obj_state.put(
+        Body=body_state.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+
+
 def set_start_session(user_id):
     key_session = user_id + KP_FILE_PATH
 
@@ -108,6 +142,7 @@ def get_lst_player_data(user_id, roll_targ):
 
 def set_user_params(user_id, url, is_update=False):
     logging.info("request start")
+    pc_id = url.split("/")[-1]
 
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as res:
@@ -116,6 +151,9 @@ def set_user_params(user_id, url, is_update=False):
 
     name = ''
     dict_param = {}
+    dict_param['user_id'] = user_id
+    dict_param['pc_id'] = pc_id
+
     is_param_end = False
     is_param_parse = False
     is_param_now_parse = False
@@ -232,9 +270,8 @@ def set_user_params(user_id, url, is_update=False):
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     
     logging.info("puts3 start")
-    #TODO IDからキャラクターのIDを取得し、保存するjsonをわける　<span class="show_id">ID:2623854</span>
-    key = user_id + "/test_npc"
-    #TODO 保存処理を関数に出す
+    key = user_id + "/" + pc_id + ".json"
+    # TODO 保存処理を関数に出す
     obj = bucket.Object(key)
     body = json.dumps(dict_param, ensure_ascii=False)
     response = obj.put(
@@ -249,7 +286,8 @@ def set_user_params(user_id, url, is_update=False):
     
     key_state = user_id + STATE_FILE_PATH
     dict_state = {
-        "url": url
+        "url": url,
+        "pc_id": dict_param["pc_id"]
         }
     logging.info("puts3 2 start")
     obj_state = bucket.Object(key_state)
@@ -262,6 +300,36 @@ def set_user_params(user_id, url, is_update=False):
     
     logging.info("puts3 2 end")
     return dict_param
+
+
+def get_status_message(message_command, dict_param, dict_state):
+    name = dict_param['name']
+
+    c_hp = dict_param["HP"]
+    if "HP" in dict_state:
+        t_hp = dict_state["HP"]
+        val_hp = eval(f"{c_hp} + {t_hp}")
+    else:
+        val_hp = dict_param["HP"]
+
+    c_mp = dict_param["MP"]
+    if "MP" in dict_state:
+        t_mp = dict_state["MP"]
+        val_mp = eval(f"{c_mp} + {t_mp}")
+    else:
+        val_mp = dict_param["MP"]
+
+    dex = dict_param["DEX"]
+
+    c_san = dict_param["現在SAN"]
+    if "SAN" in dict_state:
+        t_san = dict_state["SAN"]
+        val_san = eval(f"{c_san} + {t_san}")
+    else:
+        val_san = dict_param["現在SAN"]
+
+    return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
+
 
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
