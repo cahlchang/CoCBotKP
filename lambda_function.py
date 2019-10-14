@@ -14,7 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
-STATE_FILE_PATH = "./state.json"
+STATE_FILE_PATH = "/state.json"
 KP_FILE_PATH = "/kp.json"
 
 
@@ -41,6 +41,7 @@ def get_user_params(user_id, pc_id = None):
         key = user_id + "/" + pc_id + ".json"
     s3obj = boto3.resource('s3')
     bucket = s3obj.Bucket(AWS_S3_BUCKET_NAME)
+
     obj = bucket.Object(key)
     response = obj.get()
     body = response['Body'].read()
