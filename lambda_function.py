@@ -15,6 +15,8 @@ logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "./state.json"
+KP_FILE_PATH = "/kp.json"
+
 
 lst_trigger_param = ["name","STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","現在SAN","アイデア","幸運","知識"]
 
@@ -42,16 +44,68 @@ def get_user_params(user_id, url = None):
 def get_url_with_state(user_id):
     key_state = user_id + STATE_FILE_PATH
     
+def set_start_session(user_id):
+    key_session = user_id + KP_FILE_PATH
+
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    
-    obj = bucket.Object(key_state)
-    response = obj.get()
-    body = response['Body'].read()
-    data = json.loads(body.decode('utf-8'))
 
-    return data["url"]
+    obj_session = bucket.Object(key_session)
+    body_session = json.dumps({}, ensure_ascii=False)
+    obj_session.put(
+        Body=body_session.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+
+
+def add_gamesession_user(kp_id, user_id, pc_id):
+    key_kp_file = kp_id + KP_FILE_PATH
     
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    obj_kp_file = bucket.Object(key_kp_file)
+    response = obj_kp_file.get()
+    body = response['Body'].read()
+    dict_kp = json.loads(body.decode('utf-8'))
+
+    if "lst_user" not in dict_kp:
+        dict_kp["lst_user"] = []
+
+    dict_kp["lst_user"].append([user_id, pc_id])
+    body_session = json.dumps(dict_kp, ensure_ascii=False)
+    response = obj_kp_file.put(
+        Body=body_session.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+
+
+def get_lst_player_data(user_id, roll_targ):
+    key_kp_file = user_id + KP_FILE_PATH
+    
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    obj_kp_file = bucket.Object(key_kp_file)
+    response = obj_kp_file.get()
+    body = response['Body'].read()
+    dict_kp = json.loads(body.decode('utf-8'))
+    lst_user = dict_kp["lst_user"]
+    lst_user_param = []
+    for user in lst_user:
+        param = get_user_params(user[0], user[1])
+
+        lst_user_param.append(
+            {
+                "name": param['name'],
+                roll_targ: int(param[roll_targ])
+            })
+
+    lst_user_param.sort(key=lambda x: x[roll_targ])
+    lst_user_param.reverse()
+    return lst_user_param
+
+
 def set_user_params(user_id, url, is_update=False):
     logging.info("request start")
 
@@ -249,18 +303,43 @@ def lambda_handler(event: dict, context) -> str:
     elif "update TODO" == message:
         #TODO stateファイルに差分を書く
         PASS
-    elif "start session" == message:
-        #TODO sessionフォルダに、チャンネルごとのjsonファイルを作る。
-        PASS
-    elif "add pc ID" == message:
-        #TODO パーティ用のjsonを作る
-        PASS
     elif "list"  == message:
         PASS
         #TODO 自分のキャラクタ一覧をリスト表示する
-    elif "kp add npc" == message:
-        PASS
-        #NPCのキャラシを追加できるようにしたい
+    elif "START" == key:
+        color = "#80D2DE"
+        set_start_session(user_id)
+        return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
+    elif re.match("JOIN+.*", key):
+        color = "#80D2DE"
+        proc = r"^(.*)+(.*)$"
+        dict_state = get_dict_state(user_id)
+        result_parse = re.match(proc, message)
+        kp_id = ""
+        if result_parse:
+            kp_id = result_parse.group(2)
+
+        add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
+
+        return_message = "こんなコマンド"
+    elif re.match("KP+.*ORDER.*" , key):
+        color = "#80D2DE"
+        proc = "^(.*)\+ORDER\+(.*)$"
+        m = re.match(proc, key)
+        targ_roll = m.group(2)
+        lst_user_data = get_lst_player_data(user_id, targ_roll)
+        msg = f"{targ_roll}順\n"
+        cnt = 0
+        for user_data in lst_user_data:
+            cnt += 1
+            name = user_data["name"]
+            v = user_data[targ_roll]
+            msg += f"{cnt}, {name} ({v}) \n"
+        return_message = msg
+    # elif "list"  == message:
+    #     #TODO 自分のキャラクタ一覧をリスト表示する
+    # elif "kp add npc" == message:
+    #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
         return_message = get_user_params(user_id)
     elif message in lst_trigger_param:
