@@ -17,8 +17,8 @@ AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
 KP_FILE_PATH = "/kp.json"
 
+lst_trigger_param = ["HP", "MP"]
 
-lst_trigger_param = ["name","STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","現在SAN","アイデア","幸運","知識"]
 
 def build_response(message):
     return {
