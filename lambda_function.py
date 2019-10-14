@@ -516,6 +516,7 @@ def lambda_handler(event: dict, context) -> str:
             "attachments": [
                 {
                     "text": return_message,
+                    "type": "mrkdwn",
                     "color": color
                 }
             ]
