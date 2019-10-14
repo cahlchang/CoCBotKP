@@ -358,17 +358,34 @@ def lambda_handler(event: dict, context) -> str:
         color = "#80D2DE"
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         param = set_user_params(user_id, match_url.group(1))
-    elif "UPDATE" == key or "U" == key:
+        param["user_id"] = user_id
+        dict_state = get_dict_state(user_id)
+        return_message = get_status_message("INIT CHARA", param, dict_state)
+    elif key in ("UPDATE", "U"):
         color = "#80D2DE"
-        url_from_state = get_url_with_state(user_id)
+        dict_state = get_dict_state(user_id)
+        url_from_state = dict_state["url"]
         param = set_user_params(user_id, url_from_state, True)
-        return_message = "【{}】UPDATED\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
-    elif "update TODO" == message:
-        #TODO stateファイルに差分を書く
-        PASS
-    elif "list"  == message:
-        PASS
-        #TODO 自分のキャラクタ一覧をリスト表示する
+        return_message = get_status_message("UPDATE", param, dict_state)
+    elif re.match("(U+.*|UPDATE+.*)", key):
+        color = "#80D2DE"
+        proc = r"^(.*?)+(.*?)(+|-|*|/)(.*)$"
+        r = re.match(proc, message)
+        dict_state = get_dict_state(user_id)
+        if r:
+            message = r.group(2)
+            key = message.upper()
+            operant = r.group(3)
+            args = r.group(4)
+            if key in dict_state:
+                val_targ = dict_state[key]
+            else:
+                val_targ = "0"
+
+            num_targ = eval('{}{}{}'.format(val_targ, operant, args))
+        dict_state[key] = num_targ
+        set_state(user_id, dict_state)
+        return_message = get_status_message("UPDATE STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
     elif "START" == key:
         color = "#80D2DE"
         set_start_session(user_id)
