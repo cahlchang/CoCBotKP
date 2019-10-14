@@ -421,10 +421,12 @@ def lambda_handler(event: dict, context) -> str:
     # elif "kp add npc" == message:
     #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
-        return_message = get_user_params(user_id)
+        return_message = json.dumps(get_user_params(user_id), ensure_ascii=False)
+    elif "GETSTATE" == key:
+        return_message = json.dumps(get_dict_state(user_id), ensure_ascii=False)
     elif message in lst_trigger_param:
-        #TODO コマンド設計から考える
-        param = json.loads(get_user_params(user_id, ""))
+        # TODO コマンド設計から考える
+        param = get_user_params(user_id, "")
         return_message = "【{}】現在値{}".format(message, param[message])
     elif "景気づけ" == key:
         num = int(random.randint(1,100))
@@ -442,12 +444,12 @@ def lambda_handler(event: dict, context) -> str:
         # TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1,100))
         return_message = "お祈り：{}".format(num)
-    elif "roll" == key:
-        #TODO 1d100だけじゃなく、ダイス形式対応
+    elif "ROLL" == key:
+        # TODO 1d100だけじゃなく、ダイス形式対応
         num = int(random.randint(1,100))
         return_message = "1D100：{}".format(num)
     elif "能力値" == key:
-        param = json.loads(get_user_params(user_id, ""))
+        param = get_user_params(user_id)
         return_message = ""
         cnt = 0
         for trigger_param in lst_trigger_param:
