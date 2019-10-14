@@ -159,54 +159,54 @@ def set_user_params(user_id, url, is_update=False):
     is_param_parse = False
     is_param_now_parse = False
     lst_param = []
-    
+
     is_san_end = False
-    
+
     is_role_end = False
-    is_role_parse = False
     is_role_now_parse = False
     role_now_parse = ""
 
-    #TODO 関数処理化してもう少し早くはできるが…
+    # TODO 関数処理化してもう少し早くはできるが…
     logging.info("regexp start")
     lst = body.splitlines()
     for line in lst:
-        if False == is_param_end:
+        if not is_param_end:
             if re.match('.*<div class="disp"><table class="pc_making">.*', line):
                 is_param_parse = True
 
             if is_param_parse:
                 if re.match(r'.*<th colspan="2">現在値</th>.*', line):
                     is_param_now_parse = True
-                    
+
             if is_param_now_parse:
                 if re.match(r'/*</tr>.*', line):
                     lst = ["STR","CON","POW","DEX","APP","SIZ","INT","EDU","HP","MP","初期SAN","アイデア","幸運","知識"]
                     lst_tmp = []
                     for raw_param in lst_param:
                         m = re.match('.*value="(.*?)".*', raw_param)
-                        if m: lst_tmp.append(m.group(1))
-                        
+                        if m:
+                            lst_tmp.append(m.group(1))
+
                     for name_param in lst:
                         dict_param[name_param] = lst_tmp.pop(0)
                     is_param_end = True
 
                 lst_param.append(line)
             continue
-        
-        if False == is_san_end:
+
+        if not is_san_end:
             if re.match(".*SAN_Left.*", line):
                 is_san_end = True
                 m = re.match('.*value="(.*?)".*', line)
                 dict_param["現在SAN"] = m.group(1)
                 continue
-        
-        if False == is_role_end and True == is_san_end:
+
+        if not is_role_end and is_san_end:
             m = re.match('.*(cTBAU|cTFAU|cTAAU|cTCAU|cTKAU).*', line)
             if m:
                 is_role_now_parse = True
                 continue
-            
+
             if is_role_now_parse:
                 if "" == role_now_parse:
                     m = re.match(r'.*<th>(.*)</th>.*', line)
@@ -216,19 +216,19 @@ def set_user_params(user_id, url, is_update=False):
 
                 if not role_now_parse in dict_param:
                     dict_param[role_now_parse] = []
-                    
+
                 m = re.match('.*value="(.*?)".*', line)
                 if m:
                     dict_param[role_now_parse].append(m.group(1))
                 else:
                     dict_param[role_now_parse].append(0)
-    
+
             m = re.match('.*(TBAP|TFAP|TAAP|TCAP|TKAP).*', line) 
             if m:
                 is_role_now_parse = False
                 role_now_parse = ""
                 continue
-            
+
             m = re.match('.*btnDelLineKnowArts.*', line)
             if m:
                 is_role_end = True
@@ -259,17 +259,17 @@ def set_user_params(user_id, url, is_update=False):
                 if m2:
                     key_new = key_new.format(m2.group(1))
                     dict_temp[key_new] = dict_param[key]
-                
+
                 lst_remove.append(key)
 
     dict_param.update(dict_temp)
-    
+
     for key_remove in lst_remove:
         del dict_param[key_remove]
-    
+
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    
+
     logging.info("puts3 start")
     key = user_id + "/" + pc_id + ".json"
     # TODO 保存処理を関数に出す
@@ -280,11 +280,11 @@ def set_user_params(user_id, url, is_update=False):
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
-    
+
     logging.info("puts3 end")
     if is_update:
         return dict_param
-    
+
     key_state = user_id + STATE_FILE_PATH
     dict_state = {
         "url": url,
@@ -298,7 +298,7 @@ def set_user_params(user_id, url, is_update=False):
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
-    
+
     logging.info("puts3 2 end")
     return dict_param
 
@@ -351,15 +351,11 @@ def lambda_handler(event: dict, context) -> str:
     if "subtype" in evt_slack:
         return build_response("subtype event")
 
-    url = "https://slack.com/api/chat.postMessage"
-    channel = evt_slack["channel_id"]
     message = urllib.parse.unquote(evt_slack["text"])
     key = message.upper()
 
-    if re.match("set.<https:\/\/charasheet\.vampire-blood\.net\/.*" , message):
+    if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = "#80D2DE"
-        logging.info("set start")
-
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         param = set_user_params(user_id, match_url.group(1))
         logging.info("set params")
@@ -476,27 +472,26 @@ def lambda_handler(event: dict, context) -> str:
             args = result_parse.group(3)
             msg_correction = operant + args
             is_correction = True
-        
+
         if 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
         data = param[message]
-        
-        num = int(random.randint(1,100))
+
+        num = int(random.randint(1, 100))
         msg_eval2 = message.upper()
         if msg_eval2 in lst_trigger_status or "現在SAN" == message:
             num_targ = data
         else:
             num_targ = data[-1]
-        
+
         msg_num_targ = num_targ
         if is_correction:
             num_targ = eval('{}{}{}'.format(num_targ, operant, args))
             num_targ = math.ceil(num_targ)
-            
-        print(data)
+
         str_result = ""
-        if 0 <= int(num_targ) - num :
+        if 0 <= int(num_targ) - num:
             color = "#36a64f"
             str_result = "成功"
             if 0 >= num - 5:
@@ -507,7 +502,7 @@ def lambda_handler(event: dict, context) -> str:
             if 0 <= num - 96:
                 color = "#3F0F3F"
 
-        return_message = "{} 【{}】 {}/{} ({}{})".format(str_result, message, num, num_targ, msg_num_targ, msg_correction)
+        return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
 
     return {
