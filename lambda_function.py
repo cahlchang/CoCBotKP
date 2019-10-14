@@ -9,7 +9,7 @@ import random
 import urllib.parse
 import math
 
-# test
+# test2
 # ログ設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
