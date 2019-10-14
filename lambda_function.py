@@ -358,8 +358,6 @@ def lambda_handler(event: dict, context) -> str:
         color = "#80D2DE"
         match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         param = set_user_params(user_id, match_url.group(1))
-        logging.info("set params")
-        return_message = "【{}】SET\nHP {}/{}　　MP {}/{}　　DEX {}　　SAN{}/{}".format(param["name"], param["HP"],param["HP"],param["MP"],param["MP"],param["DEX"],param["現在SAN"],param["初期SAN"])
     elif "UPDATE" == key or "U" == key:
         color = "#80D2DE"
         url_from_state = get_url_with_state(user_id)
