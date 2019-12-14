@@ -362,6 +362,8 @@ def lambda_handler(event: dict, context) -> str:
         param["user_id"] = user_id
         dict_state = get_dict_state(user_id)
         return_message = get_status_message("INIT CHARA", param, dict_state)
+    elif key in ("HELP", "H"):
+        return_message = "command list: init, update<u>, status<s>, roll, sanc"
     elif key in ("UPDATE", "U"):
         color = "#80D2DE"
         dict_state = get_dict_state(user_id)
