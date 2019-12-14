@@ -9,7 +9,6 @@ import random
 import urllib.parse
 import math
 
-# test2
 # ログ設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -97,7 +96,6 @@ def set_start_session(user_id):
 
 def add_gamesession_user(kp_id, user_id, pc_id):
     key_kp_file = kp_id + KP_FILE_PATH
-    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     obj_kp_file = bucket.Object(key_kp_file)
@@ -339,7 +337,6 @@ def lambda_handler(event: dict, context) -> str:
     body = event["body"]
     color = ""
     body_split = body.split("&")
-    # TODO トリガーはjsonファイルから取り出す
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP"]
     map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
     evt_slack = {}
@@ -372,7 +369,7 @@ def lambda_handler(event: dict, context) -> str:
         return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
         color = "#80D2DE"
-        proc = r"^(.*?)+(.*?)(+|-|*|/)(.*)$"
+        proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
         r = re.match(proc, message)
         dict_state = get_dict_state(user_id)
         if r:
@@ -389,13 +386,13 @@ def lambda_handler(event: dict, context) -> str:
         dict_state[key] = num_targ
         set_state(user_id, dict_state)
         return_message = get_status_message("UPDATE STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
-    elif "START" == key:
+    elif re.match("KP+.*START" , key):
         color = "#80D2DE"
         set_start_session(user_id)
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
         color = "#80D2DE"
-        proc = r"^(.*)+(.*)$"
+        proc = r"^(.*)\+(.*)$"
         dict_state = get_dict_state(user_id)
         result_parse = re.match(proc, message)
         kp_id = ""
@@ -404,7 +401,7 @@ def lambda_handler(event: dict, context) -> str:
 
         add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
 
-        return_message = "こんなコマンド"
+        return_message = "参加しました"
     elif re.match("KP+.*ORDER.*" , key):
         color = "#80D2DE"
         proc = "^(.*)\+ORDER\+(.*)$"
