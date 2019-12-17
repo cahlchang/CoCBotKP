@@ -3,11 +3,14 @@ import os
 import json
 import logging
 import urllib.request
+import requests
 import boto3
 import re
 import random
 import urllib.parse
 import math
+from concurrent import futures
+
 
 # ログ設定
 logger = logging.getLogger()
@@ -331,6 +334,23 @@ def get_status_message(message_command, dict_param, dict_state):
     return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
 
 
+def return_param(response_url, user_id, return_message, color):
+    payload = {
+        "icon_emoji": "books",
+        "response_type": "in_channel",
+        "headers": {},
+        "text": "<@{}>".format(user_id),
+        "attachments": json.dumps([
+            {
+            "text": return_message,
+            "type": "mrkdwn",
+            "color": color
+            }
+        ])}
+
+    res = requests.post(response_url, data=json.dumps(payload))
+    
+
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -344,6 +364,7 @@ def lambda_handler(event: dict, context) -> str:
         l = datum.split("=")
         evt_slack[l[0]] = l[1]
     user_id = evt_slack["user_id"]
+    response_url = urllib.parse.unquote(evt_slack["response_url"])
     logging.info(json.dumps(evt_slack))
 
     if "subtype" in evt_slack:
@@ -400,7 +421,9 @@ def lambda_handler(event: dict, context) -> str:
             kp_id = result_parse.group(2)
 
         add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
-
+        dict_state["kp_id"] = kp_id
+        set_state(user_id, dict_state)
+        
         return_message = "参加しました"
     elif re.match("KP+.*ORDER.*" , key):
         color = "#80D2DE"
@@ -485,6 +508,151 @@ def lambda_handler(event: dict, context) -> str:
             str_result = "失敗"
 
         return_message = f"{str_result} 【SANチェック】 {num_targ}/{sum_san}"
+    elif re.match(r"HIDE.*", key):
+        return_message = ""
+        token = os.environ["TOKEN"]
+        
+        text = "結果は公開されず、KPが描写だけ行います"
+        return_message = "【シークレットダイス】？？？"
+
+        payload = {
+            'token': token,
+            "response_type": "in_channel",
+            'text': text,
+            "attachments": json.dumps([
+                {
+                    "text": return_message,
+                    "type": "mrkdwn",
+                    "color": color
+                }
+            ])
+        }
+
+        res = requests.post(response_url, data=json.dumps(payload),headers={'Content-Type': 'application/json'})
+        print(res.text)
+            
+        
+        def post_hide(user_id):
+            post_url = 'https://slack.com/api/chat.postMessage'
+            param = get_user_params(user_id)
+            dict_state = get_dict_state(user_id)
+            channel = '@' + dict_state["kp_id"]
+
+            m = re.match(r"HIDE\+(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
+            if m is None:
+                return_message = "技能名が解釈できません"
+            else:
+                name_role = m.group(1)
+                n_targ = 0
+                msg_rev = "+0"
+                if type(param[name_role]) == list:
+                    n_targ = int(param[name_role][5])
+                else:
+                    n_targ = int(param[name_role])
+
+                msg_disp = n_targ
+
+                if name_role in dict_state:
+                    n_targ += dict_state[name_role]
+
+                if m.group(2) is not None:
+                    if m.group(2) == "+":
+                        n_targ += int(m.group(3))
+                        msg_rev = "+" + str(m.group(3))
+                    elif m.group(2) == "-":
+                        n_targ -= int(m.group(3))
+                        msg_rev = "-" + str(m.group(3))
+                    elif m.group(2) == "*":
+                        n_targ *= int(m.group(3))
+                        msg_rev = "*" + str(m.group(3))
+                    elif m.group(2) == "/":
+                        n_targ /= int(m.group(3))
+                        msg_rev = "/" + str(m.group(3))
+                
+                num = int(random.randint(1, 100))
+                str_result = ""
+
+                if 0 <= int(n_targ) - num:
+                    color_hide = "#36a64f"
+                    str_result = "成功"
+                    if 0 >= num - 5:
+                        color_hide = "#EBB424"
+                else:
+                    color_hide = "#E01E5A"
+                    str_result = "失敗"
+                    if 0 <= num - 96:
+                        color_hide = "#3F0F3F"
+
+                text = f"<@{user_id}> try {name_role}"
+                post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
+                payload = {
+                    'token': token,
+                    'channel': channel,
+                    'text': text,
+                    "attachments": json.dumps([
+                        {
+                            "text": post_message,
+                            "type": "mrkdwn",
+                            "color": color_hide
+                        }
+                    ])
+                }
+
+                res = requests.post(post_url, data=payload)
+        with futures.ThreadPoolExecutor() as executor:
+            future_hide = executor.submit(post_hide, user_id)
+            future_hide.result()
+
+        
+        return ""
+    elif re.match(r"\d{,}[dD]\d{,}.*", key):
+        sum_result = 0
+        str_detail = ""
+        lst_rolld = []
+        cnt_ptr = 0
+        for match in re.findall(r"\d{1,}[dD]\d{1,}", key):
+            str_detail += f"{match}\t".ljust(10)
+            is_plus = True
+            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+                is_plus = False
+            cnt_ptr += len(match) + 1
+            match_roll = re.match(r".*(\d{1,})(d|D)(\d{1,}).*", match)
+            result_now = 0
+            lst = []
+            n_tmp = 0
+            for i in range(0, int(match_roll.group(1))):
+                result_now = random.randint(1, int(match_roll.group(3)))
+                n_tmp += result_now
+                lst.append(str(result_now))
+                
+            str_detail += ", ".join(lst)
+            if is_plus:
+                sum_result += n_tmp
+                str_detail +=  " [plus] \n"
+            else:
+                sum_result -= n_tmp
+                str_detail +=  " [minus] \n"
+
+        if len(key) > cnt_ptr:
+            is_plus = True
+            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+                is_plus = False
+            
+            str_calc = key[cnt_ptr:]
+            match = re.match(r"(\d{,})", str_calc)
+            result_now = int(match.group(1))
+
+            if is_plus:
+                sum_result += result_now
+                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now} [plus] \n"
+            else:
+                sum_result -= result_now
+                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now} [minus] \n"
+
+        color = "#4169e1"
+        return_message = f"*{sum_result}* 【ROLLED】\n {str_detail}"
     else:
         logging.info("command start")
         param = get_user_params(user_id)
@@ -539,20 +707,4 @@ def lambda_handler(event: dict, context) -> str:
         return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
 
-    return {
-        "isBase64Encoded": False,
-        "statusCode": 200,
-        "headers": {},
-        "body": json.dumps({
-            "icon_emoji": "books",
-            "response_type": "in_channel",
-            "text": "<@{}>".format(user_id),
-            "attachments": [
-                {
-                    "text": return_message,
-                    "type": "mrkdwn",
-                    "color": color
-                }
-            ]
-        })
-    }
+    return return_param(response_url, user_id, return_message, color)
