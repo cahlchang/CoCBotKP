@@ -3,11 +3,14 @@ import os
 import json
 import logging
 import urllib.request
+import requests
 import boto3
 import re
 import random
 import urllib.parse
 import math
+from concurrent import futures
+
 
 # ログ設定
 logger = logging.getLogger()
@@ -18,7 +21,6 @@ STATE_FILE_PATH = "/state.json"
 KP_FILE_PATH = "/kp.json"
 
 lst_trigger_param = ["HP", "MP"]
-
 
 def build_response(message):
     return {
@@ -96,7 +98,6 @@ def set_start_session(user_id):
 
 def add_gamesession_user(kp_id, user_id, pc_id):
     key_kp_file = kp_id + KP_FILE_PATH
-    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     obj_kp_file = bucket.Object(key_kp_file)
@@ -332,13 +333,52 @@ def get_status_message(message_command, dict_param, dict_state):
     return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
 
 
+def return_param(response_url, user_id, return_message, color, response_type="in_channel"):
+    payload = {
+        "icon_emoji": "books",
+        "response_type": response_type,
+        "replace_original": False,
+        "headers": {},
+        "text": "<@{}>".format(user_id),
+        "attachments": json.dumps([
+            {
+            "text": return_message,
+            "type": "mrkdwn",
+            "color": color
+            }
+        ])}
+
+    res = requests.post(response_url, data=json.dumps(payload))
+    print(res.url)
+    print(res.text)
+    
+
+def post_command(message, token, data_user, channel_id, is_replace_plus=False):
+    command_url =  "https://slack.com/api/chat.postMessage?"
+    command_string = message
+    if is_replace_plus:
+        command_string = message.replace("+", " ")
+
+    payload = {
+        "token": token,
+        #"as_user": True,
+        "username": data_user["profile"]["display_name"],
+        "icon_url": data_user["profile"]["image_1024"],
+        "channel": channel_id,
+        "text": f"/cc {command_string}"
+    }
+    print(payload)
+    res = requests.get(command_url, params=payload)
+    print(res.url)
+
+
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
     random.seed()
+    token = os.environ["TOKEN"]
     body = event["body"]
     color = ""
     body_split = body.split("&")
-    # TODO トリガーはjsonファイルから取り出す
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP"]
     map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
     evt_slack = {}
@@ -346,33 +386,67 @@ def lambda_handler(event: dict, context) -> str:
         l = datum.split("=")
         evt_slack[l[0]] = l[1]
     user_id = evt_slack["user_id"]
-    logging.info(json.dumps(evt_slack))
 
+    response_url = urllib.parse.unquote(evt_slack["response_url"])
+    logging.info(json.dumps(evt_slack))
     if "subtype" in evt_slack:
         return build_response("subtype event")
 
     message = urllib.parse.unquote(evt_slack["text"])
+    channel_id = urllib.parse.unquote(evt_slack["channel_id"])
+
+    user_url = "https://slack.com/api/users.profile.get"
+    payload = {
+        "token": token,
+        "user": user_id
+    }
+
+    res = requests.get(user_url, params=payload, headers={'Content-Type': 'application/json'})
+    data_user = json.loads(res.text)
+    print(data_user)
+
     key = message.upper()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = "#80D2DE"
-        match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
+        match_url = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         param = set_user_params(user_id, match_url.group(1))
+        name_display = param["name"] + " - (" + data_user["profile"]["real_name"] + ")"
+
+        data_user["profile"]["display_name"] = name_display
+        post_command("init " + match_url.group(1), token, data_user, channel_id, True)
         param["user_id"] = user_id
         dict_state = get_dict_state(user_id)
+
+        url = "https://slack.com/api/users.profile.set"
+        set_params = {'token': token,
+                      'user': user_id,
+                      'profile': json.dumps(
+                          {
+                              "display_name": name_display
+                          }
+                      ) }
+        headers = {'Content-Type': 'application/json'}
+        res = requests.get(url, params=set_params, headers=headers)
+
         return_message = get_status_message("INIT CHARA", param, dict_state)
+    elif key in ("HELP", "H"):
+        post_command(message, token, data_user, channel_id, False)
+        return_message = "command list: init, update<u>, status<s>, roll, sanc"
     elif key in ("UPDATE", "U"):
+        post_command(message, token, data_user, channel_id, False)
         color = "#80D2DE"
         dict_state = get_dict_state(user_id)
         url_from_state = dict_state["url"]
         param = set_user_params(user_id, url_from_state, True)
         return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
+
         color = "#80D2DE"
-        proc = r"^(.*?)+(.*?)(+|-|*|/)(.*)$"
-        r = re.match(proc, message)
+        proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
+        res = re.match(proc, message)
         dict_state = get_dict_state(user_id)
-        if r:
+        if res:
             message = r.group(2)
             key = message.upper()
             operant = r.group(3)
@@ -383,32 +457,42 @@ def lambda_handler(event: dict, context) -> str:
                 val_targ = "0"
 
             num_targ = eval('{}{}{}'.format(val_targ, operant, args))
+            post_command(f"u {key}{operant}{args}", token, data_user, channel_id)
+
         dict_state[key] = num_targ
         set_state(user_id, dict_state)
-        return_message = get_status_message("UPDATE STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
-    elif "START" == key:
+        return_message = get_status_message("UPDATE STATUS",
+                                            get_user_params(user_id,
+                                                            dict_state["pc_id"]),
+                                            dict_state)
+    elif re.match("KP+.*START", key):
         color = "#80D2DE"
+        post_command(f"kp start", token, data_user, channel_id)
         set_start_session(user_id)
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
         color = "#80D2DE"
-        proc = r"^(.*)+(.*)$"
+        proc = r"^(.*)\+(.*)$"
         dict_state = get_dict_state(user_id)
         result_parse = re.match(proc, message)
         kp_id = ""
         if result_parse:
             kp_id = result_parse.group(2)
+        post_command(f"join {kp_id}", token, data_user, channel_id)
 
         add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
+        dict_state["kp_id"] = kp_id
+        set_state(user_id, dict_state)
 
-        return_message = "こんなコマンド"
-    elif re.match("KP+.*ORDER.*" , key):
+        return_message = "参加しました"
+    elif re.match("KP+.*ORDER.*", key):
         color = "#80D2DE"
         proc = "^(.*)\+ORDER\+(.*)$"
         m = re.match(proc, key)
         targ_roll = m.group(2)
         lst_user_data = get_lst_player_data(user_id, targ_roll)
         msg = f"{targ_roll}順\n"
+        post_command(f"kp order {targ_roll}", token, data_user, channel_id)
         cnt = 0
         for user_data in lst_user_data:
             cnt += 1
@@ -422,6 +506,7 @@ def lambda_handler(event: dict, context) -> str:
     #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
         return_message = json.dumps(get_user_params(user_id), ensure_ascii=False)
+        return return_param(response_url, user_id, return_message, color, "ephemeral")
     elif "GETSTATE" == key:
         return_message = json.dumps(get_dict_state(user_id), ensure_ascii=False)
     elif message in lst_trigger_param:
@@ -429,22 +514,27 @@ def lambda_handler(event: dict, context) -> str:
         param = get_user_params(user_id, "")
         return_message = "【{}】現在値{}".format(message, param[message])
     elif "景気づけ" == key:
+        post_command(f"景気づけ", token, data_user, channel_id)
         num = int(random.randint(1,100))
         return_message = "景気づけ：{}".format(num)
     elif "素振り" == key:
+        post_command(f"素振り", token, data_user, channel_id)
         #TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
         random.seed()
         num = int(random.randint(1,100))
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == key:
+        post_command(f"起床ガチャ", token, data_user, channel_id)
         # TODO 現在時刻と合わせて少し変化を入れたい
         num = int(random.randint(1,100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == key:
+        post_command(f"お祈り", token, data_user, channel_id)
         # TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1,100))
         return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
+        post_command(f"roll", token, data_user, channel_id)
         # TODO 1d100だけじゃなく、ダイス形式対応
         num = int(random.randint(1,100))
         return_message = "1D100：{}".format(num)
@@ -459,14 +549,17 @@ def lambda_handler(event: dict, context) -> str:
                 return_message += "\n"
             elif cnt == 9:
                 break
-    elif "pcname" == message:
-        pass
+    elif re.match("NAME.*", key):
+        post_command(message, token, data_user, channel_id, True)
+        return_message = "名前を設定しました"
     elif key in ("ステータス", "STATUS", "S"):
+        post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
         color = "#80D2DE"
         dict_state = get_dict_state(user_id)
         return_message = get_status_message("STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
     elif "SANC" == key:
+        post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
         c_san = int(param["現在SAN"])
         dict_state = get_dict_state(user_id)
@@ -485,12 +578,173 @@ def lambda_handler(event: dict, context) -> str:
             str_result = "失敗"
 
         return_message = f"{str_result} 【SANチェック】 {num_targ}/{sum_san}"
+    elif re.match(r"HIDE.*", key):
+        return_message = ""
+        post_command(f"hide ？？？", token, data_user, channel_id)
+
+        text = "結果は公開されず、KPが描写だけ行います"
+        return_message = "【シークレットダイス】？？？"
+
+        payload = {
+            'token': token,
+            "response_type": "in_channel",
+            'text': text,
+            "attachments": json.dumps([
+                {
+                    "text": return_message,
+                    "type": "mrkdwn",
+                    "color": color
+                }
+            ])
+        }
+
+        res = requests.post(response_url,
+                            data=json.dumps(payload),
+                            headers={'Content-Type': 'application/json'})
+        print(res.text)
+
+        def post_hide(user_id):
+            post_url = 'https://slack.com/api/chat.postMessage'
+            param = get_user_params(user_id)
+            dict_state = get_dict_state(user_id)
+            channel = '@' + dict_state["kp_id"]
+
+            m = re.match(r"HIDE\+(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
+            if m is None:
+                return_message = "技能名が解釈できません"
+            elif m.group(1) and m.group(1) not in param:
+                name_role = m.group(1)
+                post_message = "この技能は所持していません"
+                color_hide = "gray"
+            else:
+                name_role = m.group(1)
+                n_targ = 0
+                msg_rev = "+0"
+                if type(param[name_role]) == list:
+                    n_targ = int(param[name_role][5])
+                else:
+                    n_targ = int(param[name_role])
+
+                msg_disp = n_targ
+
+                if name_role in dict_state:
+                    n_targ += dict_state[name_role]
+                if m.group(2) is not None:
+                    if m.group(2) == "+":
+                        n_targ += int(m.group(3))
+                        msg_rev = "+" + str(m.group(3))
+                    elif m.group(2) == "-":
+                        n_targ -= int(m.group(3))
+                        msg_rev = "-" + str(m.group(3))
+                    elif m.group(2) == "*":
+                        n_targ *= int(m.group(3))
+                        msg_rev = "*" + str(m.group(3))
+                    elif m.group(2) == "/":
+                        n_targ /= int(m.group(3))
+                        msg_rev = "/" + str(m.group(3))
+
+                num = int(random.randint(1, 100))
+                str_result = ""
+
+                if 0 <= int(n_targ) - num:
+                    color_hide = "#36a64f"
+                    str_result = "成功"
+                    if 0 >= num - 5:
+                        color_hide = "#EBB424"
+                else:
+                    color_hide = "#E01E5A"
+                    str_result = "失敗"
+                    if 0 <= num - 96:
+                        color_hide = "#3F0F3F"
+                post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
+
+            text = f"<@{user_id}> try {name_role}"
+
+            payload = {
+                'token': token,
+                'channel': channel,
+                'text': text,
+                "attachments": json.dumps([
+                    {
+                        "text": post_message,
+                        "type": "mrkdwn",
+                        "color": color_hide
+                    }
+                ])
+            }
+
+            requests.post(post_url, data=payload)
+        with futures.ThreadPoolExecutor() as executor:
+            future_hide = executor.submit(post_hide, user_id)
+            future_hide.result()
+
+
+        return ""
+    elif re.match(r"\d{,}[dD]\d{,}.*", key):
+        str_message = ""
+        sum_result = 0
+        str_detail = ""
+        cnt_ptr = 0
+        for match in re.findall(r"\d{1,}[dD]\d{1,}", key):
+            str_detail += f"{match}\t".ljust(10)
+            is_plus = True
+            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+                is_plus = False
+            cnt_ptr += len(match) + 1
+            match_roll = re.match(r".*(\d{1,})(d|D)(\d{1,}).*", match)
+            result_now = 0
+            lst = []
+            n_tmp = 0
+            for i in range(0, int(match_roll.group(1))):
+                result_now = random.randint(1, int(match_roll.group(3)))
+                n_tmp += result_now
+                lst.append(str(result_now))
+
+            str_detail += ", ".join(lst)
+            if is_plus:
+                if str_message == "":
+                    str_message = match
+                else:
+                    str_message += f"+{match}"
+                sum_result += n_tmp
+                str_detail +=  " [plus] \n"
+            else:
+                str_message += f"-{match}"
+                sum_result -= n_tmp
+                str_detail +=  " [minus] \n"
+
+        if len(key) > cnt_ptr:
+            is_plus = True
+            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+                is_plus = False
+
+            str_calc = key[cnt_ptr:]
+            match = re.match(r"(\d{,})", str_calc)
+            result_now = int(match.group(1))
+
+            if is_plus:
+                str_message += f"+{str_calc}"
+                sum_result += result_now
+                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now} [plus] \n"
+            else:
+                str_message += f"-{str_calc}"
+                sum_result -= result_now
+                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now} [minus] \n"
+
+        post_command(str_message, token, data_user, channel_id)
+
+        color = "#4169e1"
+        return_message = f"*{sum_result}* 【ROLLED】\n {str_detail}"
     else:
         logging.info("command start")
         param = get_user_params(user_id)
         # todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
+        post_command(message, token, data_user, channel_id)
 
+        # todo
         if not 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             message = map_alias_trigger[message.upper()]
 
@@ -507,6 +761,7 @@ def lambda_handler(event: dict, context) -> str:
             msg_correction = operant + args
             is_correction = True
 
+        # todo
         if 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
@@ -521,10 +776,12 @@ def lambda_handler(event: dict, context) -> str:
 
         msg_num_targ = num_targ
         if is_correction:
+            # todo dont use eval
             num_targ = eval('{}{}{}'.format(num_targ, operant, args))
             num_targ = math.ceil(num_targ)
 
         str_result = ""
+        #todo no yoda
         if 0 <= int(num_targ) - num:
             color = "#36a64f"
             str_result = "成功"
@@ -539,20 +796,4 @@ def lambda_handler(event: dict, context) -> str:
         return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
 
-    return {
-        "isBase64Encoded": False,
-        "statusCode": 200,
-        "headers": {},
-        "body": json.dumps({
-            "icon_emoji": "books",
-            "response_type": "in_channel",
-            "text": "<@{}>".format(user_id),
-            "attachments": [
-                {
-                    "text": return_message,
-                    "type": "mrkdwn",
-                    "color": color
-                }
-            ]
-        })
-    }
+    return return_param(response_url, user_id, return_message, color)
