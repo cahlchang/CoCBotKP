@@ -22,7 +22,6 @@ KP_FILE_PATH = "/kp.json"
 
 lst_trigger_param = ["HP", "MP"]
 
-
 def build_response(message):
     return {
         "isBase64Encoded": False,
@@ -364,9 +363,9 @@ def lambda_handler(event: dict, context) -> str:
         l = datum.split("=")
         evt_slack[l[0]] = l[1]
     user_id = evt_slack["user_id"]
+
     response_url = urllib.parse.unquote(evt_slack["response_url"])
     logging.info(json.dumps(evt_slack))
-
     if "subtype" in evt_slack:
         return build_response("subtype event")
 
@@ -375,7 +374,7 @@ def lambda_handler(event: dict, context) -> str:
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = "#80D2DE"
-        match_url  = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
+        match_url = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
         param = set_user_params(user_id, match_url.group(1))
         param["user_id"] = user_id
         dict_state = get_dict_state(user_id)
@@ -389,6 +388,7 @@ def lambda_handler(event: dict, context) -> str:
         param = set_user_params(user_id, url_from_state, True)
         return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
+
         color = "#80D2DE"
         proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
         r = re.match(proc, message)
@@ -425,7 +425,7 @@ def lambda_handler(event: dict, context) -> str:
         set_state(user_id, dict_state)
         
         return_message = "参加しました"
-    elif re.match("KP+.*ORDER.*" , key):
+    elif re.match("KP+.*ORDER.*", key):
         color = "#80D2DE"
         proc = "^(.*)\+ORDER\+(.*)$"
         m = re.match(proc, key)
@@ -530,8 +530,7 @@ def lambda_handler(event: dict, context) -> str:
 
         res = requests.post(response_url, data=json.dumps(payload),headers={'Content-Type': 'application/json'})
         print(res.text)
-            
-        
+
         def post_hide(user_id):
             post_url = 'https://slack.com/api/chat.postMessage'
             param = get_user_params(user_id)
@@ -554,7 +553,6 @@ def lambda_handler(event: dict, context) -> str:
 
                 if name_role in dict_state:
                     n_targ += dict_state[name_role]
-
                 if m.group(2) is not None:
                     if m.group(2) == "+":
                         n_targ += int(m.group(3))
@@ -568,7 +566,7 @@ def lambda_handler(event: dict, context) -> str:
                     elif m.group(2) == "/":
                         n_targ /= int(m.group(3))
                         msg_rev = "/" + str(m.group(3))
-                
+
                 num = int(random.randint(1, 100))
                 str_result = ""
 
@@ -603,7 +601,7 @@ def lambda_handler(event: dict, context) -> str:
             future_hide = executor.submit(post_hide, user_id)
             future_hide.result()
 
-        
+
         return ""
     elif re.match(r"\d{,}[dD]\d{,}.*", key):
         sum_result = 0
@@ -637,7 +635,7 @@ def lambda_handler(event: dict, context) -> str:
             is_plus = True
             if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
                 is_plus = False
-            
+
             str_calc = key[cnt_ptr:]
             match = re.match(r"(\d{,})", str_calc)
             result_now = int(match.group(1))
