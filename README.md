@@ -1,5 +1,8 @@
 # CoCNonKP
-An awesome guy doing a chore with Slack
+
+When playing "Call of Cthulhu" TRPG on slack, it is a bot that automatically does various things.  
+
+Coc Non user Keeper
 
 
 # deploy
