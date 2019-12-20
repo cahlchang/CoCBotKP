@@ -10,7 +10,7 @@ import random
 import urllib.parse
 import math
 from concurrent import futures
-
+import unicodedata
 
 # ログ設定
 logger = logging.getLogger()
@@ -351,7 +351,7 @@ def return_param(response_url, user_id, return_message, color, response_type="in
     res = requests.post(response_url, data=json.dumps(payload))
     print(res.url)
     print(res.text)
-    
+
 
 def post_command(message, token, data_user, channel_id, is_replace_plus=False):
     command_url =  "https://slack.com/api/chat.postMessage?"
@@ -413,21 +413,24 @@ def lambda_handler(event: dict, context) -> str:
         param = set_user_params(user_id, match_url.group(1))
         name_display = param["name"] + " - (" + data_user["profile"]["real_name"] + ")"
 
+        name_display = unicodedata.normalize("NFKC", name_display)
         data_user["profile"]["display_name"] = name_display
+
         post_command("init " + match_url.group(1), token, data_user, channel_id, True)
         param["user_id"] = user_id
         dict_state = get_dict_state(user_id)
-
         url = "https://slack.com/api/users.profile.set"
         set_params = {'token': token,
-                      'user': user_id,
-                      'profile': json.dumps(
-                          {
-                              "display_name": name_display
-                          }
-                      ) }
+                  'user': user_id,
+                  'profile': json.dumps(
+                      {
+                          "display_name": name_display
+                      }
+                  )
+        }
         headers = {'Content-Type': 'application/json'}
-        res = requests.get(url, params=set_params, headers=headers)
+        r = requests.get(url, params=set_params, headers=headers)
+        print(r.text)
 
         return_message = get_status_message("INIT CHARA", param, dict_state)
     elif key in ("HELP", "H"):
@@ -444,9 +447,9 @@ def lambda_handler(event: dict, context) -> str:
 
         color = "#80D2DE"
         proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
-        res = re.match(proc, message)
+        r = re.match(proc, message)
         dict_state = get_dict_state(user_id)
-        if res:
+        if r:
             message = r.group(2)
             key = message.upper()
             operant = r.group(3)
@@ -465,7 +468,7 @@ def lambda_handler(event: dict, context) -> str:
                                             get_user_params(user_id,
                                                             dict_state["pc_id"]),
                                             dict_state)
-    elif re.match("KP+.*START", key):
+    elif re.match("KP+.*START" , key):
         color = "#80D2DE"
         post_command(f"kp start", token, data_user, channel_id)
         set_start_session(user_id)
@@ -483,7 +486,6 @@ def lambda_handler(event: dict, context) -> str:
         add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
         dict_state["kp_id"] = kp_id
         set_state(user_id, dict_state)
-
         return_message = "参加しました"
     elif re.match("KP+.*ORDER.*", key):
         color = "#80D2DE"
@@ -673,25 +675,27 @@ def lambda_handler(event: dict, context) -> str:
                 ])
             }
 
-            requests.post(post_url, data=payload)
+            res = requests.post(post_url, data=payload)
         with futures.ThreadPoolExecutor() as executor:
             future_hide = executor.submit(post_hide, user_id)
             future_hide.result()
 
-
         return ""
-    elif re.match(r"\d{,}[dD]\d{,}.*", key):
+    elif re.match(r"^\d+[dD]\d*.*", key):
         str_message = ""
         sum_result = 0
         str_detail = ""
+        lst_rolld = []
         cnt_ptr = 0
-        for match in re.findall(r"\d{1,}[dD]\d{1,}", key):
-            str_detail += f"{match}\t".ljust(10)
+        for match in re.findall(r"\d+[dD]\d+", key):
+            str_detail += f"{match}\t".ljust(80)
             is_plus = True
             if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
                 is_plus = False
             cnt_ptr += len(match) + 1
-            match_roll = re.match(r".*(\d{1,})(d|D)(\d{1,}).*", match)
+            match_roll = re.match(r"(\d+)(d|D)(\d+).*", match)
+            print(match)
+            print(match_roll.group(1))
             result_now = 0
             lst = []
             n_tmp = 0
@@ -719,18 +723,18 @@ def lambda_handler(event: dict, context) -> str:
                 is_plus = False
 
             str_calc = key[cnt_ptr:]
-            match = re.match(r"(\d{,})", str_calc)
+            match = re.match(r"(\d+)", str_calc)
             result_now = int(match.group(1))
 
             if is_plus:
                 str_message += f"+{str_calc}"
                 sum_result += result_now
-                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now}".ljust(83)
                 str_detail += f"{result_now} [plus] \n"
             else:
                 str_message += f"-{str_calc}"
                 sum_result -= result_now
-                str_detail += f"{result_now}".ljust(13)
+                str_detail += f"{result_now}".ljust(83)
                 str_detail += f"{result_now} [minus] \n"
 
         post_command(str_message, token, data_user, channel_id)
@@ -764,6 +768,9 @@ def lambda_handler(event: dict, context) -> str:
         # todo
         if 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
+
+#        if message not in param:
+#            return_param(response_url, user_id, "解釈出来ないコマンドです", color, "ephemeral")
 
         data = param[message]
 
