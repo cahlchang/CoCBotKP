@@ -435,7 +435,9 @@ def lambda_handler(event: dict, context) -> str:
         return_message = get_status_message("INIT CHARA", param, dict_state)
     elif key in ("HELP", "H"):
         post_command(message, token, data_user, channel_id, False)
-        return_message = "command list: init, update<u>, status<s>, roll, sanc"
+        return_message = "command list: init, update<u>, status<s>, roll, sanc\n"\
+            "more info... https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md"
+
     elif key in ("UPDATE", "U"):
         post_command(message, token, data_user, channel_id, False)
         color = "#80D2DE"
