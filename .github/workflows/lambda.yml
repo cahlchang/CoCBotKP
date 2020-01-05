@@ -19,6 +19,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
+        pip3 install setuptools
         pip3 install requests --user --install-option="--install-purelib=./"
         zip -x .git -r lambda.zip ./*
         mv lambda.zip /tmp/lambda.zip
