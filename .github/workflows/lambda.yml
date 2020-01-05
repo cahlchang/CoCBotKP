@@ -31,5 +31,5 @@ jobs:
       with:
         type: ${{ job.status }}
         job_name: '*Deploy Lambda*'
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
