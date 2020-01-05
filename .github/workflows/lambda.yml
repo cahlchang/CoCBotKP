@@ -31,8 +31,7 @@ jobs:
         run: |
           zip -x .git -r lambda.zip ./*
           mv lambda.zip /tmp/lambda.zip
-          aws lambda update-function-code --function-name CoCNonKP --zip-file fileb:///tmp/lambda.zip --publish
-
+          aws lambda update-function-code --region ap-northeast-1 --function-name CoCNonKP --zip-file fileb:///tmp/lambda.zip --publish
       - name: Notify result to slack
         uses: homoluctus/slatify@master
         if: always()
