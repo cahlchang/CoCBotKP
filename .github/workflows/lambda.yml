@@ -14,22 +14,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-northeast-1
-
     - name: Install Dependency Packages
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: my-ecr-repo
-        IMAGE_TAG: ${{ github.sha }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
+        pip install awscli
         pip install requests -t .
         zip -x .git -r lambda.zip ./*
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        mv lambda.zip /tmp/lambda.zip
+        aws lambda update-function-code --function-name CoCNonKP --zip-file fileb:///tmp/lambda.zip --publish
 
     - name: Notify result to slack
       uses: homoluctus/slatify@master
