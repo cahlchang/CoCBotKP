@@ -119,7 +119,7 @@ def add_gamesession_user(kp_id, user_id, pc_id):
 
 def get_lst_player_data(user_id, roll_targ):
     key_kp_file = user_id + KP_FILE_PATH
-    
+
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
     obj_kp_file = bucket.Object(key_kp_file)
@@ -224,7 +224,7 @@ def set_user_params(user_id, url, is_update=False):
                 else:
                     dict_param[role_now_parse].append(0)
 
-            m = re.match('.*(TBAP|TFAP|TAAP|TCAP|TKAP).*', line) 
+            m = re.match('.*(TBAP|TFAP|TAAP|TCAP|TKAP).*', line)
             if m:
                 is_role_now_parse = False
                 role_now_parse = ""
