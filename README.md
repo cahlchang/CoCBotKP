@@ -6,6 +6,8 @@ Coc Non user Keeper
 
 ## deploy
 
+- When commits are merged to master, lambda code is deployed by GitHub Actions automatically.
+
 $ serverless deploy -v cocnonkp
 
 ## Command Reference
