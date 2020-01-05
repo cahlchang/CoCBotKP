@@ -20,7 +20,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         curl -kL https://bootstrap.pypa.io/get-pip.py | python3
-        pip3 install awscli --upgrade --user
+        pip3 install awscli --upgrade
         pip3 install requests -t .
         zip -x .git -r lambda.zip ./*
         mv lambda.zip /tmp/lambda.zip
