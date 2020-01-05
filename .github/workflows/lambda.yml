@@ -8,28 +8,36 @@ name: Deploy to Amazon Lambda
 jobs:
   deploy:
     name: Deploy
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install awscli
+      - name: Install Dependency Packages
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          zip -x .git -r lambda.zip ./*
+          mv lambda.zip /tmp/lambda.zip
+          aws lambda update-function-code --function-name CoCNonKP --zip-file fileb:///tmp/lambda.zip --publish
 
-    - name: Install Dependency Packages
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        pip3 install --upgrade pip
-        pip3 install requests --user --install-option="--install-purelib=./"
-        zip -x .git -r lambda.zip ./*
-        mv lambda.zip /tmp/lambda.zip
-        aws lambda update-function-code --function-name CoCNonKP --zip-file fileb:///tmp/lambda.zip --publish
-
-    - name: Notify result to slack
-      uses: homoluctus/slatify@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: '*Deploy Lambda*'
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Notify result to slack
+        uses: homoluctus/slatify@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Deploy Lambda*"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
