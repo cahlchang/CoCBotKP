@@ -21,6 +21,7 @@ jobs:
           pip install awscli
           pip install boto3
           pip install -r requirements.txt -t .
+          pip install -r requirements_test.txt -t .
 
     - name: GitHub Action for pytest
       run: |
