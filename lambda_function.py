@@ -250,12 +250,11 @@ def set_user_params(user_id, url, is_update=False):
         "seisaku_bunya": "製作（{}）",
         "main_souju_norimono": "操縦（{}）",
         "mylang_name": "母国語（{}）",
-        "Name\[\]": "{}"
+        "Name[]": "{}"
     }
     for key in dict_param.keys():
         for proc, key_new in dict_replace.items():
-            m = re.match('.*{}.*'.format(proc), key)
-            if m:
+            if proc in key:
                 m2 = re.match(r'.*value="(.*?)" s.*', key)
                 if m2:
                     key_new = key_new.format(m2.group(1))
@@ -409,7 +408,7 @@ def lambda_handler(event: dict, context) -> str:
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = "#80D2DE"
-        match_url = re.match(".*(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+)", message)
+        match_url = re.match(r".*<(https.*)>", message)
         param = set_user_params(user_id, match_url.group(1))
         name_display = param["name"] + " - (" + data_user["profile"]["real_name"] + ")"
 
@@ -491,9 +490,9 @@ def lambda_handler(event: dict, context) -> str:
         return_message = "参加しました"
     elif re.match("KP+.*ORDER.*", key):
         color = "#80D2DE"
-        proc = "^(.*)\+ORDER\+(.*)$"
+        proc = r"KP\+ORDER\+(.*)"
         m = re.match(proc, key)
-        targ_roll = m.group(2)
+        targ_roll = m.group(1)
         lst_user_data = get_lst_player_data(user_id, targ_roll)
         msg = f"{targ_roll}順\n"
         post_command(f"kp order {targ_roll}", token, data_user, channel_id)
