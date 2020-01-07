@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from lambda_function import get_status_message
 
-def test_
+def test_2():
     msg = "【test_user】TEST\nHP 4/5\u3000\u3000MP 4/5\u3000\u3000DEX 8\u3000\u3000SAN 10/10"
     assert get_status_message("TEST",
                               {"name": "test_user",
