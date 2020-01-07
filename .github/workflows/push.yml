@@ -4,11 +4,17 @@ jobs:
   gitHubActionForPytest:
     name: GitHub Action for pytest
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
     steps:
     - uses: actions/checkout@master
 
     - run: |
-        pip install -r requirements.txt -t .
+          python -m pip install --upgrade pip
+          pip install awscli
+          pip install -r requirements.txt -t .
 
     - name: GitHub Action for pytest
       uses: cclauss/GitHub-Action-for-pytest@master
