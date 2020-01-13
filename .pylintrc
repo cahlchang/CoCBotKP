@@ -260,7 +260,10 @@ ignored-classes=optparse.Values,thread._local,_thread._local
 # (useful for modules/projects where namespaces are manipulated during runtime
 # and thus existing member attributes cannot be deduced by static analysis). It
 # supports qualified module names, as well as Unix pattern matching.
-ignored-modules=
+
+# ignore false-positives for pylint no-member warning for boto3 classes
+# refer: https://github.com/opentelekomcloud-infra/customer-service-monitoring/pull/167
+ignored-modules=boto3
 
 # Show a hint with possible names when a member name was not found. The aspect
 # of finding the hint is based on edit distance.
