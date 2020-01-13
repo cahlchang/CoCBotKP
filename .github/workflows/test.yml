@@ -21,6 +21,10 @@ jobs:
           pip install -r requirements.txt
           pip install -r test-requirements.txt
 
-      - name: GitHub Action for pytest
+      - name: pytest
         run: |
           pytest
+
+      - name: pylint(check only error)
+        run: |
+          pylint -E *.py
