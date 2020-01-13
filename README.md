@@ -15,6 +15,10 @@ Coc Non user Keeper
 4. deactivate venv (if you want to exit venv)
     - `deactivate`
 
+## run test
+
+- run `python -m pytest ./` on virtual env.
+
 ## deploy
 
 - When commits are merged to master, lambda code is deployed by GitHub Actions automatically.
