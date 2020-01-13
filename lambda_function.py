@@ -346,7 +346,7 @@ def return_param(response_url, user_id, return_message, color, response_type="in
 
 
 def post_command(message, token, data_user, channel_id, is_replace_plus=False):
-    command_url =  "https://slack.com/api/chat.postMessage?"
+    command_url = "https://slack.com/api/chat.postMessage?"
     command_string = message
     if is_replace_plus:
         command_string = message.replace("+", " ")
@@ -706,11 +706,11 @@ def lambda_handler(event: dict, context) -> str:
                 else:
                     str_message += f"+{match}"
                 sum_result += n_tmp
-                str_detail +=  " [plus] \n"
+                str_detail += " [plus] \n"
             else:
                 str_message += f"-{match}"
                 sum_result -= n_tmp
-                str_detail +=  " [minus] \n"
+                str_detail += " [minus] \n"
 
         if len(key) > cnt_ptr:
             is_plus = True
@@ -761,7 +761,7 @@ def lambda_handler(event: dict, context) -> str:
             is_correction = True
 
         # todo
-        if 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), param.keys()))):
+        if 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
 #        if message not in param:
