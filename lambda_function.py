@@ -79,6 +79,8 @@ def set_state(user_id, dict_state):
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
+    # TODO: エラー処理すべき
+    logging.info(f"Fail to put state to S3. response:[{response}]")
 
 
 def set_start_session(user_id):
@@ -271,15 +273,6 @@ def set_user_params(user_id, url, is_update=False):
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
 
     logging.info("puts3 start")
-    key = user_id + "/" + pc_id + ".json"
-    # TODO 保存処理を関数に出す
-    obj = bucket.Object(key)
-    body = json.dumps(dict_param, ensure_ascii=False)
-    response = obj.put(
-        Body=body.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
 
     logging.info("puts3 end")
     if is_update:
@@ -299,7 +292,7 @@ def set_user_params(user_id, url, is_update=False):
         ContentType='text/plane'
     )
 
-    logging.info("puts3 2 end")
+    logging.info(f"puts3 2 end. response:[{response}]")
     return dict_param
 
 
@@ -614,7 +607,7 @@ def lambda_handler(event: dict, context) -> str:
 
             m = re.match(r"HIDE\+(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
             if m is None:
-                return_message = "技能名が解釈できません"
+                post_message = "技能名が解釈できません"
             elif m.group(1) and m.group(1) not in param:
                 name_role = m.group(1)
                 post_message = "この技能は所持していません"
@@ -677,6 +670,7 @@ def lambda_handler(event: dict, context) -> str:
             }
 
             res = requests.post(post_url, data=payload)
+            logging.info(f"post to Slack. response:[{res}]")
         with futures.ThreadPoolExecutor() as executor:
             future_hide = executor.submit(post_hide, user_id)
             future_hide.result()
@@ -686,7 +680,6 @@ def lambda_handler(event: dict, context) -> str:
         str_message = ""
         sum_result = 0
         str_detail = ""
-        lst_rolld = []
         cnt_ptr = 0
         for match in re.findall(r"\d+[dD]\d+", key):
             str_detail += f"{match}\t".ljust(80)
@@ -700,7 +693,8 @@ def lambda_handler(event: dict, context) -> str:
             result_now = 0
             lst = []
             n_tmp = 0
-            for i in range(0, int(match_roll.group(1))):
+            # TODO: ループの仕方を見直す
+            for _i in range(0, int(match_roll.group(1))):
                 result_now = random.randint(1, int(match_roll.group(3)))
                 n_tmp += result_now
                 lst.append(str(result_now))
