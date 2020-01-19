@@ -28,6 +28,12 @@ AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
 KP_FILE_PATH = "/kp.json"
 
+COLOR_CRITICAL = '#EBB424'
+COLOR_SUCCESS = '#36a64f'
+COLOR_FAILURE = '#E01E5A'
+COLOR_FUMBLE = '#3F0F3F'
+COLOR_ATTENTION = '#80D2DE'
+
 lst_trigger_param = ["HP", "MP"]
 
 def build_response(message):
@@ -408,7 +414,7 @@ def lambda_handler(event: dict, context) -> str:
     key = message.upper()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         match_url = re.match(r".*<(https.*)>", message)
         param = set_user_params(user_id, match_url.group(1))
         name_display = param["name"] + " - (" + data_user["profile"]["real_name"] + ")"
@@ -440,14 +446,13 @@ def lambda_handler(event: dict, context) -> str:
 
     elif key in ("UPDATE", "U"):
         post_command(message, token, data_user, channel_id, False)
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         dict_state = get_dict_state(user_id)
         url_from_state = dict_state["url"]
         param = set_user_params(user_id, url_from_state, True)
         return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
-
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
         r = re.match(proc, message)
         dict_state = get_dict_state(user_id)
@@ -471,12 +476,12 @@ def lambda_handler(event: dict, context) -> str:
                                                             dict_state["pc_id"]),
                                             dict_state)
     elif re.match("KP+.*START" , key):
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         post_command(f"kp start", token, data_user, channel_id)
         set_start_session(user_id)
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         proc = r"^(.*)\+(.*)$"
         dict_state = get_dict_state(user_id)
         result_parse = re.match(proc, message)
@@ -490,7 +495,7 @@ def lambda_handler(event: dict, context) -> str:
         set_state(user_id, dict_state)
         return_message = "参加しました"
     elif re.match("KP+.*ORDER.*", key):
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         proc = r"KP\+ORDER\+(.*)"
         m = re.match(proc, key)
         targ_roll = m.group(1)
@@ -559,7 +564,7 @@ def lambda_handler(event: dict, context) -> str:
     elif key in ("ステータス", "STATUS", "S"):
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
-        color = "#80D2DE"
+        color = COLOR_ATTENTION
         dict_state = get_dict_state(user_id)
         return_message = get_status_message("STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
     elif "SANC" == key:
@@ -575,10 +580,10 @@ def lambda_handler(event: dict, context) -> str:
 
         num_targ = int(random.randint(1, 100))
         if sum_san >= num_targ:
-            color = "#36a64f"
+            color = COLOR_SUCCESS
             str_result = "成功"
         else:
-            color = "#E01E5A"
+            color = COLOR_FAILURE
             str_result = "失敗"
 
         return_message = f"{str_result} 【SANチェック】 {num_targ}/{sum_san}"
@@ -651,15 +656,15 @@ def lambda_handler(event: dict, context) -> str:
                 str_result = ""
 
                 if 0 <= int(n_targ) - num:
-                    color_hide = "#36a64f"
+                    color_hide = COLOR_SUCCESS
                     str_result = "成功"
                     if 0 >= num - 5:
-                        color_hide = "#EBB424"
+                        color_hide = COLOR_CRITICAL
                 else:
-                    color_hide = "#E01E5A"
+                    color_hide = COLOR_FAILURE
                     str_result = "失敗"
                     if 0 <= num - 96:
-                        color_hide = "#3F0F3F"
+                        color_hide = COLOR_FUMBLE
                 post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
 
             text = f"<@{user_id}> try {name_role}"
@@ -793,15 +798,15 @@ def lambda_handler(event: dict, context) -> str:
         str_result = ""
         #todo no yoda
         if 0 <= int(num_targ) - num:
-            color = "#36a64f"
+            color = COLOR_SUCCESS
             str_result = "成功"
             if 0 >= num - 5:
-                color = "#EBB424"
+                color = COLOR_CRITICAL
         else:
-            color = "#E01E5A"
+            color = COLOR_FAILURE
             str_result = "失敗"
             if 0 <= num - 96:
-                color = "#3F0F3F"
+                color = COLOR_FUMBLE
 
         return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
