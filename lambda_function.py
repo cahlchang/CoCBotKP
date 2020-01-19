@@ -785,25 +785,22 @@ def lambda_handler(event: dict, _context) -> str:
             print(match)
             print(match_roll.group(1))
             result_now = 0
-            lst = []
-            n_tmp = 0
-            # TODO: ループの仕方を見直す
-            for _i in range(0, int(match_roll.group(1))):
-                result_now = random.randint(1, int(match_roll.group(3)))
-                n_tmp += result_now
-                lst.append(str(result_now))
+            dice_count = int(match_roll.group(1))
+            dice_type = int(match_roll.group(1))
+            roll_results = roll_dice(dice_count, dice_type)
+            dice_sum = sum(roll_results)
 
-            str_detail += ", ".join(lst)
+            str_detail += ", ".join(map(str, roll_results))
             if is_plus:
                 if str_message == "":
                     str_message = match
                 else:
                     str_message += f"+{match}"
-                sum_result += n_tmp
+                sum_result += dice_sum
                 str_detail += " [plus] \n"
             else:
                 str_message += f"-{match}"
-                sum_result -= n_tmp
+                sum_result -= dice_sum
                 str_detail += " [minus] \n"
 
         if len(key) > cnt_ptr:
