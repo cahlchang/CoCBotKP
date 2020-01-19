@@ -526,7 +526,7 @@ def lambda_handler(event: dict, _context) -> str:
     if "subtype" in evt_slack:
         return build_response("subtype event")
 
-    message = urllib.parse.unquote(evt_slack["text"])
+    message = urllib.parse.unquote_plus(evt_slack["text"])
     channel_id = urllib.parse.unquote(evt_slack["channel_id"])
 
     user_url = "https://slack.com/api/users.profile.get"
