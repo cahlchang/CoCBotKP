@@ -1,5 +1,7 @@
 # pylint: disable=missing-module-docstring, missing-function-docstring
 
+import re
+
 import pytest
 import lambda_function as main
 
@@ -78,3 +80,13 @@ def test_eval_roll_or_value_for_value(text, val):
 ])
 def test_format_as_command(text, expected):
     assert main.format_as_command(text) == expected
+
+
+@pytest.mark.parametrize("cmd, san_val, msg_matcher, color", [
+    ("SANC", 100, r"成功 【SANチェック】 \d+/100", main.COLOR_SUCCESS),
+    ("SANC", 0, r"失敗 【SANチェック】 \d+/0", main.COLOR_FAILURE),
+])
+def test_get_sanc_result(cmd, san_val, msg_matcher, color):
+    actual_msg, actual_color = main.get_sanc_result(cmd, san_val)
+    assert re.match(msg_matcher, actual_msg) is not None
+    assert actual_color == color

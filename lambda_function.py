@@ -16,7 +16,7 @@ import random
 import math
 from concurrent import futures
 import unicodedata
-from typing import List
+from typing import List, Tuple
 
 import boto3
 import requests
@@ -466,6 +466,27 @@ def format_as_command(text: str) -> str:
     """
     return text.upper().strip()
 
+def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
+    """
+    Check SAN and return result message and color.
+    Arguments:
+        cmd {str} -- command text
+        pc_san {int} -- PC's SAN value
+
+    Returns:
+        str -- report message
+        str -- color that indicates success or failure
+    """
+    dice_result = int(random.randint(1, 100))
+    if pc_san >= dice_result:
+        color = COLOR_SUCCESS
+        result_msg = "成功"
+    else:
+        color = COLOR_FAILURE
+        result_msg = "失敗"
+
+    return f"{result_msg} 【SANチェック】 {dice_result}/{pc_san}", color
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -623,7 +644,6 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = "景気づけ：{}".format(num)
     elif "素振り" == key:
         post_command(f"素振り", token, data_user, channel_id)
-        # TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
         random.seed()
         num = int(random.randint(1, 100))
         return_message = "素振り：{}".format(num)
@@ -639,7 +659,6 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
         post_command(f"roll", token, data_user, channel_id)
-        # TODO 1d100だけじゃなく、ダイス形式対応
         num = int(random.randint(1, 100))
         return_message = "1D100：{}".format(num)
     elif "能力値" == key:
@@ -664,7 +683,7 @@ def lambda_handler(event: dict, _context) -> str:
         dict_state = get_dict_state(user_id)
         return_message = get_status_message(
             "STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
-    elif "SANC" == key:
+    elif key.startswith("SANC"):
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
         c_san = int(param["現在SAN"])
@@ -675,15 +694,8 @@ def lambda_handler(event: dict, _context) -> str:
             d_san = 0
         sum_san = c_san + d_san
 
-        num_targ = int(random.randint(1, 100))
-        if sum_san >= num_targ:
-            color = COLOR_SUCCESS
-            str_result = "成功"
-        else:
-            color = COLOR_FAILURE
-            str_result = "失敗"
+        return_message, color = get_sanc_result(key, sum_san)
 
-        return_message = f"{str_result} 【SANチェック】 {num_targ}/{sum_san}"
     elif re.match(r"HIDE.*", key):
         return_message = ""
         post_command(f"hide ？？？", token, data_user, channel_id)
