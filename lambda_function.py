@@ -460,6 +460,12 @@ def roll_dice(dice_count: int, dice_type: int) -> List[int]:
         results.append(random.randint(1, dice_type))
     return results
 
+def format_as_command(text: str) -> str:
+    """
+    Make text uppercased and remove edge spaces
+    """
+    return text.upper().strip()
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -495,7 +501,7 @@ def lambda_handler(event: dict, _context) -> str:
     data_user = json.loads(res.text)
     print(data_user)
 
-    key = message.upper()
+    key = format_as_command(message)
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = COLOR_ATTENTION

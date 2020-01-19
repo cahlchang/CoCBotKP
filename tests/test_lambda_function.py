@@ -69,3 +69,12 @@ def test_eval_roll_or_value_for_value(text, val):
     results = main.eval_roll_or_value(text)
     assert len(results) == 1
     assert results[0] == val
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("sanc", "SANC"),
+    ("  sanc 1d100    ", "SANC 1D100"),
+    ("  1d100 ", "1D100"),
+])
+def test_format_as_command(text, expected):
+    assert main.format_as_command(text) == expected
