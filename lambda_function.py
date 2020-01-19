@@ -16,6 +16,7 @@ import random
 import math
 from concurrent import futures
 import unicodedata
+from typing import List
 
 import boto3
 import requests
@@ -420,6 +421,44 @@ def split_alternative_roll_or_value(cmd) -> bool:
         return None
     return result.groups()
 
+def eval_roll_or_value(text: str) -> List[int]:
+    """
+    Evaluate text formated roll or value.
+    If invalid format text is passed, just return [0].
+    For dice roll, return values as list.
+    Arguments:
+        text {str} -- expect evaluatable text
+                   examples: "1", "1D3", "2D6"
+    Returns:
+        List[int] -- evaluated values
+    """
+    try:
+        return [int(text)]
+    except ValueError:
+        dice_matcher = re.fullmatch(r"(\d+)D(\d+)", text)
+        if dice_matcher is None:
+            return [0]
+        match_numbers = dice_matcher.groups()
+        dice_count = int(match_numbers[0])
+        dice_type = int(match_numbers[1])
+        if dice_count < 0 or dice_type < 0:
+            return [0]
+        return roll_dice(dice_count, dice_type)
+
+def roll_dice(dice_count: int, dice_type: int) -> List[int]:
+    """
+    Get multiple and various dice roll result.
+    ex) `roll_dice(2, 6)` means 2D6 and return each result like [2, 5].
+    Arguments:
+        dice_count {int} -- [description]
+        dice_type {int} -- [description]
+    Returns:
+        List[int] -- All dice results
+    """
+    results = []
+    for _ in range(dice_count):
+        results.append(random.randint(1, dice_type))
+    return results
 
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))

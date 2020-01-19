@@ -44,3 +44,28 @@ def test_judge_1d100(target, actual, exp_msg, exp_color):
 ])
 def test_split_alternative_roll_or_value(cmd, result):
     assert main.split_alternative_roll_or_value(cmd) == result
+
+
+@pytest.mark.parametrize("text, count, min_val, max_val", [
+    ("1D6", 1, 1, 6),
+    ("3D6", 3, 1, 6),
+    ("1d6", 1, 0, 0),
+])
+def test_eval_roll_or_value_for_roll(text, count, min_val, max_val):
+    results = main.eval_roll_or_value(text)
+    assert len(results) == count
+    for val in results:
+        assert min_val <= val
+        assert val <= max_val
+
+
+@pytest.mark.parametrize("text, val", [
+    ("0", 0),
+    ("1", 1),
+    ("hoge", 0),
+    ("100a", 0),
+])
+def test_eval_roll_or_value_for_value(text, val):
+    results = main.eval_roll_or_value(text)
+    assert len(results) == 1
+    assert results[0] == val
