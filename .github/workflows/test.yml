@@ -23,7 +23,7 @@ jobs:
 
       - name: pytest
         run: |
-          pytest
+          python -m pytest
 
       - name: pylint(check only error)
         run: |
