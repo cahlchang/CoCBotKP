@@ -1,4 +1,11 @@
-# -*- coding: utf-8 -*-
+"""[summary]
+Slack Bot function for CoC TRPG.
+This is deployed on AWS Lambda
+
+[terms]
+state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
+"""
+
 import os
 import json
 import logging
@@ -15,6 +22,7 @@ import unicodedata
 # ログ設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
