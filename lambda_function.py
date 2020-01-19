@@ -1,4 +1,4 @@
-"""[summary]
+"""
 Slack Bot function for CoC TRPG.
 This is deployed on AWS Lambda
 
@@ -10,14 +10,15 @@ import os
 import json
 import logging
 import urllib.request
-import requests
-import boto3
+import urllib.parse
 import re
 import random
-import urllib.parse
 import math
 from concurrent import futures
 import unicodedata
+
+import boto3
+import requests
 
 # ログ設定
 logger = logging.getLogger()
