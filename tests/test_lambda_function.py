@@ -28,3 +28,17 @@ def test_judge_1d100(target, actual, exp_msg, exp_color):
     msg, color = main.judge_1d100(target, actual)
     assert msg == exp_msg
     assert color == exp_color
+
+
+@pytest.mark.parametrize("cmd, result", [
+    ("0/1", ("0", "1")),
+    ("1/1D3", ("1", "1D3")),
+    ("1D3/1D8", ("1D3", "1D8")),
+    ("1", None),
+    ("1DD3/1D8", None),
+    ("1D3/1DD8", None),
+    ("hoge/1D3", None),
+    ("1/hoge", None),
+])
+def test_split_alternative_roll_or_value(cmd, result):
+    assert main.split_alternative_roll_or_value(cmd) == result

@@ -401,7 +401,27 @@ def judge_1d100(target: int, actual: int):
         return "失敗", COLOR_FUMBLE
     return "失敗", COLOR_FAILURE
 
-def lambda_handler(event: dict, context) -> str:
+def split_alternative_roll_or_value(cmd) -> bool:
+    """
+    Split text 2 roll or value.
+    Alternative roll is like following.
+    - 0/1
+    - 1/1D3
+    - 1D20/1D100
+
+    Arguments:
+        cmd {str} -- command made by upper case
+    Returns:
+        tuple of 2 int or None
+    """
+    element_matcher = r"(\d+D?\d*)"
+    result = re.fullmatch(f"{element_matcher}/{element_matcher}", cmd)
+    if result is None or len(result.groups()) != 2:
+        return None
+    return result.groups()
+
+
+def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
     token = os.environ["TOKEN"]
