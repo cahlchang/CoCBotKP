@@ -292,6 +292,15 @@ def set_user_params(user_id, url, is_update=False):
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
 
     logging.info("puts3 start")
+    key = user_id + "/" + pc_id + ".json"
+    # TODO 保存処理を関数に出す
+    obj = bucket.Object(key)
+    body = json.dumps(dict_param, ensure_ascii=False)
+    response = obj.put(
+        Body=body.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
 
     logging.info("puts3 end")
     if is_update:
