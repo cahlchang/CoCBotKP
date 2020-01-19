@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring, missing-function-docstring
+
 import pytest
 import lambda_function as main
 
