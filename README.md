@@ -11,9 +11,13 @@ Coc Non user Keeper
 2. activate venv
     - `source v-env/bin/activate`
 3. install dependency libraries
-    - `pip install -r requirements.txt`
+    - `pip install -r requirements.txt -r test-requirements.txt`
 4. deactivate venv (if you want to exit venv)
     - `deactivate`
+
+## run test
+
+- run `python -m pytest ./` on virtual env.
 
 ## deploy
 
