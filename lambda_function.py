@@ -36,6 +36,7 @@ COLOR_ATTENTION = '#80D2DE'
 
 lst_trigger_param = ["HP", "MP"]
 
+
 def build_response(message):
     return {
         "isBase64Encoded": False,
@@ -48,7 +49,7 @@ def build_response(message):
     }
 
 
-def get_user_params(user_id, pc_id = None):
+def get_user_params(user_id, pc_id=None):
     key = ""
     if pc_id is None:
         dict_state = get_dict_state(user_id)
@@ -197,7 +198,8 @@ def set_user_params(user_id, url, is_update=False):
 
             if is_param_now_parse:
                 if re.match(r'/*</tr>.*', line):
-                    lst = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP", "初期SAN", "アイデア", "幸運", "知識"]
+                    lst = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT",
+                        "EDU", "HP", "MP", "初期SAN", "アイデア", "幸運", "知識"]
                     lst_tmp = []
                     for raw_param in lst_param:
                         m = re.match('.*value="(.*?)".*', raw_param)
@@ -251,7 +253,8 @@ def set_user_params(user_id, url, is_update=False):
                 is_role_end = True
 
         if '' == name and is_role_end:
-            m = re.match('.*<input name="pc_name" class="str" id="pc_name" size="55" type="text" value="(.*)">.*', line)
+            m = re.match(
+                '.*<input name="pc_name" class="str" id="pc_name" size="55" type="text" value="(.*)">.*', line)
             if m:
                 dict_param["name"] = m.group(1)
 
@@ -296,7 +299,7 @@ def set_user_params(user_id, url, is_update=False):
     dict_state = {
         "url": url,
         "pc_id": dict_param["pc_id"]
-        }
+    }
     logging.info("puts3 2 start")
     obj_state = bucket.Object(key_state)
     body_state = json.dumps(dict_state, ensure_ascii=False)
@@ -348,9 +351,9 @@ def return_param(response_url, user_id, return_message, color, response_type="in
         "text": "<@{}>".format(user_id),
         "attachments": json.dumps([
             {
-            "text": return_message,
-            "type": "mrkdwn",
-            "color": color
+                "text": return_message,
+                "type": "mrkdwn",
+                "color": color
             }
         ])}
 
@@ -367,7 +370,7 @@ def post_command(message, token, data_user, channel_id, is_replace_plus=False):
 
     payload = {
         "token": token,
-        #"as_user": True,
+        # "as_user": True,
         "username": data_user["profile"]["display_name"],
         "icon_url": data_user["profile"]["image_1024"],
         "channel": channel_id,
@@ -378,6 +381,25 @@ def post_command(message, token, data_user, channel_id, is_replace_plus=False):
     print(res.url)
 
 
+def judge_1d100(target: int, actual: int):
+    """"
+    Judge 1d100 dice result, and return text and color for message.
+    Result is critical, success, failure or fumble.
+    Arguments:
+        target {int} -- target value (ex. skill value)
+        actual {int} -- dice value
+    Returns:
+        message {string}
+        rgb_color {string}
+    """
+    if actual <= 5:
+        return "成功", COLOR_CRITICAL
+    elif actual <= target:
+        return "成功", COLOR_SUCCESS
+    elif actual >= 96:
+        return "失敗", COLOR_FUMBLE
+    return "失敗", COLOR_FAILURE
+
 def lambda_handler(event: dict, context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -385,7 +407,8 @@ def lambda_handler(event: dict, context) -> str:
     body = event["body"]
     color = ""
     body_split = body.split("&")
-    lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP"]
+    lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON",
+        "POW", "DEX", "APP", "SIZ", "INT", "EDU", "HP", "MP"]
     map_alias_trigger = {"こぶし": "こぶし（パンチ）"}
     evt_slack = {}
     for datum in body_split:
@@ -407,7 +430,8 @@ def lambda_handler(event: dict, context) -> str:
         "user": user_id
     }
 
-    res = requests.get(user_url, params=payload, headers={'Content-Type': 'application/json'})
+    res = requests.get(user_url, params=payload, headers={
+                       'Content-Type': 'application/json'})
     data_user = json.loads(res.text)
     print(data_user)
 
@@ -417,18 +441,20 @@ def lambda_handler(event: dict, context) -> str:
         color = COLOR_ATTENTION
         match_url = re.match(r".*<(https.*)>", message)
         param = set_user_params(user_id, match_url.group(1))
-        name_display = param["name"] + " - (" + data_user["profile"]["real_name"] + ")"
+        name_display = param["name"] + \
+            " - (" + data_user["profile"]["real_name"] + ")"
 
         name_display = unicodedata.normalize("NFKC", name_display)
         data_user["profile"]["display_name"] = name_display
 
-        post_command("init " + match_url.group(1), token, data_user, channel_id, True)
+        post_command("init " + match_url.group(1),
+                     token, data_user, channel_id, True)
         param["user_id"] = user_id
         dict_state = get_dict_state(user_id)
         url = "https://slack.com/api/users.profile.set"
         set_params = {'token': token,
-                  'user': user_id,
-                  'profile': json.dumps(
+                      'user': user_id,
+                      'profile': json.dumps(
                       {
                           "display_name": name_display
                       }
@@ -467,7 +493,8 @@ def lambda_handler(event: dict, context) -> str:
                 val_targ = "0"
 
             num_targ = eval('{}{}{}'.format(val_targ, operant, args))
-            post_command(f"u {key}{operant}{args}", token, data_user, channel_id)
+            post_command(f"u {key}{operant}{args}",
+                         token, data_user, channel_id)
 
         dict_state[key] = num_targ
         set_state(user_id, dict_state)
@@ -475,7 +502,7 @@ def lambda_handler(event: dict, context) -> str:
                                             get_user_params(user_id,
                                                             dict_state["pc_id"]),
                                             dict_state)
-    elif re.match("KP+.*START" , key):
+    elif re.match("KP+.*START", key):
         color = COLOR_ATTENTION
         post_command(f"kp start", token, data_user, channel_id)
         set_start_session(user_id)
@@ -514,38 +541,40 @@ def lambda_handler(event: dict, context) -> str:
     # elif "kp add npc" == message:
     #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
-        return_message = json.dumps(get_user_params(user_id), ensure_ascii=False)
+        return_message = json.dumps(
+            get_user_params(user_id), ensure_ascii=False)
         return return_param(response_url, user_id, return_message, color, "ephemeral")
     elif "GETSTATE" == key:
-        return_message = json.dumps(get_dict_state(user_id), ensure_ascii=False)
+        return_message = json.dumps(
+            get_dict_state(user_id), ensure_ascii=False)
     elif message in lst_trigger_param:
         # TODO コマンド設計から考える
         param = get_user_params(user_id, "")
         return_message = "【{}】現在値{}".format(message, param[message])
     elif "景気づけ" == key:
         post_command(f"景気づけ", token, data_user, channel_id)
-        num = int(random.randint(1,100))
+        num = int(random.randint(1, 100))
         return_message = "景気づけ：{}".format(num)
     elif "素振り" == key:
         post_command(f"素振り", token, data_user, channel_id)
-        #TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
+        # TODO なんかシード値をなんかしたい（Lambdaなので意味はない）
         random.seed()
-        num = int(random.randint(1,100))
+        num = int(random.randint(1, 100))
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == key:
         post_command(f"起床ガチャ", token, data_user, channel_id)
         # TODO 現在時刻と合わせて少し変化を入れたい
-        num = int(random.randint(1,100))
+        num = int(random.randint(1, 100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == key:
         post_command(f"お祈り", token, data_user, channel_id)
         # TODO たまに変な効果を出すようにしたい
-        num = int(random.randint(1,100))
+        num = int(random.randint(1, 100))
         return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
         post_command(f"roll", token, data_user, channel_id)
         # TODO 1d100だけじゃなく、ダイス形式対応
-        num = int(random.randint(1,100))
+        num = int(random.randint(1, 100))
         return_message = "1D100：{}".format(num)
     elif "能力値" == key:
         param = get_user_params(user_id)
@@ -553,7 +582,8 @@ def lambda_handler(event: dict, context) -> str:
         cnt = 0
         for trigger_param in lst_trigger_param:
             cnt += 1
-            return_message += "{}:{} ".format(trigger_param, param[trigger_param])
+            return_message += "{}:{} ".format(trigger_param,
+                                              param[trigger_param])
             if cnt == 1:
                 return_message += "\n"
             elif cnt == 9:
@@ -566,7 +596,8 @@ def lambda_handler(event: dict, context) -> str:
         param = get_user_params(user_id)
         color = COLOR_ATTENTION
         dict_state = get_dict_state(user_id)
-        return_message = get_status_message("STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
+        return_message = get_status_message(
+            "STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
     elif "SANC" == key:
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
@@ -653,18 +684,8 @@ def lambda_handler(event: dict, context) -> str:
                         msg_rev = "/" + str(m.group(3))
 
                 num = int(random.randint(1, 100))
-                str_result = ""
 
-                if 0 <= int(n_targ) - num:
-                    color_hide = COLOR_SUCCESS
-                    str_result = "成功"
-                    if 0 >= num - 5:
-                        color_hide = COLOR_CRITICAL
-                else:
-                    color_hide = COLOR_FAILURE
-                    str_result = "失敗"
-                    if 0 <= num - 96:
-                        color_hide = COLOR_FUMBLE
+                str_result, color_hide = judge_1d100(int(n_targ), num)
                 post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
 
             text = f"<@{user_id}> try {name_role}"
@@ -757,7 +778,7 @@ def lambda_handler(event: dict, context) -> str:
         post_command(message, token, data_user, channel_id)
 
         # todo
-        if not 0 == len(list(filter(lambda matcher: re.match(message , matcher, re.IGNORECASE), map_alias_trigger.keys()))):
+        if not 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             message = map_alias_trigger[message.upper()]
 
         proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
@@ -795,18 +816,7 @@ def lambda_handler(event: dict, context) -> str:
             num_targ = eval('{}{}{}'.format(num_targ, operant, args))
             num_targ = math.ceil(num_targ)
 
-        str_result = ""
-        #todo no yoda
-        if 0 <= int(num_targ) - num:
-            color = COLOR_SUCCESS
-            str_result = "成功"
-            if 0 >= num - 5:
-                color = COLOR_CRITICAL
-        else:
-            color = COLOR_FAILURE
-            str_result = "失敗"
-            if 0 <= num - 96:
-                color = COLOR_FUMBLE
+        str_result, color = judge_1d100(int(num_targ), num)
 
         return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
