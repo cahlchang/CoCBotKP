@@ -402,7 +402,7 @@ def judge_1d100(target: int, actual: int):
         return "失敗", COLOR_FUMBLE
     return "失敗", COLOR_FAILURE
 
-def split_alternative_roll_or_value(cmd) -> bool:
+def split_alternative_roll_or_value(cmd) -> Tuple[str, str]:
     """
     Split text 2 roll or value.
     Alternative roll is like following.
@@ -413,7 +413,7 @@ def split_alternative_roll_or_value(cmd) -> bool:
     Arguments:
         cmd {str} -- command made by upper case
     Returns:
-        tuple of 2 int or None
+        tuple of 2 str or None
     """
     element_matcher = r"(\d+D?\d*)"
     result = re.fullmatch(f"{element_matcher}/{element_matcher}", cmd)
@@ -478,14 +478,23 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
         str -- color that indicates success or failure
     """
     dice_result = int(random.randint(1, 100))
-    if pc_san >= dice_result:
+    is_success = pc_san >= dice_result
+    if is_success:
         color = COLOR_SUCCESS
-        result_msg = "成功"
+        result_word = "成功"
     else:
         color = COLOR_FAILURE
-        result_msg = "失敗"
+        result_word = "失敗"
 
-    return f"{result_msg} 【SANチェック】 {dice_result}/{pc_san}", color
+    message = f"{result_word} 【SANチェック】 {dice_result}/{pc_san}"
+    cmd_parts = cmd.split()
+    if len(cmd_parts) == 2:
+        match_result = split_alternative_roll_or_value(cmd_parts[1])
+        if match_result:
+            san_roll =  match_result[0] if is_success else match_result[1]
+            san_damage = sum(eval_roll_or_value(san_roll))
+            message += f"\n【減少値】 {san_damage}"
+    return message, color
 
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))

@@ -85,6 +85,10 @@ def test_format_as_command(text, expected):
 @pytest.mark.parametrize("cmd, san_val, msg_matcher, color", [
     ("SANC", 100, r"成功 【SANチェック】 \d+/100", main.COLOR_SUCCESS),
     ("SANC", 0, r"失敗 【SANチェック】 \d+/0", main.COLOR_FAILURE),
+    ("SANC 1/1D3", 100,
+     r"成功 【SANチェック】 \d+/100\n【減少値】 \d", main.COLOR_SUCCESS),
+    ("SANC 1/1D3", 0,
+     r"失敗 【SANチェック】 \d+/0\n【減少値】 \d", main.COLOR_FAILURE),
 ])
 def test_get_sanc_result(cmd, san_val, msg_matcher, color):
     actual_msg, actual_color = main.get_sanc_result(cmd, san_val)
