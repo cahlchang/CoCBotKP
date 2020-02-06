@@ -505,6 +505,62 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
             message += f"\n【減少値】 {san_damage}"
     return message, color
 
+def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
+    """
+    Arguments:
+        text {str} -- expect evaluatable text
+                   examples: "1D3", "2D6", "2D6 + 3", 1D8 + 1D4"
+    Returns:
+        str -- post message
+    """
+    str_message = ""
+    sum_result = 0
+    str_detail = ""
+    cnt_ptr = 0
+    for match in re.findall(r"\d+[dD]\d+", key):
+        str_detail += f"{match}".ljust(80)
+        is_plus = True
+        if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+            is_plus = False
+        cnt_ptr += len(match) + 1
+        roll_results = eval_roll_or_value(match)
+        dice_sum = sum(roll_results)
+
+        str_detail += ", ".join(map(str, roll_results))
+        if is_plus:
+            if str_message == "":
+                str_message = match
+            else:
+                str_message += f"+{match}"
+            sum_result += dice_sum
+            str_detail += " [plus] \n"
+        else:
+            str_message += f"-{match}"
+            sum_result -= dice_sum
+            str_detail += " [minus] \n"
+
+    if len(key) > cnt_ptr:
+        is_plus = True
+        if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
+            is_plus = False
+
+        str_calc = key[cnt_ptr:]
+        match = re.match(r"(\d+)", str_calc)
+        result_now = int(match.group(1))
+
+        if is_plus:
+            str_message += f"+{str_calc}"
+            sum_result += result_now
+            str_detail += f"{result_now}".ljust(80)
+            str_detail += f"{result_now} [plus] \n"
+        else:
+            str_message += f"-{str_calc}"
+            sum_result -= result_now
+            str_detail += f"{result_now}".ljust(80)
+            str_detail += f"{result_now} [minus] \n"
+
+    return str_message, str_detail, sum_result
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -807,57 +863,7 @@ def lambda_handler(event: dict, _context) -> str:
 
         return ""
     elif re.match(r"^\d+[dD]\d*.*", key):
-        str_message = ""
-        sum_result = 0
-        str_detail = ""
-        cnt_ptr = 0
-        for match in re.findall(r"\d+[dD]\d+", key):
-            str_detail += f"{match}\t".ljust(80)
-            is_plus = True
-            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
-                is_plus = False
-            cnt_ptr += len(match) + 1
-            match_roll = re.match(r"(\d+)(d|D)(\d+).*", match)
-            print(match)
-            print(match_roll.group(1))
-            result_now = 0
-            dice_count = int(match_roll.group(1))
-            dice_type = int(match_roll.group(1))
-            roll_results = roll_dice(dice_count, dice_type)
-            dice_sum = sum(roll_results)
-
-            str_detail += ", ".join(map(str, roll_results))
-            if is_plus:
-                if str_message == "":
-                    str_message = match
-                else:
-                    str_message += f"+{match}"
-                sum_result += dice_sum
-                str_detail += " [plus] \n"
-            else:
-                str_message += f"-{match}"
-                sum_result -= dice_sum
-                str_detail += " [minus] \n"
-
-        if len(key) > cnt_ptr:
-            is_plus = True
-            if cnt_ptr > 0 and str(key[cnt_ptr - 1: cnt_ptr]) == "-":
-                is_plus = False
-
-            str_calc = key[cnt_ptr:]
-            match = re.match(r"(\d+)", str_calc)
-            result_now = int(match.group(1))
-
-            if is_plus:
-                str_message += f"+{str_calc}"
-                sum_result += result_now
-                str_detail += f"{result_now}".ljust(83)
-                str_detail += f"{result_now} [plus] \n"
-            else:
-                str_message += f"-{str_calc}"
-                sum_result -= result_now
-                str_detail += f"{result_now}".ljust(83)
-                str_detail += f"{result_now} [minus] \n"
+        str_message, str_detail, sum_result = create_post_message_rolls_result(key)
 
         post_command(str_message, token, data_user, channel_id)
 
