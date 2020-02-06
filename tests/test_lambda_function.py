@@ -94,3 +94,14 @@ def test_get_sanc_result(cmd, san_val, msg_matcher, color):
     actual_msg, actual_color = main.get_sanc_result(cmd, san_val)
     assert re.match(msg_matcher, actual_msg) is not None
     assert actual_color == color
+
+
+@pytest.mark.parametrize("text, message, detail, sum_val", [
+    ("1D1", "1D1", f"1D1".ljust(80) + "1 [plus] \n", 1),
+    ("1D1+1", "1D1+1", f"1D1".ljust(80) + "1 [plus] \n" + f"1".ljust(80) + "1 [plus] \n", 2),
+])
+def test_create_post_message_rolls_result(text, message, detail, sum_val):
+    result_message, resule_detail, result_sum = main.create_post_message_rolls_result(text)
+    assert result_message == message
+    assert resule_detail == detail
+    assert result_sum == sum_val
