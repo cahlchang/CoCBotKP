@@ -509,7 +509,7 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
     """
     Arguments:
         text {str} -- expect evaluatable text
-                   examples: "1D3", "2D6", "2D6 + 3", 1D8 + 1D4"
+                   examples: "1D3", "2D6", "2D6+3", "1D8+1D4"
     Returns:
         str -- post message
         str -- message detail
