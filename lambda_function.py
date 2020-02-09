@@ -585,6 +585,31 @@ def analyze_update_command(command: str) -> Tuple[str, str, str]:
         return None
     return result.group(2), result.group(3), result.group(4)
 
+def analyze_join_command(command: str) -> str:
+    """
+    analyze join command and return KP ID
+
+    Examples:
+        "JOIN UE63DUJJF" => "UE63DUJJF"
+    """
+    result = re.fullmatch(r"\S+\s+(\S+)", command)
+    if result is None:
+        return None
+    return result.group(1)
+
+def analyze_kp_order_command(command: str) -> str:
+    """
+    analyze KP ORDER command and return target status name
+
+    Examples:
+        "KP ORDER DEX" => "DEX"
+        "KP ORDER 幸運" => "幸運"
+    """
+    result = re.fullmatch(r"KP\s+ORDER\s+(\S+)", command)
+    if result is None:
+        return None
+    return result.group(1)
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -690,37 +715,28 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
         color = COLOR_ATTENTION
-        proc = r"^(.*)\+(.*)$"
         dict_state = get_dict_state(user_id)
-        result_parse = re.match(proc, message)
-        kp_id = ""
-        if result_parse:
-            kp_id = result_parse.group(2)
-        post_command(f"join {kp_id}", token, data_user, channel_id)
-
-        add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
-        dict_state["kp_id"] = kp_id
-        set_state(user_id, dict_state)
-        return_message = "参加しました"
+        kp_id = analyze_join_command(key)
+        if kp_id:
+            post_command(f"join {kp_id}", token, data_user, channel_id)
+            add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
+            dict_state["kp_id"] = kp_id
+            set_state(user_id, dict_state)
+            return_message = "参加しました"
+        return_message = f"{message}\nJOINコマンドが不正です"
     elif re.match("KP+.*ORDER.*", key):
         color = COLOR_ATTENTION
-        proc = r"KP\+ORDER\+(.*)"
-        m = re.match(proc, key)
-        targ_roll = m.group(1)
-        lst_user_data = get_lst_player_data(user_id, targ_roll)
-        msg = f"{targ_roll}順\n"
-        post_command(f"kp order {targ_roll}", token, data_user, channel_id)
+        target_status = analyze_kp_order_command(key)
+        lst_user_data = get_lst_player_data(user_id, target_status)
+        msg = f"{target_status}順\n"
+        post_command(f"kp order {target_status}", token, data_user, channel_id)
         cnt = 0
         for user_data in lst_user_data:
             cnt += 1
             name = user_data["name"]
-            v = user_data[targ_roll]
+            v = user_data[target_status]
             msg += f"{cnt}, {name} ({v}) \n"
         return_message = msg
-    # elif "list"  == message:
-    #     #TODO 自分のキャラクタ一覧をリスト表示する
-    # elif "kp add npc" == message:
-    #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
         return_message = json.dumps(
             get_user_params(user_id), ensure_ascii=False)
@@ -743,12 +759,10 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == key:
         post_command(f"起床ガチャ", token, data_user, channel_id)
-        # TODO 現在時刻と合わせて少し変化を入れたい
         num = int(random.randint(1, 100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == key:
         post_command(f"お祈り", token, data_user, channel_id)
-        # TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1, 100))
         return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
@@ -896,7 +910,6 @@ def lambda_handler(event: dict, _context) -> str:
         message = urllib.parse.unquote(message)
         post_command(message, token, data_user, channel_id)
 
-        # todo
         if not 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             message = map_alias_trigger[message.upper()]
 
@@ -913,7 +926,6 @@ def lambda_handler(event: dict, _context) -> str:
             msg_correction = operant + args
             is_correction = True
 
-        # todo
         if 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
@@ -931,7 +943,6 @@ def lambda_handler(event: dict, _context) -> str:
 
         msg_num_targ = num_targ
         if is_correction:
-            # todo dont use eval
             num_targ = eval('{}{}{}'.format(num_targ, operant, args))
             num_targ = math.ceil(num_targ)
 
