@@ -23,6 +23,7 @@ def test_2():
     (100, 1, "成功", main.COLOR_CRITICAL),
     (100, 5, "成功", main.COLOR_CRITICAL),
     (20, 15, "成功", main.COLOR_SUCCESS),
+    (1, 5, "失敗", main.COLOR_FAILURE),
     (100, 100, "成功", main.COLOR_SUCCESS),
     (94, 95, "失敗", main.COLOR_FAILURE),
     (95, 96, "失敗", main.COLOR_FUMBLE),

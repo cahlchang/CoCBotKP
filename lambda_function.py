@@ -392,22 +392,23 @@ def post_command(message, token, data_user, channel_id, is_replace_plus=False):
     print(res.url)
 
 
-def judge_1d100(target: int, actual: int):
+def judge_1d100(target: int, dice: int):
     """"
     Judge 1d100 dice result, and return text and color for message.
     Result is critical, success, failure or fumble.
     Arguments:
         target {int} -- target value (ex. skill value)
-        actual {int} -- dice value
+        dice {int} -- dice value
     Returns:
         message {string}
         rgb_color {string}
     """
-    if actual <= 5:
-        return "成功", COLOR_CRITICAL
-    elif actual <= target:
+    if dice <= target:
+        if dice <= 5:
+            return "成功", COLOR_CRITICAL
         return "成功", COLOR_SUCCESS
-    elif actual >= 96:
+
+    if dice >= 96:
         return "失敗", COLOR_FUMBLE
     return "失敗", COLOR_FAILURE
 
