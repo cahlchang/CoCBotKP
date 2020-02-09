@@ -596,6 +596,19 @@ def analyze_join_command(command: str) -> str:
         return None
     return result.group(1)
 
+def analyze_kp_order_command(command: str) -> str:
+    """
+    analyze KP ORDER command and return target status name
+
+    Examples:
+        "KP ORDER DEX" => "DEX"
+        "KP ORDER 幸運" => "幸運"
+    """
+    result = re.fullmatch(r"KP\s+ORDER\s+(\S+)", command)
+    if result is None:
+        return None
+    return result.group(1)
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -712,17 +725,15 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = f"{message}\nJOINコマンドが不正です"
     elif re.match("KP+.*ORDER.*", key):
         color = COLOR_ATTENTION
-        proc = r"KP\+ORDER\+(.*)"
-        m = re.match(proc, key)
-        targ_roll = m.group(1)
-        lst_user_data = get_lst_player_data(user_id, targ_roll)
-        msg = f"{targ_roll}順\n"
-        post_command(f"kp order {targ_roll}", token, data_user, channel_id)
+        target_status = analyze_kp_order_command(key)
+        lst_user_data = get_lst_player_data(user_id, target_status)
+        msg = f"{target_status}順\n"
+        post_command(f"kp order {target_status}", token, data_user, channel_id)
         cnt = 0
         for user_data in lst_user_data:
             cnt += 1
             name = user_data["name"]
-            v = user_data[targ_roll]
+            v = user_data[target_status]
             msg += f"{cnt}, {name} ({v}) \n"
         return_message = msg
     # elif "list"  == message:
