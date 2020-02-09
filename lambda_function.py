@@ -405,11 +405,11 @@ def judge_1d100(target: int, dice: int):
     """
     if dice <= target:
         if dice <= 5:
-            return "成功", COLOR_CRITICAL
+            return "クリティカル", COLOR_CRITICAL
         return "成功", COLOR_SUCCESS
 
     if dice >= 96:
-        return "失敗", COLOR_FUMBLE
+        return "ファンブル", COLOR_FUMBLE
     return "失敗", COLOR_FAILURE
 
 def split_alternative_roll_or_value(cmd) -> Tuple[str, str]:
