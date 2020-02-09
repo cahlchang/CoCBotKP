@@ -736,10 +736,6 @@ def lambda_handler(event: dict, _context) -> str:
             v = user_data[target_status]
             msg += f"{cnt}, {name} ({v}) \n"
         return_message = msg
-    # elif "list"  == message:
-    #     #TODO 自分のキャラクタ一覧をリスト表示する
-    # elif "kp add npc" == message:
-    #     #TODO NPCのキャラシを追加できるようにしたい
     elif "GET" == key:
         return_message = json.dumps(
             get_user_params(user_id), ensure_ascii=False)
@@ -762,12 +758,10 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = "素振り：{}".format(num)
     elif "起床ガチャ" == key:
         post_command(f"起床ガチャ", token, data_user, channel_id)
-        # TODO 現在時刻と合わせて少し変化を入れたい
         num = int(random.randint(1, 100))
         return_message = "起床ガチャ：{}".format(num)
     elif "お祈り" == key:
         post_command(f"お祈り", token, data_user, channel_id)
-        # TODO たまに変な効果を出すようにしたい
         num = int(random.randint(1, 100))
         return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
@@ -915,7 +909,6 @@ def lambda_handler(event: dict, _context) -> str:
         message = urllib.parse.unquote(message)
         post_command(message, token, data_user, channel_id)
 
-        # todo
         if not 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             message = map_alias_trigger[message.upper()]
 
@@ -932,7 +925,6 @@ def lambda_handler(event: dict, _context) -> str:
             msg_correction = operant + args
             is_correction = True
 
-        # todo
         if 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
@@ -950,7 +942,6 @@ def lambda_handler(event: dict, _context) -> str:
 
         msg_num_targ = num_targ
         if is_correction:
-            # todo dont use eval
             num_targ = eval('{}{}{}'.format(num_targ, operant, args))
             num_targ = math.ceil(num_targ)
 
