@@ -98,10 +98,35 @@ def test_get_sanc_result(cmd, san_val, msg_matcher, color):
 
 @pytest.mark.parametrize("text, message, detail, sum_val", [
     ("1D1", "1D1", f"1D1".ljust(80) + "1 [plus] \n", 1),
-    ("1D1+1", "1D1+1", f"1D1".ljust(80) + "1 [plus] \n" + f"1".ljust(80) + "1 [plus] \n", 2),
+    ("1D1+1", "1D1+1", f"1D1".ljust(80) +
+     "1 [plus] \n" + f"1".ljust(80) + "1 [plus] \n", 2),
 ])
 def test_create_post_message_rolls_result(text, message, detail, sum_val):
-    result_message, resule_detail, result_sum = main.create_post_message_rolls_result(text)
+    result_message, resule_detail, result_sum = main.create_post_message_rolls_result(
+        text)
     assert result_message == message
     assert resule_detail == detail
     assert result_sum == sum_val
+
+
+@pytest.mark.parametrize("command, exp_status_name, exp_operator, exp_arg", [
+    ("u MP+1", "MP", "+", "1"),
+    ("u SAN-10", "SAN", "-", "10"),
+    ("u HP - 5", "HP", "-", "5"),
+])
+def test_analyze_update_command(command, exp_status_name, exp_operator, exp_arg):
+    result = main.analyze_update_command(command)
+    assert result
+    status_name, operator, arg = result
+    assert status_name == exp_status_name
+    assert operator == exp_operator
+    assert arg == exp_arg
+
+
+@pytest.mark.parametrize("command", [
+    ("u MP"),
+    ("u SAN^10"),
+])
+def test_analyze_update_command_invalid(command):
+    result = main.analyze_update_command(command)
+    assert result == None
