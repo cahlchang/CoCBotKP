@@ -20,13 +20,14 @@ def test_2():
 
 
 @pytest.mark.parametrize("target, actual, exp_msg, exp_color", [
-    (100, 1, "成功", main.COLOR_CRITICAL),
-    (100, 5, "成功", main.COLOR_CRITICAL),
+    (1, 1, "クリティカル", main.COLOR_CRITICAL),
+    (5, 5, "クリティカル", main.COLOR_CRITICAL),
     (20, 15, "成功", main.COLOR_SUCCESS),
     (100, 100, "成功", main.COLOR_SUCCESS),
+    (1, 5, "失敗", main.COLOR_FAILURE),
     (94, 95, "失敗", main.COLOR_FAILURE),
-    (95, 96, "失敗", main.COLOR_FUMBLE),
-    (95, 100, "失敗", main.COLOR_FUMBLE),
+    (95, 96, "ファンブル", main.COLOR_FUMBLE),
+    (95, 100, "ファンブル", main.COLOR_FUMBLE),
 ])
 def test_judge_1d100(target, actual, exp_msg, exp_color):
     msg, color = main.judge_1d100(target, actual)
