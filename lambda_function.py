@@ -584,6 +584,18 @@ def analyze_update_command(command: str) -> Tuple[str, str, str]:
         return None
     return result.group(2), result.group(3), result.group(4)
 
+def analyze_join_command(command: str) -> str:
+    """
+    analyze join command and return KP ID
+
+    Examples:
+        "JOIN UE63DUJJF" => "UE63DUJJF"
+    """
+    result = re.fullmatch(r"\S+\s+(\S+)", command)
+    if result is None:
+        return None
+    return result.group(1)
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -689,18 +701,15 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
         color = COLOR_ATTENTION
-        proc = r"^(.*)\+(.*)$"
         dict_state = get_dict_state(user_id)
-        result_parse = re.match(proc, message)
-        kp_id = ""
-        if result_parse:
-            kp_id = result_parse.group(2)
-        post_command(f"join {kp_id}", token, data_user, channel_id)
-
-        add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
-        dict_state["kp_id"] = kp_id
-        set_state(user_id, dict_state)
-        return_message = "参加しました"
+        kp_id = analyze_join_command(key)
+        if kp_id:
+            post_command(f"join {kp_id}", token, data_user, channel_id)
+            add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
+            dict_state["kp_id"] = kp_id
+            set_state(user_id, dict_state)
+            return_message = "参加しました"
+        return_message = f"{message}\nJOINコマンドが不正です"
     elif re.match("KP+.*ORDER.*", key):
         color = COLOR_ATTENTION
         proc = r"KP\+ORDER\+(.*)"

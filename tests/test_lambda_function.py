@@ -129,4 +129,12 @@ def test_analyze_update_command(command, exp_status_name, exp_operator, exp_arg)
 ])
 def test_analyze_update_command_invalid(command):
     result = main.analyze_update_command(command)
-    assert result == None
+    assert result is None
+
+
+@pytest.mark.parametrize("command, exp_kp_id", [
+    ("join UE63DUJJF", "UE63DUJJF"),
+])
+def test_analyze_join_command(command, exp_kp_id):
+    kp_id = main.analyze_join_command(command)
+    assert kp_id == exp_kp_id
