@@ -723,7 +723,8 @@ def lambda_handler(event: dict, _context) -> str:
             dict_state["kp_id"] = kp_id
             set_state(user_id, dict_state)
             return_message = "参加しました"
-        return_message = f"{message}\nJOINコマンドが不正です"
+        else:
+            return_message = f"{message}\nJOINコマンドが不正です"
     elif re.match("KP+.*ORDER.*", key):
         color = COLOR_ATTENTION
         target_status = analyze_kp_order_command(key)
