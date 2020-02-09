@@ -563,6 +563,27 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
 
     return str_message, str_detail, sum_result
 
+def analyze_update_command(command: str) -> Tuple[str, str, str]:
+    """
+    analyze update command and return status name, operator and arg
+
+    Arguments:
+        command {str} -- command text
+
+    Returns:
+        str -- status_name
+        str -- operator
+        str -- arg
+
+    Examples:
+        "u MP+1" => ("MP", "+", "1")
+        "u SAN - 10" => ("SAN", "-", "10")
+    """
+    result = re.fullmatch(r"(.+)\s+(\S+)\s*(\+|\-|\*|\/)\s*(\d+)$", command)
+    if result is None:
+        return None
+    return result.group(2), result.group(3), result.group(4)
+
 def lambda_handler(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -642,24 +663,20 @@ def lambda_handler(event: dict, _context) -> str:
         return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
         color = COLOR_ATTENTION
-        proc = r"^(.*?)\+(.*?)(\+|\-|\*|\/)(.*)$"
-        r = re.match(proc, message)
+        result = analyze_update_command(key)
         dict_state = get_dict_state(user_id)
-        if r:
-            message = r.group(2)
-            key = message.upper()
-            operant = r.group(3)
-            args = r.group(4)
-            if key in dict_state:
-                val_targ = dict_state[key]
+        if result:
+            status_name, operator, arg = result
+            if status_name in dict_state:
+                val_targ = dict_state[status_name]
             else:
                 val_targ = "0"
 
-            num_targ = eval('{}{}{}'.format(val_targ, operant, args))
-            post_command(f"u {key}{operant}{args}",
+            num_targ = eval(f'{val_targ}{operator}{arg}')
+            post_command(f"u {status_name}{operator}{arg}",
                          token, data_user, channel_id)
 
-        dict_state[key] = num_targ
+        dict_state[status_name] = num_targ
         set_state(user_id, dict_state)
         return_message = get_status_message("UPDATE STATUS",
                                             get_user_params(user_id,
