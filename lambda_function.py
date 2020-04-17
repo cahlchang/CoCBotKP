@@ -838,14 +838,16 @@ def bootstrap(event: dict, _context) -> str:
             param = get_user_params(user_id)
             dict_state = get_dict_state(user_id)
             channel = '@' + dict_state["kp_id"]
+            color_hide = "gray"
 
-            m = re.match(r"HIDE\+(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
+            m = re.match(r"HIDE\s(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
             if m is None:
-                post_message = "技能名が解釈できません"
+                text = "role not found"
+                post_message = f"技能名が解釈できません。\n{key}"
             elif m.group(1) and m.group(1) not in param:
+                text = "error"
                 name_role = m.group(1)
                 post_message = "この技能は所持していません"
-                color_hide = "gray"
             else:
                 name_role = m.group(1)
                 n_targ = 0
@@ -878,7 +880,7 @@ def bootstrap(event: dict, _context) -> str:
                 str_result, color_hide = judge_1d100(int(n_targ), num)
                 post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
 
-            text = f"<@{user_id}> try {name_role}"
+                text = f"<@{user_id}> try {name_role}"
 
             payload = {
                 'token': token,
