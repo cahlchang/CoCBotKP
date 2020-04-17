@@ -845,9 +845,9 @@ def bootstrap(event: dict, _context) -> str:
                 text = "role not found"
                 post_message = f"技能名が解釈できません。\n{key}"
             elif m.group(1) and m.group(1) not in param:
-                text = "error"
+                text = "role miss"
                 name_role = m.group(1)
-                post_message = "この技能は所持していません"
+                post_message = f"この技能は所持していません。\n{key}"
             else:
                 name_role = m.group(1)
                 n_targ = 0
