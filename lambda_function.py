@@ -20,6 +20,7 @@ from typing import List, Tuple
 
 import boto3
 import requests
+import traceback
 
 # ログ設定
 logger = logging.getLogger()
@@ -597,6 +598,7 @@ def analyze_join_command(command: str) -> str:
         return None
     return result.group(1)
 
+
 def analyze_kp_order_command(command: str) -> str:
     """
     analyze KP ORDER command and return target status name
@@ -610,7 +612,8 @@ def analyze_kp_order_command(command: str) -> str:
         return None
     return result.group(1)
 
-def lambda_handler(event: dict, _context) -> str:
+
+def bootstrap(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
     token = os.environ["TOKEN"]
@@ -948,8 +951,24 @@ def lambda_handler(event: dict, _context) -> str:
             num_targ = math.ceil(num_targ)
 
         str_result, color = judge_1d100(int(num_targ), num)
-
         return_message = f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})"
         logging.info("command end")
 
     return return_param(response_url, user_id, return_message, color)
+
+
+def lambda_handler(event: dict, _context) -> str:
+    try:
+        return bootstrap(event, _context)
+    except Exception as e:
+        token = os.environ["TOKEN"]
+        command_url = "https://slack.com/api/chat.postMessage?"
+        channel_id = 'CNCM21Z9T'
+        payload = {
+            "token": token,
+            "channel": channel_id,
+            "text": traceback.format_exc()
+        }
+        print(payload)
+        res = requests.get(command_url, params=payload)
+
