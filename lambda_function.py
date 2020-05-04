@@ -667,9 +667,14 @@ def bootstrap(event: dict, _context) -> str:
     data_user = json.loads(res.text)
     print(data_user)
     key = format_as_command(message)
-    
+
     bot = Bot()
     bot.key = key
+    bot.message = message
+    bot.token = token
+    bot.data_user = data_user
+    bot.channel_id = channel_id
+
     bot.dispatch()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
