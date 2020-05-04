@@ -948,7 +948,7 @@ def bootstrap(event: dict, _context) -> str:
         # todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
         # 一回のコマンドで複数回呼ばれてる？いつか直す
-        if not bot_params:
+        if bot_params is not None:
             post_command(message, token, data_user, channel_id)
 
         if not 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), map_alias_trigger.keys()))):
