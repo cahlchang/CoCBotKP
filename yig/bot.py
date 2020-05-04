@@ -1,12 +1,17 @@
 from importlib import import_module
 from glob import glob
+from yig.util import post_command
 
 command_list = []
 
 class Bot(object):
     global command_list
     key = ""
-    
+    message = ""
+    token = ""
+    data_user = None
+    channel_id = ""
+
     def __init__(self):
         self.init_plugins()
 
@@ -20,6 +25,7 @@ class Bot(object):
     def dispatch(self):
         for command_datum in command_list:
             if self.key == command_datum["command"]:
+                post_command(self.message, self.token, self.data_user, self.channel_id)
                 command_datum["function"](self)
 
     def test(self):
