@@ -1,11 +1,14 @@
 from importlib import import_module
 from glob import glob
 from yig.util import post_command
+from yig.util import return_param_builder
 
 command_list = []
 
 class Bot(object):
     global command_list
+    user_id = ""
+    response_url = ""
     key = ""
     message = ""
     token = ""
@@ -26,7 +29,11 @@ class Bot(object):
         for command_datum in command_list:
             if self.key == command_datum["command"]:
                 post_command(self.message, self.token, self.data_user, self.channel_id)
-                command_datum["function"](self)
+                return_message, color = command_datum["function"](self)
+                return return_param_builder(self.response_url,
+                                            self.user_id,
+                                            return_message,
+                                            color)
 
     def test(self):
         print("test")
