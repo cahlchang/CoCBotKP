@@ -101,9 +101,8 @@ def set_state(user_id, dict_state):
     logging.info(f"Fail to put state to S3. response:[{response}]")
 
 
-def set_start_session(user_id):
+def set_start_session(user_id, kp_name):
     key_session = user_id + KP_FILE_PATH
-
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
 
@@ -114,6 +113,18 @@ def set_start_session(user_id):
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
+
+    url = "https://slack.com/api/users.profile.set"
+    set_params = {'token': os.environ["TOKEN"],
+                  'user': user_id,
+                  'profile': json.dumps(
+                      {
+                          "display_name": kp_name
+                      }
+                  )}
+    headers = {'Content-Type': 'application/json'}
+    r = requests.get(url, params=set_params, headers=headers)
+    print(r.text)
 
 
 def add_gamesession_user(kp_id, user_id, pc_id):
@@ -645,7 +656,7 @@ def bootstrap(event: dict, _context) -> str:
 
     user_url = "https://slack.com/api/users.profile.get"
     payload = {
-        "token": token,
+        "token": os.environ["TOKEN"],
         "user": user_id
     }
 
@@ -719,8 +730,10 @@ def bootstrap(event: dict, _context) -> str:
                                             dict_state)
     elif re.match("KP+.*START", key):
         color = COLOR_ATTENTION
+        kp_name = "KP by " + data_user["profile"]["real_name"]
+        data_user["profile"]["display_name"] = kp_name
         post_command(f"kp start", token, data_user, channel_id)
-        set_start_session(user_id)
+        set_start_session(user_id, kp_name)
         return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
     elif re.match("JOIN+.*", key):
         color = COLOR_ATTENTION
