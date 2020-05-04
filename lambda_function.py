@@ -13,6 +13,8 @@ import traceback
 
 import boto3
 import requests
+from yig.bot import Bot
+
 
 """
 Slack Bot function for CoC TRPG.
@@ -664,8 +666,11 @@ def bootstrap(event: dict, _context) -> str:
                        'Content-Type': 'application/json'})
     data_user = json.loads(res.text)
     print(data_user)
-
     key = format_as_command(message)
+    
+    bot = Bot()
+    bot.key = key
+    bot.dispatch()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = COLOR_ATTENTION
