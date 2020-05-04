@@ -1,11 +1,3 @@
-"""
-Slack Bot function for CoC TRPG.
-This is deployed on AWS Lambda
-
-[terms]
-state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
-"""
-
 import os
 import json
 import logging
@@ -17,10 +9,18 @@ import math
 from concurrent import futures
 import unicodedata
 from typing import List, Tuple
+import traceback
 
 import boto3
 import requests
-import traceback
+
+"""
+Slack Bot function for CoC TRPG.
+This is deployed on AWS Lambda
+
+[terms]
+state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
+"""
 
 # ログ設定
 logger = logging.getLogger()
@@ -303,7 +303,6 @@ def set_user_params(user_id, url, is_update=False):
         ContentType='text/plane'
     )
 
-    logging.info("puts3 end")
     if is_update:
         return dict_param
 
@@ -312,7 +311,6 @@ def set_user_params(user_id, url, is_update=False):
         "url": url,
         "pc_id": dict_param["pc_id"]
     }
-    logging.info("puts3 2 start")
     obj_state = bucket.Object(key_state)
     body_state = json.dumps(dict_state, ensure_ascii=False)
     response = obj_state.put(
@@ -413,6 +411,7 @@ def judge_1d100(target: int, dice: int):
         return "ファンブル", COLOR_FUMBLE
     return "失敗", COLOR_FAILURE
 
+
 def split_alternative_roll_or_value(cmd) -> Tuple[str, str]:
     """
     Split text 2 roll or value.
@@ -431,6 +430,7 @@ def split_alternative_roll_or_value(cmd) -> Tuple[str, str]:
     if result is None or len(result.groups()) != 2:
         return None
     return result.groups()
+
 
 def eval_roll_or_value(text: str) -> List[int]:
     """
@@ -456,6 +456,7 @@ def eval_roll_or_value(text: str) -> List[int]:
             return [0]
         return roll_dice(dice_count, dice_type)
 
+
 def roll_dice(dice_count: int, dice_type: int) -> List[int]:
     """
     Get multiple and various dice roll result.
@@ -471,11 +472,13 @@ def roll_dice(dice_count: int, dice_type: int) -> List[int]:
         results.append(random.randint(1, dice_type))
     return results
 
+
 def format_as_command(text: str) -> str:
     """
     Make text uppercased and remove edge spaces
     """
     return text.upper().strip()
+
 
 def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
     """
@@ -506,6 +509,7 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
             san_damage = sum(eval_roll_or_value(san_roll))
             message += f"\n【減少値】 {san_damage}"
     return message, color
+
 
 def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
     """
@@ -565,6 +569,7 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
 
     return str_message, str_detail, sum_result
 
+
 def analyze_update_command(command: str) -> Tuple[str, str, str]:
     """
     analyze update command and return status name, operator and arg
@@ -585,6 +590,7 @@ def analyze_update_command(command: str) -> Tuple[str, str, str]:
     if result is None:
         return None
     return result.group(2), result.group(3), result.group(4)
+
 
 def analyze_join_command(command: str) -> str:
     """
@@ -749,7 +755,7 @@ def bootstrap(event: dict, _context) -> str:
         return_message = json.dumps(
             get_dict_state(user_id), ensure_ascii=False)
     elif message in lst_trigger_param:
-        # TODO コマンド設計から考える
+        #TODO コマンド設計から考える
         param = get_user_params(user_id, "")
         return_message = "【{}】現在値{}".format(message, param[message])
     elif "景気づけ" == key:
@@ -973,4 +979,3 @@ def lambda_handler(event: dict, _context) -> str:
         }
         print(payload)
         res = requests.get(command_url, params=payload)
-
