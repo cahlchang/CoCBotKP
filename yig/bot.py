@@ -34,6 +34,7 @@ class Bot(object):
                                             self.user_id,
                                             return_message,
                                             color)
+        return None
 
     def test(self):
         print("test")
