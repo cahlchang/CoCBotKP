@@ -19,7 +19,7 @@ def post_command(message, token, data_user, channel_id, is_replace_plus=False):
     print(res.url)
 
 
-def return_param_builder(response_url, user_id, return_message, color, response_type="in_channel"):
+def post_result(response_url, user_id, return_message, color, response_type="in_channel"):
     payload = {
         "icon_emoji": "books",
         "response_type": response_type,
