@@ -677,7 +677,7 @@ def bootstrap(event: dict, _context) -> str:
     bot.user_id = user_id
     bot.response_url = response_url
 
-    bot_params = bot.dispatch()
+    is_bot_command = bot.dispatch()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = COLOR_ATTENTION
@@ -707,8 +707,8 @@ def bootstrap(event: dict, _context) -> str:
         print(r.text)
 
         return_message = get_status_message("INIT CHARA", param, dict_state)
-    elif bot_params:
-        return bot_params
+    elif is_bot_command:
+        return None
     elif key in ("HELP", "H"):
         post_command(message, token, data_user, channel_id, False)
         return_message = "command list: init, update<u>, status<s>, roll, sanc\n"\
@@ -948,8 +948,7 @@ def bootstrap(event: dict, _context) -> str:
         # todo spaceが入っていてもなんとかしたい
         message = urllib.parse.unquote(message)
         # 一回のコマンドで複数回呼ばれてる？いつか直す
-        if bot_params is not None:
-            post_command(message, token, data_user, channel_id)
+        post_command(message, token, data_user, channel_id)
 
         if not 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), map_alias_trigger.keys()))):
             message = map_alias_trigger[message.upper()]

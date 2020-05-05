@@ -1,7 +1,7 @@
 from importlib import import_module
 from glob import glob
 from yig.util import post_command
-from yig.util import return_param_builder
+from yig.util import post_result
 
 command_list = []
 
@@ -28,13 +28,17 @@ class Bot(object):
     def dispatch(self):
         for command_datum in command_list:
             if self.key == command_datum["command"]:
-                post_command(self.message, self.token, self.data_user, self.channel_id)
+                post_command(self.message,
+                             self.token,
+                             self.data_user,
+                             self.channel_id)
                 return_message, color = command_datum["function"](self)
-                return return_param_builder(self.response_url,
-                                            self.user_id,
-                                            return_message,
-                                            color)
-        return None
+                post_result(self.response_url,
+                            self.user_id,
+                            return_message,
+                            color)
+                return True
+        return False
 
     def test(self):
         print("test")
