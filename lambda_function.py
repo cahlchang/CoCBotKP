@@ -15,7 +15,6 @@ import boto3
 import requests
 from yig.bot import Bot
 
-
 """
 Slack Bot function for CoC TRPG.
 This is deployed on AWS Lambda
@@ -28,7 +27,6 @@ state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
 KP_FILE_PATH = "/kp.json"
@@ -40,7 +38,6 @@ COLOR_FUMBLE = '#3F0F3F'
 COLOR_ATTENTION = '#80D2DE'
 
 lst_trigger_param = ["HP", "MP"]
-
 
 def build_response(message):
     return {
@@ -55,6 +52,9 @@ def build_response(message):
 
 
 def get_user_params(user_id, pc_id=None):
+    """
+    get_user_params function is PC parameter from AWS S3
+    """
     key = ""
     if pc_id is None:
         dict_state = get_dict_state(user_id)
@@ -87,26 +87,31 @@ def get_dict_state(user_id):
 
 
 def set_state(user_id, dict_state):
+    """
+    set_state function is update PC state param.
+    """
     key_state = user_id + STATE_FILE_PATH
 
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
 
     obj_state = bucket.Object(key_state)
     body_state = json.dumps(dict_state, ensure_ascii=False)
-    response = obj_state.put(
+    obj_state.put(
         Body=body_state.encode('utf-8'),
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
-    # TODO: エラー処理すべき
-    logging.info(f"Fail to put state to S3. response:[{response}]")
 
 
 def set_start_session(user_id, kp_name):
+    """
+    set_start_session function is starting game session.
+    create s3 file.
+    """
     key_session = user_id + KP_FILE_PATH
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
 
     obj_session = bucket.Object(key_session)
     body_session = json.dumps({}, ensure_ascii=False)
@@ -125,14 +130,14 @@ def set_start_session(user_id, kp_name):
                       }
                   )}
     headers = {'Content-Type': 'application/json'}
-    r = requests.get(url, params=set_params, headers=headers)
-    print(r.text)
+    response = requests.get(url, params=set_params, headers=headers)
+    print(response.text)
 
 
 def add_gamesession_user(kp_id, user_id, pc_id):
     key_kp_file = kp_id + KP_FILE_PATH
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
     obj_kp_file = bucket.Object(key_kp_file)
     response = obj_kp_file.get()
     body = response['Body'].read()
@@ -518,7 +523,7 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
     if len(cmd_parts) == 2:
         match_result = split_alternative_roll_or_value(cmd_parts[1])
         if match_result:
-            san_roll =  match_result[0] if is_success else match_result[1]
+            san_roll = match_result[0] if is_success else match_result[1]
             san_damage = sum(eval_roll_or_value(san_roll))
             message += f"\n【減少値】 {san_damage}"
     return message, color
@@ -675,6 +680,7 @@ def bootstrap(event: dict, _context) -> str:
     bot.data_user = data_user
     bot.channel_id = channel_id
     bot.user_id = user_id
+    
     bot.response_url = response_url
 
     is_bot_command = bot.dispatch()
@@ -696,12 +702,9 @@ def bootstrap(event: dict, _context) -> str:
         url = "https://slack.com/api/users.profile.set"
         set_params = {'token': token,
                       'user': user_id,
-                      'profile': json.dumps(
-                      {
+                      'profile': json.dumps({
                           "display_name": name_display
-                      }
-                  )
-        }
+                      })}
         headers = {'Content-Type': 'application/json'}
         r = requests.get(url, params=set_params, headers=headers)
         print(r.text)
