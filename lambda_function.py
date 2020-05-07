@@ -652,7 +652,6 @@ def bootstrap(event: dict, _context) -> str:
         l = datum.split("=")
         evt_slack[l[0]] = l[1]
     user_id = evt_slack["user_id"]
-    user_token = evt_slack["token"]
 
     response_url = urllib.parse.unquote(evt_slack["response_url"])
     logging.info(json.dumps(evt_slack))
@@ -682,8 +681,7 @@ def bootstrap(event: dict, _context) -> str:
     bot.channel_id = channel_id
     bot.user_id = user_id
     bot.response_url = response_url
-    bot.user_token = user_token
-
+ 
     is_bot_command = bot.dispatch()
 
     if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):

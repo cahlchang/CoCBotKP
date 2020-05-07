@@ -12,7 +12,6 @@ class Bot(object):
     key = ""
     message = ""
     token = ""
-    user_token = ""
     data_user = None
     channel_id = ""
 
