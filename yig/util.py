@@ -2,7 +2,7 @@ import requests
 import json
 import boto3
 
-import yig
+import yig.config
 
 def post_command(message,
                  token,
