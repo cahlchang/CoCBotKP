@@ -7,6 +7,7 @@ from yig.util import get_state_data
 
 import yig.config
 
+
 @listener("SAVEIMG")
 def save_image(bot):
     """
@@ -20,8 +21,7 @@ def save_image(bot):
         exception = Exception("Content-Type: " + content_type)
         raise exception
 
-    ext = os.path.splitext(icon_url)[1]
-    filename = "%s%s" % (state_data["pc_id"], ext)
+    filename = "%s%s" % (state_data["pc_id"], "_image")
 
     s3_client = boto3.resource('s3')
     bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
@@ -32,21 +32,26 @@ def save_image(bot):
 
     return "アイコンを保存しました。", yig.config.COLOR_ATTENTION
 
+
 @listener("LOADIMG")
 def load_image(bot):
     """
-    This function saves the slack icon image to S3.
+    This function upload icon from s3
     """
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    key_image = "%s/%s" % (bot.user_id, filename)
-    obj = bucket.Object(key_image)
-    response = obj.get()
-    body = response['Body'].read()
+    state_data = get_state_data(bot.user_id)
+    s3_client = boto3.client('s3')
 
-    url = "https://slack.com/api/users.setPhoto"
-    set_params = {'token': bot.user_token,
-                  'image': body}
-    r = requests.get(url, params=set_params)
-    
-    return "アイコンを更新しました。", yig.config.COLOR_ATTENTION
+    filename = "%s%s" % (state_data["pc_id"], "_image")
+    key_image = "%s/%s" % (bot.user_id, filename)
+    with open('/tmp/load_image', 'wb') as fp:
+        s3_client.download_fileobj(yig.config.AWS_S3_BUCKET_NAME, key_image, fp)
+    files = {'file': open("/tmp/load_image", 'rb')}
+    param = {
+        'token': bot.token,
+        "channels": bot.channel_id
+    }
+    res = requests.post(url="https://slack.com/api/files.upload",
+                        params=param,
+                        files=files)
+
+    return "アイコン画像をロードしました。", yig.config.COLOR_ATTENTION
