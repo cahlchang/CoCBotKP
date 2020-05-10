@@ -10,7 +10,6 @@ from concurrent import futures
 import unicodedata
 from typing import List, Tuple
 import traceback
-
 import boto3
 import requests
 from yig.bot import Bot
@@ -636,7 +635,6 @@ def analyze_kp_order_command(command: str) -> str:
         return None
     return result.group(1)
 
-
 def bootstrap(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     random.seed()
@@ -684,7 +682,8 @@ def bootstrap(event: dict, _context) -> str:
  
     is_bot_command = bot.dispatch()
 
-    if re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
+    # セッション回して大丈夫ならけす
+    if False and re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
         color = COLOR_ATTENTION
         match_url = re.match(r".*<(https.*)>", message)
         param = set_user_params(user_id, match_url.group(1))
