@@ -62,3 +62,23 @@ def get_state_data(user_id):
     response = obj.get()
     body = response['Body'].read()
     return json.loads(body.decode('utf-8'))
+
+
+def get_user_param(user_id, pc_id=None):
+    """
+    get_user_params function is PC parameter from AWS S3
+    """
+    key = ""
+    if pc_id is None:
+        dict_state = get_state_data(user_id)
+        key = user_id + "/" + dict_state["pc_id"] + ".json"
+    else:
+        key = user_id + "/" + pc_id + ".json"
+    s3obj = boto3.resource('s3')
+    bucket = s3obj.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+
+    obj = bucket.Object(key)
+    response = obj.get()
+    body = response['Body'].read()
+    return json.loads(body.decode('utf-8'))
+
