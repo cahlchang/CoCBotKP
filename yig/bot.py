@@ -3,7 +3,15 @@ from glob import glob
 from yig.util import post_command
 from yig.util import post_result
 
-command_list = []
+import re
+
+KEY_MATCH_FLAG = 0
+RE_MATCH_FLAG = 1
+
+command_manager = {
+    KEY_MATCH_FLAG: [],
+    RE_MATCH_FLAG: []
+}
 
 class Bot(object):
     global command_list
@@ -26,8 +34,21 @@ class Bot(object):
             import_module(".".join(module.split("/")))
 
     def dispatch(self):
-        for command_datum in command_list:
+        for command_datum in command_manager[KEY_MATCH_FLAG]:
             if self.key == command_datum["command"]:
+                post_command(self.message,
+                             self.token,
+                             self.data_user,
+                             self.channel_id)
+                return_message, color = command_datum["function"](self)
+                post_result(self.response_url,
+                            self.user_id,
+                            return_message,
+                            color)
+                return True
+
+        for command_datum in command_manager[RE_MATCH_FLAG]:
+            if re.match(command_datum["command"], self.message):
                 post_command(self.message,
                              self.token,
                              self.data_user,
@@ -42,16 +63,16 @@ class Bot(object):
 
     def test(self):
         print("test")
-        for command_datum in command_list:
+        for command_datum in command_manager[KEY_MATCH_FLAG]:
             print(command_datum["command"])
             print(command_datum["function"])
             command_datum["function"](self)
 
 
-def listener(command_string):
+def listener(command_string, flag=KEY_MATCH_FLAG):
     def wrapper(self):
-        global command_list
-        command_list.append({"command": command_string,
-                             "function": self})
-        
+        global command_manager
+        command_manager[flag].append({"command": command_string,
+                                      "function": self})
+
     return wrapper
