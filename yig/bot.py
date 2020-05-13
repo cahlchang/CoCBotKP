@@ -16,6 +16,14 @@ command_manager = {
 class Bot(object):
     global command_list
 
+    user_id = ""
+    response_url = ""
+    key = ""
+    message = ""
+    token = ""
+    data_user = None
+    channel_id = ""
+
     def __init__(self,
                  user_id,
                  token,
