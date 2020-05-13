@@ -671,15 +671,13 @@ def bootstrap(event: dict, _context) -> str:
     print(data_user)
     key = format_as_command(message)
 
-    bot = Bot()
-    bot.key = key
-    bot.message = message
-    bot.token = token
-    bot.data_user = data_user
-    bot.channel_id = channel_id
-    bot.user_id = user_id
-    bot.response_url = response_url
- 
+    bot = Bot(user_id,
+              token,
+              message,
+              key,
+              data_user,
+              channel_id,
+              response_url)
     is_bot_command = bot.dispatch()
 
     # セッション回して大丈夫ならけす

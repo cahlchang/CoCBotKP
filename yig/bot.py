@@ -15,15 +15,23 @@ command_manager = {
 
 class Bot(object):
     global command_list
-    user_id = ""
-    response_url = ""
-    key = ""
-    message = ""
-    token = ""
-    data_user = None
-    channel_id = ""
 
-    def __init__(self):
+    def __init__(self,
+                 user_id,
+                 token,
+                 message,
+                 key,
+                 data_user,
+                 channel_id,
+                 response_url):
+        self.user_id = user_id
+        self.token = token
+        self.message = message
+        self.key = key
+        self.data_user = data_user
+        self.channel_id = channel_id
+        self.response_url = response_url
+
         self.init_plugins()
 
     def init_plugins(self):
