@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.0.2] 2020-05-14
+
+### Added
+
+- Added to "List Chara Command".
+
+### Changed
+
+- Porting toy command.
+- any Refactored.
+
 
 ## [0.0.1] 2020-05-10
 
