@@ -28,6 +28,7 @@ def show_list_chara(bot):
 
     lst_chara = get_all_chara_data(bot.user_id)
     lst_show = []
+    lst_cond_data = []
     for chara_data in lst_chara:
         param_chara = 0
         if "name" not in chara_data:
@@ -57,11 +58,18 @@ def show_list_chara(bot):
                                                 name,
                                                 param_condition,
                                                 param_chara)
+            lst_cond_data.append({"param": param_chara, "text": str_set})
         else:
             str_set = "<%s|%s - %s>" % (chara_data["url"],
                                         chara_data["pc_id"],
                                         name)
-        lst_show.append(str_set)
+            lst_show.append(str_set)
+
+    if param_condition:
+        lst_sorted = sorted(lst_cond_data, key=lambda x:x['param'], reverse=True)
+        for data in lst_sorted:
+            lst_show.append(data["text"])
+
     return "%s" % ("\n").join(lst_show), yig.config.COLOR_ATTENTION
 
 
