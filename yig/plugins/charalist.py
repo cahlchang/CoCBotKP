@@ -31,8 +31,13 @@ def show_list_chara(bot):
     lst_cond_data = []
     for chara_data in lst_chara:
         param_chara = 0
+
         if "name" not in chara_data:
             continue
+
+        if "pc_id" not in chara_data:
+            continue
+
         name = chara_data["name"].replace('\u3000', '')
         if "url" not in chara_data:
             chara_data["url"] = "https://charasheet.vampire-blood.net/%s" % chara_data["pc_id"]
