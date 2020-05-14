@@ -24,7 +24,14 @@ class Bot(object):
     data_user = None
     channel_id = ""
 
-    def __init__(self, user_id, token, message, key, data_user, channel_id, response_url):
+    def __init__(self,
+                 user_id="",
+                 token="",
+                 message="",
+                 key="",
+                 data_user={},
+                 channel_id="",
+                 response_url=""):
         self.user_id = user_id
         self.token = token
         self.message = message
