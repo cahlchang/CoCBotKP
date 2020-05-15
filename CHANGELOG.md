@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.3] 2020-05-15
+
+### Added
+
+- Added search to "List command".
+- Added documents.
+
 ## [0.0.2] 2020-05-14
 
 ### Added
