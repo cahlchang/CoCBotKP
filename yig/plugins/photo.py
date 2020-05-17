@@ -1,6 +1,7 @@
 import requests
-import boto3
 import os
+import imghdr
+import boto3
 
 from yig.bot import listener
 from yig.util import get_state_data
@@ -45,7 +46,10 @@ def load_image(bot):
     key_image = "%s/%s" % (bot.user_id, filename)
     with open('/tmp/load_image', 'wb') as fp:
         s3_client.download_fileobj(yig.config.AWS_S3_BUCKET_NAME, key_image, fp)
-    files = {'file': open("/tmp/load_image", 'rb')}
+    imagetype = imghdr.what('/tmp/load_image')
+    os.rename('/tmp/load_image', '/tmp/load_image.%s' % imagetype)
+
+    files = {'file': open('/tmp/load_image.%s' % imagetype, 'rb')}
     param = {
         'token': bot.token,
         "channels": bot.channel_id
