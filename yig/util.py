@@ -23,6 +23,7 @@ def post_command(message,
     print(payload)
     res = requests.get(command_url, params=payload)
     print(res.url)
+    print(res.text)
 
 
 def post_result(response_url,

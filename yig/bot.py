@@ -121,7 +121,8 @@ class Bot(object):
         obj = bucket.Object(key_ws)
         response = obj.get()
         body = response['Body'].read()
-        return json.loads(body.decode('utf-8'))['token']
+        self.token = json.loads(body.decode('utf-8'))['token']
+        return self.token
 
 
     def test(self):
