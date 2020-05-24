@@ -41,13 +41,13 @@ class Bot(object):
                    data_user,
                    channel_id,
                    team_id):
-        user_id = user_id
-        response_url = response_url
-        key = key
-        message = message
-        data_user = data_user
-        channel_id = channel_id
-        team_id = team_id
+        self.user_id = user_id
+        self.response_url = response_url
+        self.key = key
+        self.message = message
+        self.data_user = data_user
+        self.channel_id = channel_id
+        self.team_id = team_id
 
     def init_plugins(self):
         module_list = glob('yig/plugins/*.py')
