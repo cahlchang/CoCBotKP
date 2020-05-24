@@ -635,11 +635,17 @@ def analyze_kp_order_command(command: str) -> str:
         return None
     return result.group(1)
 
+
 def bootstrap(event: dict, _context) -> str:
     logging.info(json.dumps(event))
+    bot = Bot()
+    if "params" in event and "path" in event["params"]:
+        bot.install_bot(event)
+        # todo redirectでワークスペースに飛ぶように
+        return "ok"
     random.seed()
-    token = os.environ["TOKEN"]
     body = event["body"]
+
     color = ""
     body_split = body.split("&")
     lst_trigger_status = ["知識", "アイデア", "幸運", "STR", "CON",
@@ -658,28 +664,27 @@ def bootstrap(event: dict, _context) -> str:
 
     message = urllib.parse.unquote_plus(evt_slack["text"])
     channel_id = urllib.parse.unquote(evt_slack["channel_id"])
+    team_id = urllib.parse.unquote(evt_slack["team_id"])
 
+    token = bot.get_token(team_id)
     user_url = "https://slack.com/api/users.profile.get"
-    payload = {
-        "token": os.environ["TOKEN"],
-        "user": user_id
-    }
+    payload = { "token": token,
+                "user": user_id}
 
     res = requests.get(user_url, params=payload, headers={
-                       'Content-Type': 'application/json'})
+        'Content-Type': 'application/json'})
     data_user = json.loads(res.text)
     print(data_user)
     key = format_as_command(message)
 
-    bot = Bot()
-    bot.key = key
-    bot.message = message
-    bot.token = token
-    bot.data_user = data_user
-    bot.channel_id = channel_id
-    bot.user_id = user_id
-    bot.response_url = response_url
- 
+    bot.init_param(user_id,
+                   response_url,
+                   key,
+                   message,
+                   data_user,
+                   channel_id,
+                   team_id)
+
     is_bot_command = bot.dispatch()
 
     # セッション回して大丈夫ならけす
@@ -786,23 +791,6 @@ def bootstrap(event: dict, _context) -> str:
         #TODO コマンド設計から考える
         param = get_user_params(user_id, "")
         return_message = "【{}】現在値{}".format(message, param[message])
-    elif "景気づけ" == key:
-        post_command(f"景気づけ", token, data_user, channel_id)
-        num = int(random.randint(1, 100))
-        return_message = "景気づけ：{}".format(num)
-    elif "素振り" == key:
-        post_command(f"素振り", token, data_user, channel_id)
-        random.seed()
-        num = int(random.randint(1, 100))
-        return_message = "素振り：{}".format(num)
-    elif "起床ガチャ" == key:
-        post_command(f"起床ガチャ", token, data_user, channel_id)
-        num = int(random.randint(1, 100))
-        return_message = "起床ガチャ：{}".format(num)
-    elif "お祈り" == key:
-        post_command(f"お祈り", token, data_user, channel_id)
-        num = int(random.randint(1, 100))
-        return_message = "お祈り：{}".format(num)
     elif "ROLL" == key:
         post_command(f"roll", token, data_user, channel_id)
         num = int(random.randint(1, 100))
