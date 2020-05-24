@@ -687,33 +687,7 @@ def bootstrap(event: dict, _context) -> str:
 
     is_bot_command = bot.dispatch()
 
-    # セッション回して大丈夫ならけす
-    if False and re.match(r"init.<https://charasheet.vampire-blood.net/.*", message):
-        color = COLOR_ATTENTION
-        match_url = re.match(r".*<(https.*)>", message)
-        param = set_user_params(user_id, match_url.group(1))
-        name_display = param["name"] + \
-            " - (" + data_user["profile"]["real_name"] + ")"
-
-        name_display = unicodedata.normalize("NFKC", name_display)
-        data_user["profile"]["display_name"] = name_display
-
-        post_command("init " + match_url.group(1),
-                     token, data_user, channel_id, True)
-        param["user_id"] = user_id
-        dict_state = get_dict_state(user_id)
-        url = "https://slack.com/api/users.profile.set"
-        set_params = {'token': token,
-                      'user': user_id,
-                      'profile': json.dumps({
-                          "display_name": name_display
-                      })}
-        headers = {'Content-Type': 'application/json'}
-        r = requests.get(url, params=set_params, headers=headers)
-        print(r.text)
-
-        return_message = get_status_message("INIT CHARA", param, dict_state)
-    elif is_bot_command:
+    if is_bot_command:
         return None
     elif key in ("HELP", "H"):
         post_command(message, token, data_user, channel_id, False)
@@ -807,9 +781,6 @@ def bootstrap(event: dict, _context) -> str:
                 return_message += "\n"
             elif cnt == 9:
                 break
-    elif re.match("NAME.*", key):
-        post_command(message, token, data_user, channel_id, True)
-        return_message = "名前を設定しました"
     elif key in ("ステータス", "STATUS", "S"):
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
