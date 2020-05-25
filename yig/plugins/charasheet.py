@@ -54,7 +54,7 @@ def init_charasheet_with_vampire(bot):
 def update_charasheet_with_vampire(bot):
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.user_id)
-    url = state_data["url"] + ".json"
+    url = state_data["url"]
     res = requests.get(url)
     request_json = json.loads(res.text)
     param_json = format_param_json(bot, request_json)

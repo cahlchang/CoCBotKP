@@ -776,7 +776,7 @@ def lambda_handler(event: dict, _context) -> str:
     try:
         return bootstrap(event, _context)
     except Exception as e:
-        token = os.environ["TOKEN"]
+        token = os.environ["WS_TOKEN"]
         command_url = "https://slack.com/api/chat.postMessage?"
         channel_id = 'CNCM21Z9T'
         payload = {
