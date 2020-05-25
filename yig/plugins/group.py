@@ -31,7 +31,7 @@ def join_session(bot):
 
 @listener("kp+.*order.*", RE_MATCH_FLAG)
 def order_member(bot):
-    color = COLOR_ATTENTION
+    color = yig.config.COLOR_ATTENTION
     target_status = analyze_kp_order_command(bot.key)
     lst_user_data = get_lst_player_data(bot.user_id, target_status)
     msg = f"{target_status}順\n"
