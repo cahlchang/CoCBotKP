@@ -25,7 +25,7 @@ def join_session(bot):
         set_state(user_id, dict_state)
         return "セッションに参加しました", color
     else:
-        return = "%s\nJOINコマンドが不正です" % bot.message, color
+        return "%s\nJOINコマンドが不正です" % bot.message, color
 
 
 @listener("kp+.*order.*", RE_MATCH_FLAG)
