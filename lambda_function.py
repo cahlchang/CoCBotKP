@@ -28,7 +28,6 @@ logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
-KP_FILE_PATH = "/kp.json"
 
 COLOR_CRITICAL = '#EBB424'
 COLOR_SUCCESS = '#36a64f'
@@ -101,70 +100,6 @@ def set_state(user_id, dict_state):
         ContentEncoding='utf-8',
         ContentType='text/plane'
     )
-
-
-def set_start_session(user_id, kp_name):
-    """
-    set_start_session function is starting game session.
-    create s3 file.
-    """
-    key_session = user_id + KP_FILE_PATH
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
-
-    obj_session = bucket.Object(key_session)
-    body_session = json.dumps({}, ensure_ascii=False)
-    obj_session.put(
-        Body=body_session.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
-
-
-def add_gamesession_user(kp_id, user_id, pc_id):
-    key_kp_file = kp_id + KP_FILE_PATH
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
-    obj_kp_file = bucket.Object(key_kp_file)
-    response = obj_kp_file.get()
-    body = response['Body'].read()
-    dict_kp = json.loads(body.decode('utf-8'))
-
-    if "lst_user" not in dict_kp:
-        dict_kp["lst_user"] = []
-
-    dict_kp["lst_user"].append([user_id, pc_id])
-    body_session = json.dumps(dict_kp, ensure_ascii=False)
-    response = obj_kp_file.put(
-        Body=body_session.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
-
-
-def get_lst_player_data(user_id, roll_targ):
-    key_kp_file = user_id + KP_FILE_PATH
-
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-    obj_kp_file = bucket.Object(key_kp_file)
-    response = obj_kp_file.get()
-    body = response['Body'].read()
-    dict_kp = json.loads(body.decode('utf-8'))
-    lst_user = dict_kp["lst_user"]
-    lst_user_param = []
-    for user in lst_user:
-        param = get_user_params(user[0], user[1])
-
-        lst_user_param.append(
-            {
-                "name": param['name'],
-                roll_targ: int(param[roll_targ])
-            })
-
-    lst_user_param.sort(key=lambda x: x[roll_targ])
-    lst_user_param.reverse()
-    return lst_user_param
 
 
 def get_status_message(message_command, dict_param, dict_state):
@@ -435,34 +370,6 @@ def analyze_update_command(command: str) -> Tuple[str, str, str]:
         return None
     return result.group(2), result.group(3), result.group(4)
 
-
-def analyze_join_command(command: str) -> str:
-    """
-    analyze join command and return KP ID
-
-    Examples:
-        "JOIN UE63DUJJF" => "UE63DUJJF"
-    """
-    result = re.fullmatch(r"\S+\s+(\S+)", command)
-    if result is None:
-        return None
-    return result.group(1)
-
-
-def analyze_kp_order_command(command: str) -> str:
-    """
-    analyze KP ORDER command and return target status name
-
-    Examples:
-        "KP ORDER DEX" => "DEX"
-        "KP ORDER 幸運" => "幸運"
-    """
-    result = re.fullmatch(r"KP\s+ORDER\s+(\S+)", command)
-    if result is None:
-        return None
-    return result.group(1)
-
-
 def bootstrap(event: dict, _context) -> str:
     logging.info(json.dumps(event))
     bot = Bot()
@@ -541,38 +448,6 @@ def bootstrap(event: dict, _context) -> str:
                                             get_user_params(user_id,
                                                             dict_state["pc_id"]),
                                             dict_state)
-    elif re.match("KP+.*START", key):
-        color = COLOR_ATTENTION
-        kp_name = "KP by " + data_user["profile"]["real_name"]
-        data_user["profile"]["display_name"] = kp_name
-        post_command(f"kp start", token, data_user, channel_id)
-        set_start_session(user_id, kp_name)
-        return_message = f"セッションを開始します。\n参加コマンド\n```/cc join {user_id}```"
-    elif re.match("JOIN+.*", key):
-        color = COLOR_ATTENTION
-        dict_state = get_dict_state(user_id)
-        kp_id = analyze_join_command(key)
-        if kp_id:
-            post_command(f"join {kp_id}", token, data_user, channel_id)
-            add_gamesession_user(kp_id, user_id, dict_state["pc_id"])
-            dict_state["kp_id"] = kp_id
-            set_state(user_id, dict_state)
-            return_message = "参加しました"
-        else:
-            return_message = f"{message}\nJOINコマンドが不正です"
-    elif re.match("KP+.*ORDER.*", key):
-        color = COLOR_ATTENTION
-        target_status = analyze_kp_order_command(key)
-        lst_user_data = get_lst_player_data(user_id, target_status)
-        msg = f"{target_status}順\n"
-        post_command(f"kp order {target_status}", token, data_user, channel_id)
-        cnt = 0
-        for user_data in lst_user_data:
-            cnt += 1
-            name = user_data["name"]
-            v = user_data[target_status]
-            msg += f"{cnt}, {name} ({v}) \n"
-        return_message = msg
     elif "GET" == key:
         return_message = json.dumps(
             get_user_params(user_id), ensure_ascii=False)
