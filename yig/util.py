@@ -65,6 +65,22 @@ def get_state_data(user_id):
     return json.loads(body.decode('utf-8'))
 
 
+def set_state_data(user_id, state_data):
+    """
+    set_state function is update PC state param.
+    """
+    key_state = user_id + yig.config.STATE_FILE_PATH
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    obj_state = bucket.Object(key_state)
+    body_state = json.dumps(state_data, ensure_ascii=False)
+    obj_state.put(
+        Body=body_state.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+
+
 def get_user_param(user_id, pc_id=None):
     """
     get_user_params function is PC parameter from AWS S3
