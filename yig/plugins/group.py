@@ -94,7 +94,7 @@ def get_lst_player_data(user_id, roll_targ):
     lst_user = dict_kp["lst_user"]
     lst_user_param = []
     for user in lst_user:
-        param = get_user_params(user[0], user[1])
+        param = get_user_param(user[0], user[1])
         lst_user_param.append(
             {
                 "name": param['name'],
