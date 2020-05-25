@@ -102,24 +102,6 @@ def set_state(user_id, dict_state):
     )
 
 
-def set_start_session(user_id, kp_name):
-    """
-    set_start_session function is starting game session.
-    create s3 file.
-    """
-    key_session = user_id + KP_FILE_PATH
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(AWS_S3_BUCKET_NAME)
-
-    obj_session = bucket.Object(key_session)
-    body_session = json.dumps({}, ensure_ascii=False)
-    obj_session.put(
-        Body=body_session.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
-
-
 def get_status_message(message_command, dict_param, dict_state):
     name = dict_param['name']
 
