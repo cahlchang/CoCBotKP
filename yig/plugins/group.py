@@ -1,5 +1,5 @@
 from yig.bot import listener, RE_MATCH_FLAG
-from yig.util import get_state_data, set_state_data
+from yig.util import get_state_data, set_state_data, get_user_param
 
 import boto3
 import yig.config
