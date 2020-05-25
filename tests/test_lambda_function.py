@@ -4,6 +4,7 @@ import re
 
 import pytest
 import lambda_function as main
+from yig.plugins.group import analyze_join_command, analyze_kp_order_command
 
 
 def test_2():
@@ -137,7 +138,7 @@ def test_analyze_update_command_invalid(command):
     ("join UE63DUJJF", "UE63DUJJF"),
 ])
 def test_analyze_join_command(command, exp_kp_id):
-    kp_id = main.analyze_join_command(command)
+    kp_id = analyze_join_command(command)
     assert kp_id == exp_kp_id
 
 
@@ -146,5 +147,5 @@ def test_analyze_join_command(command, exp_kp_id):
     ("KP ORDER 幸運", "幸運"),
 ])
 def test_analyze_kp_order_command(command, exp_status_name):
-    status_name = main.analyze_kp_order_command(command)
+    status_name = analyze_kp_order_command(command)
     assert status_name == exp_status_name
