@@ -23,7 +23,7 @@ def join_session(bot):
     if kp_id:
         add_gamesession_user(kp_id, bot.user_id, state_data["pc_id"])
         state_data["kp_id"] = kp_id
-        set_state(user_id, dict_state)
+        set_state_data(user_id, dict_state)
         return "セッションに参加しました", color
     else:
         return "%s\nJOINコマンドが不正です" % bot.message, color
