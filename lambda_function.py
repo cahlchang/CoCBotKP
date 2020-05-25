@@ -120,18 +120,6 @@ def set_start_session(user_id, kp_name):
         ContentType='text/plane'
     )
 
-    url = "https://slack.com/api/users.profile.set"
-    set_params = {'token': os.environ["TOKEN"],
-                  'user': user_id,
-                  'profile': json.dumps(
-                      {
-                          "display_name": kp_name
-                      }
-                  )}
-    headers = {'Content-Type': 'application/json'}
-    response = requests.get(url, params=set_params, headers=headers)
-    print(response.text)
-
 
 def add_gamesession_user(kp_id, user_id, pc_id):
     key_kp_file = kp_id + KP_FILE_PATH
@@ -177,167 +165,6 @@ def get_lst_player_data(user_id, roll_targ):
     lst_user_param.sort(key=lambda x: x[roll_targ])
     lst_user_param.reverse()
     return lst_user_param
-
-
-def set_user_params(user_id, url, is_update=False):
-    logging.info("request start")
-    pc_id = url.split("/")[-1]
-
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req) as res:
-        body = res.read().decode('utf-8')
-    logging.info("request end")
-
-    name = ''
-    dict_param = {}
-    dict_param['user_id'] = user_id
-    dict_param['pc_id'] = pc_id
-
-    is_param_end = False
-    is_param_parse = False
-    is_param_now_parse = False
-    lst_param = []
-
-    is_san_end = False
-
-    is_role_end = False
-    is_role_now_parse = False
-    role_now_parse = ""
-
-    # TODO 関数処理化してもう少し早くはできるが…
-    logging.info("regexp start")
-    lst = body.splitlines()
-    for line in lst:
-        if not is_param_end:
-            if re.match('.*<div class="disp"><table class="pc_making">.*', line):
-                is_param_parse = True
-
-            if is_param_parse:
-                if re.match(r'.*<th colspan="2">現在値</th>.*', line):
-                    is_param_now_parse = True
-
-            if is_param_now_parse:
-                if re.match(r'/*</tr>.*', line):
-                    lst = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT",
-                        "EDU", "HP", "MP", "初期SAN", "アイデア", "幸運", "知識"]
-                    lst_tmp = []
-                    for raw_param in lst_param:
-                        m = re.match('.*value="(.*?)".*', raw_param)
-                        if m:
-                            lst_tmp.append(m.group(1))
-
-                    for name_param in lst:
-                        dict_param[name_param] = lst_tmp.pop(0)
-                    is_param_end = True
-
-                lst_param.append(line)
-            continue
-
-        if not is_san_end:
-            if re.match(".*SAN_Left.*", line):
-                is_san_end = True
-                m = re.match('.*value="(.*?)".*', line)
-                dict_param["現在SAN"] = m.group(1)
-                continue
-
-        if not is_role_end and is_san_end:
-            m = re.match('.*(cTBAU|cTFAU|cTAAU|cTCAU|cTKAU).*', line)
-            if m:
-                is_role_now_parse = True
-                continue
-
-            if is_role_now_parse:
-                if "" == role_now_parse:
-                    m = re.match(r'.*<th>(.*)</th>.*', line)
-                    if m:
-                        role_now_parse = m.group(1)
-                        continue
-
-                if role_now_parse not in dict_param:
-                    dict_param[role_now_parse] = []
-
-                m = re.match('.*value="(.*?)".*', line)
-                if m:
-                    dict_param[role_now_parse].append(m.group(1))
-                else:
-                    dict_param[role_now_parse].append(0)
-
-            m = re.match('.*(TBAP|TFAP|TAAP|TCAP|TKAP).*', line)
-            if m:
-                is_role_now_parse = False
-                role_now_parse = ""
-                continue
-
-            m = re.match('.*btnDelLineKnowArts.*', line)
-            if m:
-                is_role_end = True
-
-        if '' == name and is_role_end:
-            m = re.match(
-                '.*<input name="pc_name" class="str" id="pc_name" size="55" type="text" value="(.*)">.*', line)
-            if m:
-                dict_param["name"] = m.group(1)
-
-            continue
-
-    logging.info("regexp end")
-    dict_temp = {}
-    lst_remove = []
-    dict_replace = {
-        "unten_bunya": "運転（{}）",
-        "geijutu_bunya": "芸術（{}）",
-        "seisaku_bunya": "製作（{}）",
-        "main_souju_norimono": "操縦（{}）",
-        "mylang_name": "母国語（{}）",
-        "Name[]": "{}"
-    }
-    for key in dict_param.keys():
-        for proc, key_new in dict_replace.items():
-            if proc in key:
-                m2 = re.match(r'.*value="(.*?)" s.*', key)
-                if m2:
-                    key_new = key_new.format(m2.group(1))
-                    dict_temp[key_new] = dict_param[key]
-
-                lst_remove.append(key)
-
-    dict_param.update(dict_temp)
-
-    for key_remove in lst_remove:
-        del dict_param[key_remove]
-
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(AWS_S3_BUCKET_NAME)
-
-    logging.info("puts3 start")
-    key = user_id + "/" + pc_id + ".json"
-    # TODO 保存処理を関数に出す
-    obj = bucket.Object(key)
-    body = json.dumps(dict_param, ensure_ascii=False)
-    response = obj.put(
-        Body=body.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
-
-    if is_update:
-        return dict_param
-
-    key_state = user_id + STATE_FILE_PATH
-    dict_state = {
-        "url": url,
-        "pc_id": dict_param["pc_id"]
-    }
-    obj_state = bucket.Object(key_state)
-    body_state = json.dumps(dict_state, ensure_ascii=False)
-    response = obj_state.put(
-        Body=body_state.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
-
-    logging.info(f"puts3 2 end. response:[{response}]")
-    return dict_param
 
 
 def get_status_message(message_command, dict_param, dict_state):
@@ -693,14 +520,6 @@ def bootstrap(event: dict, _context) -> str:
         post_command(message, token, data_user, channel_id, False)
         return_message = "command list: init, update<u>, status<s>, roll, sanc\n"\
             "more info... https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md"
-
-    elif key in ("UPDATE", "U"):
-        post_command(message, token, data_user, channel_id, False)
-        color = COLOR_ATTENTION
-        dict_state = get_dict_state(user_id)
-        url_from_state = dict_state["url"]
-        param = set_user_params(user_id, url_from_state, True)
-        return_message = get_status_message("UPDATE", param, dict_state)
     elif re.match("(U+.*|UPDATE+.*)", key):
         color = COLOR_ATTENTION
         result = analyze_update_command(key)

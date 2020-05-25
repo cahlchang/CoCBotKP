@@ -50,6 +50,29 @@ def init_charasheet_with_vampire(bot):
     return get_status_message("INIT CHARA", param_json, dict_state), yig.config.COLOR_ATTENTION
 
 
+@listener(r"^(u|update)$", RE_MATCH_FLAG)
+def update_charasheet_with_vampire(bot):
+    color = yig.config.COLOR_ATTENTION
+    state_data = get_state_data(bot.user_id)
+    url = state_data["url"] + ".json"
+    res = requests.get(url)
+    request_json = json.loads(res.text)
+    param_json = format_param_json(bot, request_json)
+
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+
+    key = "%s/%s.json" % (param_json["user_id"], param_json["pc_id"])
+    obj = bucket.Object(key)
+    body = json.dumps(param_json, ensure_ascii=False)
+    response = obj.put(
+        Body=body.encode('utf-8'),
+        ContentEncoding='utf-8',
+        ContentType='text/plane'
+    )
+
+    return get_status_message("UPDATE", param_json, state_data), color
+
 
 # todo いい感じにする
 def get_status_message(message_command, dict_param, dict_state):
