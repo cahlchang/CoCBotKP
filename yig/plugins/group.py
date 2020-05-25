@@ -10,7 +10,7 @@ KP_FILE_PATH = "/kp.json"
 @listener("kp+.*start", RE_MATCH_FLAG)
 def start_session(bot):
     color = yig.config.COLOR_ATTENTION
-    set_start_session(bot,user_id)
+    set_start_session(bot.user_id)
     return "セッションを開始します。\n参加コマンド\n```/cc join %s```" % bot.user_id, color
 
 
