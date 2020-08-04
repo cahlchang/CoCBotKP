@@ -23,8 +23,8 @@ state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
 """
 
 # ログ設定
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+# logger = logging.getLogger()
+# logger.setLevel(logging.INFO)
 
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
 STATE_FILE_PATH = "/state.json"
@@ -36,6 +36,7 @@ COLOR_FUMBLE = '#3F0F3F'
 COLOR_ATTENTION = '#80D2DE'
 
 lst_trigger_param = ["HP", "MP"]
+
 
 def build_response(message):
     return {
@@ -127,7 +128,6 @@ def get_status_message(message_command, dict_param, dict_state):
         val_san = eval(f"{c_san} + {t_san}")
     else:
         val_san = dict_param["現在SAN"]
-
     return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
 
 
@@ -423,10 +423,6 @@ def bootstrap(event: dict, _context) -> str:
 
     if is_bot_command:
         return None
-    elif key in ("HELP", "H"):
-        post_command(message, token, data_user, channel_id, False)
-        return_message = "command list: init, update<u>, status<s>, roll, sanc\n"\
-            "more info... https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md"
     elif re.match("(U+.*|UPDATE+.*)", key):
         color = COLOR_ATTENTION
         result = analyze_update_command(key)
@@ -448,33 +444,6 @@ def bootstrap(event: dict, _context) -> str:
                                             get_user_params(user_id,
                                                             dict_state["pc_id"]),
                                             dict_state)
-    elif "GET" == key:
-        return_message = json.dumps(
-            get_user_params(user_id), ensure_ascii=False)
-        return return_param(response_url, user_id, return_message, color, "ephemeral")
-    elif "GETSTATE" == key:
-        return_message = json.dumps(
-            get_dict_state(user_id), ensure_ascii=False)
-    elif message in lst_trigger_param:
-        #TODO コマンド設計から考える
-        param = get_user_params(user_id, "")
-        return_message = "【{}】現在値{}".format(message, param[message])
-    elif "ROLL" == key:
-        post_command(f"roll", token, data_user, channel_id)
-        num = int(random.randint(1, 100))
-        return_message = "1D100：{}".format(num)
-    elif "能力値" == key:
-        param = get_user_params(user_id)
-        return_message = ""
-        cnt = 0
-        for trigger_param in lst_trigger_param:
-            cnt += 1
-            return_message += "{}:{} ".format(trigger_param,
-                                              param[trigger_param])
-            if cnt == 1:
-                return_message += "\n"
-            elif cnt == 9:
-                break
     elif key in ("ステータス", "STATUS", "S"):
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
@@ -482,6 +451,10 @@ def bootstrap(event: dict, _context) -> str:
         dict_state = get_dict_state(user_id)
         return_message = get_status_message(
             "STATUS", get_user_params(user_id, dict_state["pc_id"]), dict_state)
+    elif "GET" == key:
+        return_message = json.dumps(
+            get_user_params(user_id), ensure_ascii=False)
+        return return_param(response_url, user_id, return_message, color, "ephemeral")
     elif key.startswith("SANC"):
         post_command(message, token, data_user, channel_id)
         param = get_user_params(user_id)
@@ -623,9 +596,6 @@ def bootstrap(event: dict, _context) -> str:
         if 0 == len(list(filter(lambda matcher: re.match(message, matcher, re.IGNORECASE), param.keys()))):
             return build_response("@{} norm message".format(user_id))
 
-#        if message not in param:
-#            return_param(response_url, user_id, "解釈出来ないコマンドです", color, "ephemeral")
-
         data = param[message]
 
         num = int(random.randint(1, 100))
@@ -651,13 +621,12 @@ def lambda_handler(event: dict, _context) -> str:
     try:
         return bootstrap(event, _context)
     except Exception as e:
-        token = os.environ["WS_TOKEN"]
-        command_url = "https://slack.com/api/chat.postMessage?"
         channel_id = 'CNCM21Z9T'
         payload = {
-            "token": token,
+            "token": os.environ["WS_TOKEN"],
             "channel": channel_id,
             "text": traceback.format_exc()
         }
-        print(payload)
-        res = requests.get(command_url, params=payload)
+        res = requests.get("https://slack.com/api/chat.postMessage?",
+                           params=payload)
+        print(res.text)

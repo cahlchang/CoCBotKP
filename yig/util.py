@@ -4,6 +4,7 @@ import boto3
 
 import yig.config
 
+
 def post_command(message,
                  token,
                  data_user,
@@ -20,32 +21,41 @@ def post_command(message,
         "channel": channel_id,
         "text": f"/cc {message}"
     }
-    print(payload)
     res = requests.get(command_url, params=payload)
-    print(res.url)
     print(res.text)
 
 
-def post_result(response_url,
+def post_result(token,
                 user_id,
-                return_message,
+                channel_id,
+                return_content,
                 color,
                 response_type="in_channel"):
+    command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
+        "token": token,
         "icon_emoji": "books",
+        "channel": channel_id,
         "response_type": response_type,
         "replace_original": False,
-        "headers": {},
-        "text": "<@{}>".format(user_id),
-        "attachments": json.dumps([
-            {
-                "text": return_message,
-                "type": "mrkdwn",
-                "color": color
-            }
-        ])}
+        "headers": {}
+    }
+    if isinstance(return_content, str):
+        normal_format = {
+            "text": "<@{}>".format(user_id),
+            "attachments": json.dumps([
+                {
+                "text": return_content,
+                    "type": "mrkdwn",
+                    "color": color
+                }])
+        }
+        payload.update(normal_format)
+    else:
+        payload.update(return_content)
+        print(payload)
 
-    res = requests.post(response_url, data=json.dumps(payload))
+    res = requests.get(command_url, params=payload)
     print(res.text)
 
 
