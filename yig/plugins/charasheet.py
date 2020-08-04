@@ -4,7 +4,7 @@ import re
 import json
 
 from yig.bot import listener, RE_MATCH_FLAG
-from yig.util import get_state_data
+from yig.util import get_state_data, write_user_data
 
 import yig.config
 
@@ -15,38 +15,27 @@ def init_charasheet_with_vampire(bot):
 `/cc init YOUR_CHARACTER_SHEET_URL`
     """
     matcher = re.match(r".*<(https.*)>", bot.message)
-
     url = matcher.group(1) + ".json"
-    res = requests.get(url)
-    request_json = json.loads(res.text)
+    response = requests.get(url)
+
+    request_json = json.loads(response.text)
     param_json = format_param_json(bot, request_json)
 
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    pc_id = param_json["pc_id"]
+    key = f"{pc_id}.json"
 
-    key = "%s/%s.json" % (param_json["user_id"], param_json["pc_id"])
-    obj = bucket.Object(key)
-    body = json.dumps(param_json, ensure_ascii=False)
-    response = obj.put(
-        Body=body.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+    write_pc_json = json.dumps(param_json, ensure_ascii=False).encode('utf-8')
+    write_user_data(bot.channel_id, bot.user_id, key, write_pc_json)
 
-    #todo 力尽きたのであとでいい感じにする
     STATE_FILE_PATH = "/state.json"
     key_state = param_json["user_id"] + STATE_FILE_PATH
     dict_state = {
         "url": url,
         "pc_id": "%s" % param_json["pc_id"]
     }
-    obj_state = bucket.Object(key_state)
-    body_state = json.dumps(dict_state, ensure_ascii=False)
-    response = obj_state.put(
-        Body=body_state.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+
+    write_state_json = json.dumps(dict_state, ensure_ascii=False).encode('utf-8')
+    write_user_data(bot.channel_id, bot.user_id, key, write_state_json)
 
     return get_status_message("INIT CHARA", param_json, dict_state), yig.config.COLOR_ATTENTION
 
