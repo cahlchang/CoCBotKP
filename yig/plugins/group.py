@@ -8,8 +8,12 @@ import json
 
 KP_FILE_PATH = "/kp.json"
 
+
 @listener("kp+.*start", RE_MATCH_FLAG)
 def start_session(bot):
+    """session start
+start
+    """
     color = yig.config.COLOR_ATTENTION
     set_start_session(bot.user_id)
     return "セッションを開始します。\n参加コマンド\n```/cc join %s```" % bot.user_id, color
@@ -17,6 +21,9 @@ def start_session(bot):
 
 @listener("join+.*", RE_MATCH_FLAG)
 def join_session(bot):
+    """session start
+join
+    """
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.user_id)
     kp_id = analyze_join_command(bot.key)
@@ -31,6 +38,9 @@ def join_session(bot):
 
 @listener("kp+.*order.*", RE_MATCH_FLAG)
 def order_member(bot):
+    """session start
+order
+    """
     color = yig.config.COLOR_ATTENTION
     target_status = analyze_kp_order_command(bot.key)
     lst_user_data = get_lst_player_data(bot.user_id, target_status)

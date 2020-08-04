@@ -8,10 +8,11 @@ from yig.util import get_state_data
 
 import yig.config
 
+
 @listener(r"init.<https://charasheet.vampire-blood.net/.*", RE_MATCH_FLAG)
 def init_charasheet_with_vampire(bot):
-    """
-    This function init charasheet
+    """:pencil: *init charasheet*
+`/cc init YOUR_CHARACTER_SHEET_URL`
     """
     matcher = re.match(r".*<(https.*)>", bot.message)
 
@@ -52,6 +53,10 @@ def init_charasheet_with_vampire(bot):
 
 @listener(r"^(u|update)$", RE_MATCH_FLAG)
 def update_charasheet_with_vampire(bot):
+    """:arrows_counterclockwise: *update charasheet*
+`/cc u`
+`/cc update`
+    """
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.user_id)
     url = state_data["url"]
@@ -123,7 +128,7 @@ def format_param_json(bot, request_json):
         "NP12": "アイデア",
         "NP13": "幸運",
         "NP14": "知識"}
-    
+
     tba_replace = ["回避",
                    "キック",
                    "組み付き",
@@ -189,13 +194,13 @@ def format_param_json(bot, request_json):
 
     for key, param in REPLACE_PARAMETER.items():
           param_json[param] = request_json[key]
-    
+
     def replace_role_param(key, lst_key_roles):
         return_data = {}
         if f"{key}Name" in request_json:
             for custom_added_name in request_json[f"{key}Name"]:
                 lst_key_roles.append(custom_added_name)
-            
+
         for idx, param in enumerate(lst_key_roles):
             lst = []
             lst.append(request_json[f"{key}D"][idx])

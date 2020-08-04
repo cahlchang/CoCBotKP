@@ -87,31 +87,28 @@ class Bot(object):
             return "ok"
 
     def dispatch(self):
+        def process():
+            post_command(self.message,
+                         self.token,
+                         self.data_user,
+                         self.channel_id)
+            return_content, color = command_datum["function"](self)
+            post_result(self.token,
+                        self.user_id,
+                        self.channel_id,
+                        return_content,
+                        color)
+
         for command_datum in command_manager[KEY_MATCH_FLAG]:
             if self.key == command_datum["command"]:
-                post_command(self.message,
-                             self.token,
-                             self.data_user,
-                             self.channel_id)
-                return_message, color = command_datum["function"](self)
-                post_result(self.response_url,
-                            self.user_id,
-                            return_message,
-                            color)
+                process()
                 return True
 
         for command_datum in command_manager[RE_MATCH_FLAG]:
             if re.match(command_datum["command"], self.message):
-                post_command(self.message,
-                             self.token,
-                             self.data_user,
-                             self.channel_id)
-                return_message, color = command_datum["function"](self)
-                post_result(self.response_url,
-                            self.user_id,
-                            return_message,
-                            color)
+                process()
                 return True
+
         return False
 
     def get_token(self, team_id):
@@ -124,19 +121,16 @@ class Bot(object):
         self.token = json.loads(body.decode('utf-8'))['token']
         return self.token
 
-
-    def test(self):
-        print("test")
-        for command_datum in command_manager[KEY_MATCH_FLAG]:
-            print(command_datum["command"])
-            print(command_datum["function"])
-            command_datum["function"](self)
+    def get_listener(self):
+        return command_manager
 
 
 def listener(command_string, flag=KEY_MATCH_FLAG):
     def wrapper(self):
         global command_manager
-        command_manager[flag].append({"command": command_string,
-                                      "function": self})
-
+        command_manager[flag].append(
+            {
+                "command": command_string,
+                "function": self
+            })
     return wrapper

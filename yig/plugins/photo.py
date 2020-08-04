@@ -11,8 +11,7 @@ import yig.config
 
 @listener("SAVEIMG")
 def save_image(bot):
-    """
-    This function saves the slack icon image to S3.
+    """This function saves the slack icon image to S3.
     """
     state_data = get_state_data(bot.user_id)
     icon_url = bot.data_user["profile"]["image_512"]
@@ -36,8 +35,7 @@ def save_image(bot):
 
 @listener("LOADIMG")
 def load_image(bot):
-    """
-    This function upload icon from s3
+    """This function upload icon from s3
     """
     state_data = get_state_data(bot.user_id)
     s3_client = boto3.client('s3')
