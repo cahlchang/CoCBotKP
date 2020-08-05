@@ -50,7 +50,7 @@ def bootstrap(event: dict, _context) -> str:
 
     response_url = urllib.parse.unquote(evt_slack["response_url"])
     if "subtype" in evt_slack:
-        return build_response("subtype event")
+        return None
 
     message = urllib.parse.unquote(evt_slack["text"])
     channel_id = urllib.parse.unquote(evt_slack["channel_id"])
