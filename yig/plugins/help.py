@@ -114,7 +114,7 @@ def help(bot):
             skill_name = skill[0]
             skill_targ = skill[1]
             skill_content.append({"type": "mrkdwn",
-                                  "text": f"*{skill_name}* (target {skill_targ})\n`/cc {skill_name}  [+-*/][number]`"})
+                                  "text": f"*{skill_name}* (target point *{skill_targ}*)\n`/cc {skill_name}  [+-*/][number]`"})
             if cnt == 10:
                 break
         block_content.append({"type": "section",

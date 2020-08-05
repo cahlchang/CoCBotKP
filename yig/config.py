@@ -1,5 +1,5 @@
 AWS_S3_BUCKET_NAME = 'wheellab-coc-pcparams'
-STATE_FILE_PATH = "/state.json"
+STATE_FILE_PATH = "state.json"
 KP_FILE_PATH = "/kp.json"
 
 COLOR_CRITICAL = '#EBB424'
