@@ -128,11 +128,6 @@ def hide_roll(bot):
 def roll_skill(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
 
-    alias_roll = {"こぶし": "こぶし（パンチ）"}
-
-    if bot.message in alias_roll.keys():
-        bot.message = alias_roll[bot.message]
-
     lst_trigger_status = ["知識",
                           "アイデア",
                           "幸運",
@@ -159,6 +154,10 @@ def roll_skill(bot):
         msg_correction = operant + args
         is_correction = True
 
+    alias_roll = {"こぶし": "こぶし（パンチ）"}
+
+    if bot.message in alias_roll.keys():
+        bot.message = alias_roll[bot.message]
 
     data = user_param[bot.message]
 
