@@ -31,7 +31,6 @@ def hide_roll(bot):
     str_message, str_detail, sum_result = create_post_message_rolls_result(bot.key)
     return f"*{sum_result}* 【ROLLED】\n {str_detail}", "#4169e1"
 
-import requests
 @listener(r"hide.*", RE_NOPOST_COMMANG_FLAG)
 def hide_roll(bot):
     post_command("hide ？？？",
