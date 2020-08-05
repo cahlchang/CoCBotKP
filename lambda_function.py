@@ -3,13 +3,8 @@ import json
 import logging
 import urllib.request
 import urllib.parse
-import re
 import random
-import math
-import unicodedata
-from typing import List, Tuple
 import traceback
-import boto3
 import requests
 from yig.bot import Bot
 
