@@ -58,11 +58,8 @@ def post_result(token,
     command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
         "token": token,
-        "icon_emoji": "books",
         "channel": channel_id,
         "response_type": response_type,
-        "replace_original": False,
-        "headers": {}
     }
     if isinstance(return_content, str):
         normal_format = {
@@ -79,7 +76,7 @@ def post_result(token,
         payload.update(return_content)
         print(payload)
 
-    res = requests.get(command_url, params=payload)
+    res = requests.post(command_url, params=payload)
     print(res.text)
 
 

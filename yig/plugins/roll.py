@@ -1,11 +1,12 @@
 import re
 import random
 import math
+import json
 from typing import List, Tuple
 from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
-from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message
+from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result
 import yig.config
 
 
@@ -30,38 +31,21 @@ def hide_roll(bot):
     str_message, str_detail, sum_result = create_post_message_rolls_result(bot.key)
     return f"*{sum_result}* 【ROLLED】\n {str_detail}", "#4169e1"
 
-
 @listener(r"hide.*", RE_NOPOST_COMMANG_FLAG)
 def hide_roll(bot):
     post_command("hide ？？？",
                  bot.token,
                  bot.data_user,
                  bot.channel_id)
-    text = "結果は公開されず、KPが描写だけ行います"
-
-    payload = {
-        'text': text,
-        "attachments": json.dumps([
-            {
-                "text": return_message,
-                "type": "mrkdwn",
-                "color": color
-            }
-        ])
-    }
-
-    res = requests.post(bot.response_url,
-                        data=json.dumps(payload),
-                        headers={'Content-Type': 'application/json'})
-    print(res.text)
 
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
         dict_state = get_state_data(bot.team_id, bot.user_id)
         param = get_user_param(bot.team_id, bot.user_id, dict_state["pc_id"])
-        channel = '@' + dict_state["kp_id"]
         color_hide = "gray"
-
+        channel = '@' + dict_state["kp_id"]
+        key = bot.key
+        text = ""
         m = re.match(r"HIDE\s(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
         if m is None:
             text = "role not found"
@@ -104,8 +88,6 @@ def hide_roll(bot):
             text = f"<@{user_id}> try {name_role}"
 
         payload = {
-            'token': token,
-            'channel': channel,
             'text': text,
             "attachments": json.dumps([
                 {
@@ -115,13 +97,26 @@ def hide_roll(bot):
                 }
             ])
         }
-
-        res = requests.post(post_url, data=payload)
+        post_result(bot.token,
+                    user_id,
+                    channel,
+                    payload,
+                    "gray")
     with futures.ThreadPoolExecutor() as executor:
-        future_hide = executor.submit(post_hide, user_id)
+        future_hide = executor.submit(post_hide, bot.user_id)
         future_hide.result()
 
-    return "【シークレットダイス】？？？", "gray"
+    return_payload = {
+        "text": "結果は公開されず、KPが描写だけ行います",
+        "attachments": json.dumps([
+            {
+                "text": "【シークレットダイス】？？？",
+                "type": "mrkdwn",
+                "color": "gray"
+            }])
+    }
+
+    return return_payload, "gray"
 
 
 @listener("roll_skill", LAST_EVALUATION_FLAG)
