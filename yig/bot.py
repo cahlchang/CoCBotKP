@@ -11,12 +11,18 @@ import boto3
 import requests
 import os
 
-KEY_MATCH_FLAG = 0
-RE_MATCH_FLAG = 1
+RE_NOPOST_COMMANG_FLAG = 0
+KEY_MATCH_FLAG = 1
+KEY_IN_FLAG = 2
+RE_MATCH_FLAG = 3
+LAST_EVALUATION_FLAG = 4
 
 command_manager = {
+    RE_NOPOST_COMMANG_FLAG: [],
     KEY_MATCH_FLAG: [],
-    RE_MATCH_FLAG: []
+    KEY_IN_FLAG: [],
+    RE_MATCH_FLAG: [],
+    LAST_EVALUATION_FLAG: []
 }
 
 class Bot(object):
@@ -83,7 +89,6 @@ class Bot(object):
                 ContentEncoding='utf-8',
                 ContentType='text/plane'
             )
-
             return "ok"
 
     def dispatch(self):
@@ -99,15 +104,35 @@ class Bot(object):
                         return_content,
                         color)
 
+        # 辛くなったら直す
+        for command_datum in command_manager[RE_NOPOST_COMMANG_FLAG]:
+            if re.match(command_datum["command"], self.message, flags=re.IGNORECASE):
+                return_content, color = command_datum["function"](self)
+                post_result(self.token,
+                            self.user_id,
+                            self.channel_id,
+                            return_content,
+                            color)
+                return True
+
         for command_datum in command_manager[KEY_MATCH_FLAG]:
             if self.key == command_datum["command"]:
                 process()
                 return True
 
-        for command_datum in command_manager[RE_MATCH_FLAG]:
-            if re.match(command_datum["command"], self.message):
+        for command_datum in command_manager[KEY_IN_FLAG]:
+            if self.key in command_datum["command"]:
                 process()
                 return True
+
+        for command_datum in command_manager[RE_MATCH_FLAG]:
+            if re.match(command_datum["command"], self.message, flags=re.IGNORECASE):
+                process()
+                return True
+
+        for command_datum in command_manager[LAST_EVALUATION_FLAG]:
+            process()
+            return True
 
         return False
 

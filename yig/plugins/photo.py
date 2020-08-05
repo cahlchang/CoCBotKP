@@ -1,11 +1,9 @@
 import requests
 import os
-import imghdr
 import boto3
 
 from yig.bot import listener
-from yig.util import get_state_data
-
+from yig.util import get_state_data, get_charaimage
 import yig.config
 
 
@@ -38,22 +36,13 @@ def load_image(bot):
     """This function upload icon from s3
     """
     state_data = get_state_data(bot.user_id)
-    s3_client = boto3.client('s3')
-
-    filename = "%s%s" % (state_data["pc_id"], "_image")
-    key_image = "%s/%s" % (bot.user_id, filename)
-    with open('/tmp/load_image', 'wb') as fp:
-        s3_client.download_fileobj(yig.config.AWS_S3_BUCKET_NAME, key_image, fp)
-    imagetype = imghdr.what('/tmp/load_image')
-    os.rename('/tmp/load_image', '/tmp/load_image.%s' % imagetype)
-
-    files = {'file': open('/tmp/load_image.%s' % imagetype, 'rb')}
+    image = get_charaimage(bot.user_id, state_data["pc_id"])
     param = {
         'token': bot.token,
         "channels": bot.channel_id
     }
     res = requests.post(url="https://slack.com/api/files.upload",
                         params=param,
-                        files=files)
+                        files={'files': image})
 
     return "アイコン画像をロードしました。", yig.config.COLOR_ATTENTION

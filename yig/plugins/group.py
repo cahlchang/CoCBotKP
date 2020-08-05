@@ -1,49 +1,64 @@
 from yig.bot import listener, RE_MATCH_FLAG
-from yig.util import get_state_data, set_state_data, get_user_param
+from yig.util import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data
 
-import boto3
 import yig.config
 import re
 import json
 
-KP_FILE_PATH = "/kp.json"
+KP_FILE_PATH = "kp.json"
 
 
 @listener("kp+.*start", RE_MATCH_FLAG)
-def start_session(bot):
+def session_start(bot):
     """session start
 start
     """
     color = yig.config.COLOR_ATTENTION
-    set_start_session(bot.user_id)
-    return "セッションを開始します。\n参加コマンド\n```/cc join %s```" % bot.user_id, color
+    set_start_session(bot.team_id, bot.user_id)
+    return "セッションを開始します。\n参加コマンド\n`/cc join %s`" % bot.user_id, color
 
 
 @listener("join+.*", RE_MATCH_FLAG)
-def join_session(bot):
+def session_join(bot):
     """session start
 join
     """
     color = yig.config.COLOR_ATTENTION
-    state_data = get_state_data(bot.user_id)
+    state_data = get_state_data(bot.team_id, bot.user_id)
     kp_id = analyze_join_command(bot.key)
     if kp_id:
-        add_gamesession_user(kp_id, bot.user_id, state_data["pc_id"])
+        add_gamesession_user(bot.team_id, kp_id, bot.user_id, state_data['pc_id'])
         state_data["kp_id"] = kp_id
-        set_state_data(bot.user_id, state_data)
+        set_state_data(bot.team_id, bot.user_id, state_data)
         return "セッションに参加しました", color
     else:
         return "%s\nJOINコマンドが不正です" % bot.message, color
 
 
+@listener("leave+.*", RE_MATCH_FLAG)
+def session_join(bot):
+    """session leave
+join
+    """
+    color = yig.config.COLOR_ATTENTION
+    state_data = get_state_data(bot.team_id, bot.user_id)
+    kp_id = analyze_join_command(bot.key)
+    if kp_id:
+        reduce_gamesession_user(bot.team_id, kp_id, bot.user_id, state_data['pc_id'])
+        state_data.pop("kp_id")
+        set_state_data(bot.team_id, bot.user_id, state_data)
+        return "セッションから退出しました", color
+    else:
+        return "%s\nLEAVEコマンドが不正です" % bot.message, color
+
+
 @listener("kp+.*order.*", RE_MATCH_FLAG)
-def order_member(bot):
+def session_member_order(bot):
     """session start
 order
     """
-    color = yig.config.COLOR_ATTENTION
     target_status = analyze_kp_order_command(bot.key)
-    lst_user_data = get_lst_player_data(bot.user_id, target_status)
+    lst_user_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
     msg = f"{target_status}順\n"
     cnt = 0
     for user_data in lst_user_data:
@@ -51,60 +66,46 @@ order
         name = user_data["name"]
         v = user_data[target_status]
         msg += f"{cnt}, {name} ({v}) \n"
-    return msg, color
+    return msg, yig.config.COLOR_ATTENTION
 
 
-def set_start_session(user_id):
+def set_start_session(team_id, user_id):
     """
     set_start_session function is starting game session.
     create s3 file.
     """
-    key_session = user_id + KP_FILE_PATH
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-
-    obj_session = bucket.Object(key_session)
-    body_session = json.dumps({}, ensure_ascii=False)
-    obj_session.put(
-        Body=body_session.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+    write_user_data(team_id, user_id, KP_FILE_PATH, json.dumps({}, ensure_ascii=False))
 
 
-def add_gamesession_user(kp_id, user_id, pc_id):
-    key_kp_file = kp_id + KP_FILE_PATH
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    obj_kp_file = bucket.Object(key_kp_file)
-    response = obj_kp_file.get()
-    body = response['Body'].read()
-    dict_kp = json.loads(body.decode('utf-8'))
+def add_gamesession_user(team_id, kp_id, user_id, pc_id):
+    body = read_user_data(team_id, kp_id, KP_FILE_PATH)
+    dict_kp = json.loads(body)
 
     if "lst_user" not in dict_kp:
         dict_kp["lst_user"] = []
 
     dict_kp["lst_user"].append([user_id, pc_id])
-    body_session = json.dumps(dict_kp, ensure_ascii=False)
-    response = obj_kp_file.put(
-        Body=body_session.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+    body_write = json.dumps(dict_kp, ensure_ascii=False).encode('utf-8')
+    write_user_data(team_id, kp_id, KP_FILE_PATH, body_write)
 
 
-def get_lst_player_data(user_id, roll_targ):
-    key_kp_file = user_id + KP_FILE_PATH
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    obj_kp_file = bucket.Object(key_kp_file)
-    response = obj_kp_file.get()
-    body = response['Body'].read()
-    dict_kp = json.loads(body.decode('utf-8'))
+def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
+    body = read_user_data(team_id, kp_id, KP_FILE_PATH)
+    print(body)
+    dict_kp = json.loads(body)
+    lst_reduce = []
+    lst = [lst_joined for lst_joined in dict_kp["lst_user"] if lst_joined[0] != user_id]
+    dict_kp["lst_user"] = lst
+    body_write = json.dumps(dict_kp, ensure_ascii=False).encode('utf-8')
+    write_user_data(team_id, kp_id, KP_FILE_PATH, body_write)
+
+
+def get_lst_player_data(team_id, user_id, roll_targ):
+    dict_kp = json.loads(read_user_data(team_id, user_id, KP_FILE_PATH).decode('utf-8'))
     lst_user = dict_kp["lst_user"]
     lst_user_param = []
     for user in lst_user:
-        param = get_user_param(user[0], user[1])
+        param = get_user_param(team_id, user[0], user[1])
         lst_user_param.append(
             {
                 "name": param['name'],

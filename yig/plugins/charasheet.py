@@ -1,10 +1,9 @@
 import requests
-import boto3
 import re
 import json
 
-from yig.bot import listener, RE_MATCH_FLAG
-from yig.util import get_state_data, write_user_data
+from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
+from yig.util import get_state_data, write_user_data, get_status_message
 
 import yig.config
 
@@ -25,77 +24,38 @@ def init_charasheet_with_vampire(bot):
     key = f"{pc_id}.json"
 
     write_pc_json = json.dumps(param_json, ensure_ascii=False).encode('utf-8')
-    write_user_data(bot.channel_id, bot.user_id, key, write_pc_json)
+    write_user_data(bot.team_id, bot.user_id, key, write_pc_json)
 
-    STATE_FILE_PATH = "/state.json"
-    key_state = param_json["user_id"] + STATE_FILE_PATH
     dict_state = {
         "url": url,
         "pc_id": "%s" % param_json["pc_id"]
     }
 
     write_state_json = json.dumps(dict_state, ensure_ascii=False).encode('utf-8')
-    write_user_data(bot.channel_id, bot.user_id, key, write_state_json)
+    write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
 
     return get_status_message("INIT CHARA", param_json, dict_state), yig.config.COLOR_ATTENTION
 
 
-@listener(r"^(u|update)$", RE_MATCH_FLAG)
+@listener(('U', 'UPDATE'), KEY_IN_FLAG)
 def update_charasheet_with_vampire(bot):
     """:arrows_counterclockwise: *update charasheet*
 `/cc u`
 `/cc update`
     """
-    color = yig.config.COLOR_ATTENTION
-    state_data = get_state_data(bot.user_id)
+    state_data = get_state_data(bot.team_id, bot.user_id)
     url = state_data["url"]
     res = requests.get(url)
     request_json = json.loads(res.text)
     param_json = format_param_json(bot, request_json)
 
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    pc_id = param_json["pc_id"]
+    key = f"{pc_id}.json"
 
-    key = "%s/%s.json" % (param_json["user_id"], param_json["pc_id"])
-    obj = bucket.Object(key)
-    body = json.dumps(param_json, ensure_ascii=False)
-    response = obj.put(
-        Body=body.encode('utf-8'),
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+    write_pc_json = json.dumps(param_json, ensure_ascii=False).encode('utf-8')
+    write_user_data(bot.team_id, bot.user_id, key, write_pc_json)
 
-    return get_status_message("UPDATE", param_json, state_data), color
-
-
-# todo いい感じにする
-def get_status_message(message_command, dict_param, dict_state):
-    name = dict_param['name']
-
-    c_hp = dict_param["HP"]
-    if "HP" in dict_state:
-        t_hp = dict_state["HP"]
-        val_hp = eval(f"{c_hp} + {t_hp}")
-    else:
-        val_hp = dict_param["HP"]
-
-    c_mp = dict_param["MP"]
-    if "MP" in dict_state:
-        t_mp = dict_state["MP"]
-        val_mp = eval(f"{c_mp} + {t_mp}")
-    else:
-        val_mp = dict_param["MP"]
-
-    dex = dict_param["DEX"]
-
-    c_san = dict_param["現在SAN"]
-    if "SAN" in dict_state:
-        t_san = dict_state["SAN"]
-        val_san = eval(f"{c_san} + {t_san}")
-    else:
-        val_san = dict_param["現在SAN"]
-
-    return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
+    return get_status_message("UPDATE", param_json, state_data), yig.config.COLOR_ATTENTION
 
 
 # todo 技能の定義なんとかならないか。。。
