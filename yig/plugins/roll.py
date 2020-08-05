@@ -89,7 +89,6 @@ def hide_roll(bot):
 
         payload = {
             'text': text,
-            "replace_original": True,
             "attachments": json.dumps([
                 {
                     "text": post_message,
