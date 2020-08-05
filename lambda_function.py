@@ -47,7 +47,9 @@ def bootstrap(event: dict, _context) -> str:
     if "subtype" in evt_slack:
         return None
 
-    message = urllib.parse.unquote(evt_slack["text"])
+    message = urllib.parse.unquote_plus(evt_slack["text"])
+    if message.split(' ')[-1].isnumeric():
+        message = message.split(' ')[:-1].join(' ') + " " + message.split(' ')[-1]
     channel_id = urllib.parse.unquote(evt_slack["channel_id"])
     team_id = urllib.parse.unquote(evt_slack["team_id"])
 
