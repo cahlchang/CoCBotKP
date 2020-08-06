@@ -31,9 +31,9 @@ def session_join(bot):
         return "%s\nJOINコマンドが不正です" % bot.message, color
 
 
-@listener("LEAVE", RE_MATCH_FLAG)
+@listener("leave+.*", RE_MATCH_FLAG)
 def session_leave(bot):
-    """:wave: *leave TRPG session*\n`/cc leave`"""
+    """:wave: *leave TRPG session*\n`/cc leave [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.team_id, bot.user_id)
     kp_id = analyze_join_command(bot.key)
