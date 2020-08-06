@@ -1,5 +1,5 @@
 from yig.bot import listener
-from yig.util import get_user_param, get_state_data
+from yig.util import get_user_param, get_state_data, get_pc_icon_url
 
 import yig.config
 import json
@@ -56,7 +56,7 @@ def help(bot):
             },
             "accessory": {
                 "type": "image",
-                "image_url": "https://wheellab-coc-pcparams.s3-ap-northeast-1.amazonaws.com/" + bot.team_id + "/" + bot.user_id + "/" + state_data["pc_id"] + ".png",
+                "image_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
                 "alt_text": "image"
             }
         }
