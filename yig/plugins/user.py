@@ -10,8 +10,7 @@ import yig.config
 
 @listener(("ステータス", "STATUS", "S"), KEY_IN_FLAG)
 def show_status(bot):
-    """status
-    """
+    """:eyes: *show status*\n`/cc s`\n`/cc status`"""
     dict_state = get_state_data(bot.team_id, bot.user_id)
     user_param = get_user_param(bot.team_id ,bot.user_id, dict_state["pc_id"])
     return get_status_message("STATUS", user_param, dict_state), yig.config.COLOR_ATTENTION
@@ -19,9 +18,7 @@ def show_status(bot):
 
 @listener("MEMO")
 def show_memo(bot):
-    """:pencil: *show user memo*
-`/cc memo`
-    """
+    """:spiral_note_pad: *show user memo*\n`/cc memo`"""
     user_param = get_user_param(bot.team_id, bot.user_id)
     return user_param[bot.message], yig.config.COLOR_ATTENTION
 
@@ -41,9 +38,9 @@ def easteregg_dump_data(bot):
 
 @listener(r"^(u+.*|update+.*)$", RE_MATCH_FLAG)
 def update_user_status(bot):
-    """:arrows_counterclockwise: *update user status*
-`/cc u [ROLE][+-][POINT]`
-`/cc update [ROLE][+-][POINT]`
+    """:arrows_clockwise: *update user status*
+`/cc u [STATUS][+|-][POINT]`
+`/cc update [STATUS][+|-][POINT]`
     """
     result = analyze_update_command(bot.key)
     state_data = get_state_data(bot.team_id, bot.user_id)

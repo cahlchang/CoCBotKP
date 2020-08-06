@@ -1,4 +1,4 @@
-from yig.bot import listener, RE_MATCH_FLAG
+from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
 from yig.util import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data
 
 import yig.config
@@ -10,9 +10,7 @@ KP_FILE_PATH = "kp.json"
 
 @listener("kp+.*start", RE_MATCH_FLAG)
 def session_start(bot):
-    """session start
-start
-    """
+    """:sparkles: *TRPG session start*\n`/cc kp start`"""
     color = yig.config.COLOR_ATTENTION
     set_start_session(bot.team_id, bot.user_id)
     return "セッションを開始します。\n参加コマンド\n`/cc join %s`" % bot.user_id, color
@@ -20,9 +18,7 @@ start
 
 @listener("join+.*", RE_MATCH_FLAG)
 def session_join(bot):
-    """session start
-join
-    """
+    """:+1: *join TRPG session*\n`/cc join [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.team_id, bot.user_id)
     kp_id = analyze_join_command(bot.key)
@@ -35,11 +31,9 @@ join
         return "%s\nJOINコマンドが不正です" % bot.message, color
 
 
-@listener("leave+.*", RE_MATCH_FLAG)
-def session_join(bot):
-    """session leave
-join
-    """
+@listener("LEAVE", RE_MATCH_FLAG)
+def session_leave(bot):
+    """:wave: *leave TRPG session*\n`/cc leave`"""
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.team_id, bot.user_id)
     kp_id = analyze_join_command(bot.key)
@@ -52,11 +46,9 @@ join
         return "%s\nLEAVEコマンドが不正です" % bot.message, color
 
 
-@listener("kp+.*order.*", RE_MATCH_FLAG)
+@listener("kp+.*[order|sort].*", RE_MATCH_FLAG)
 def session_member_order(bot):
-    """session start
-order
-    """
+    """:telescope:　*kp order member*\n`/cc order [PARAM]`\n`/cc sort [PARAM]`"""
     target_status = analyze_kp_order_command(bot.key)
     lst_user_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
     msg = f"{target_status}順\n"
