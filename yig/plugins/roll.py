@@ -12,7 +12,7 @@ import yig.config
 
 @listener(r"sanc.*", RE_MATCH_FLAG)
 def sanity_check(bot):
-    # post_command(message, token, data_user, channel_id)
+    """:ghost: *san check*\n`/cc sanc`\n`/cc sanc [safe_point]/[fail_point]`"""
     state_data = get_state_data(bot.team_id, bot.user_id)
     param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
     c_san = int(param["現在SAN"])
@@ -27,12 +27,15 @@ def sanity_check(bot):
 
 
 @listener(r"^\d+[dD]\d*.*", RE_MATCH_FLAG)
-def hide_roll(bot):
+def dice_roll(bot):
+    """:game_die: *dice roll*\n`/cc [X]D[Y]`\n`/cc [X]d[Y][+|-][X]d[Y][+|-][N]`"""
     str_message, str_detail, sum_result = create_post_message_rolls_result(bot.key)
     return f"*{sum_result}* 【ROLLED】\n {str_detail}", "#4169e1"
 
+
 @listener(r"hide.*", RE_NOPOST_COMMANG_FLAG)
 def hide_roll(bot):
+    """:love_letter: *hide roll*\n`/cc hide [PARAM|ANY_COMMENT]` """
     post_command("hide ？？？",
                  bot.token,
                  bot.data_user,

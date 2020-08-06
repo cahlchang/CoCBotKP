@@ -3,8 +3,10 @@ import json
 import boto3
 import imghdr
 import os
+import copy
 
 import yig.config
+
 
 def write_user_data(team_id, user_id, filename, content):
     s3_client = boto3.resource('s3')
@@ -27,6 +29,17 @@ def read_user_data(team_id, user_id, filename):
     print(f"{user_dir}/{filename}")
     response = obj.get()
     return response['Body'].read()
+
+
+def get_pc_icon_url(team_id, user_id, pc_id):
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    file_name = f"{team_id}/{user_id}/{pc_id}.png"
+    obj = list(bucket.objects.filter(Prefix=file_name))
+    if len(obj) > 0:
+        return f"https://wheellab-coc-pcparams.s3.ap-northeast-1.amazonaws.com/{team_id}/{user_id}/{pc_id}.png"
+    else:
+        return "https://wheellab-coc-pcparams.s3.ap-northeast-1.amazonaws.com/public/noimage.png"
 
 
 def post_command(message,
@@ -61,6 +74,11 @@ def post_result(token,
         "channel": channel_id,
         "response_type": response_type,
     }
+    def request(command_url, payload):
+        print(payload)
+        res = requests.post(command_url, params=payload)
+        print(res.text)
+
     if isinstance(return_content, str):
         normal_format = {
             "text": "<@{}>".format(user_id),
@@ -72,12 +90,15 @@ def post_result(token,
                 }])
         }
         payload.update(normal_format)
+        request(command_url, payload)
+    elif isinstance(return_content, list):
+        for one_payload in return_content:
+            use_payload = copy.copy(payload)
+            use_payload.update(one_payload)
+            request(command_url, use_payload)
     else:
         payload.update(return_content)
-        print(payload)
-
-    res = requests.post(command_url, params=payload)
-    print(res.text)
+        request(command_url, payload)
 
 
 def get_state_data(team_id, user_id):

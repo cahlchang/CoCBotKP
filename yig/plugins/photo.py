@@ -8,9 +8,8 @@ import yig.config
 
 
 @listener("SAVEIMG")
-def save_image(bot):
-    """This function saves the slack icon image to S3.
-    """
+def icon_save_image(bot):
+    """:art: *save slack icon*\n`/cc saveimg`"""
     state_data = get_state_data(bot.user_id)
     icon_url = bot.data_user["profile"]["image_512"]
     response = requests.get(icon_url, stream=True)
@@ -32,9 +31,8 @@ def save_image(bot):
 
 
 @listener("LOADIMG")
-def load_image(bot):
-    """This function upload icon from s3
-    """
+def icon_load_image(bot):
+    """:frame_with_picture: *load icon image*\n`/cc loadimg`"""
     state_data = get_state_data(bot.user_id)
     image = get_charaimage(bot.user_id, state_data["pc_id"])
     param = {

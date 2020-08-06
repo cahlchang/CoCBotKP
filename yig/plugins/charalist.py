@@ -9,9 +9,7 @@ import yig.config
 
 @listener("list chara.*", RE_MATCH_FLAG)
 def show_list_chara(bot):
-    """
-show my chara from s3
-    """
+    """:books: *show your PC List*\n`/cc list chara`\n`/cc list chara [>|<][PARAM]`"""
     matcher_param = re.match("LIST CHARA (.*)", bot.key)
     param_condition = None
     operant_condition = None

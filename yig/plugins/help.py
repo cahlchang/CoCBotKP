@@ -1,5 +1,5 @@
 from yig.bot import listener
-from yig.util import get_user_param
+from yig.util import get_user_param, get_state_data, get_pc_icon_url
 
 import yig.config
 import json
@@ -12,19 +12,16 @@ def help(bot):
     """
     about = "This is the command to play Call of Cthulhu.\nEnjoy!"
     refer = "*<https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md|All Documents.>*\n\n"
-    getstatus = ":eyes: *show status*\n`/cc s`\n`/cc status`"
-    sanc = ":ghost: *san check*\n`/cc sanc`\n`/cc sanc [safe_point]/[fail_point]`"
 
     dict_function = {}
     for list_function in bot.get_listener().values():
         for datum in list_function:
-            dict_function[datum["function"].__name__] = datum
+            if datum["function"].__name__ == "roll_skill" or datum["function"].__name__.startswith("easteregg"):
+                continue
+            dict_function[datum["function"].__name__] = datum["function"].__doc__
 
-    func_init_vampire = dict_function.pop('init_charasheet_with_vampire')
-    func_update_vampire = dict_function.pop('update_charasheet_with_vampire')
-
-    user_param = get_user_param(bot.user_id)
-
+    state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
     block_content = [
             {
                 "type": "header",
@@ -48,16 +45,19 @@ def help(bot):
     if user_param is not None:
         pc_name = user_param['name']
         now_hp = user_param['HP']
+        now_mp = user_param['MP']
+        now_san = user_param['現在SAN']
+        db = user_param['DB']
         user_content = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"*Name* \n{pc_name}\n\n*HP* {now_hp}/{now_hp}"
+                "text": f"*PC INFO*\n\n*Name:* {pc_name}\n*HP:*  {now_hp}/{now_hp}  *MP:* {now_mp}/{now_mp}  *SAN:* {now_san}/{now_san}  *DB:*  {db}"
             },
             "accessory": {
                 "type": "image",
-                "image_url": bot.data_user["profile"]["image_512"],
-                "alt_text": "computer thumbnail"
+                "image_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+                "alt_text": "image"
             }
         }
         block_content.append(user_content)
@@ -65,76 +65,112 @@ def help(bot):
             if isinstance(v, list):
                 skill_list.append((k, v[-1]))
 
-    common_content = [
-        {
-            "type": "divider"
-        },
-        {
-            "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": func_init_vampire["function"].__doc__
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": func_update_vampire["function"].__doc__
-                }
-            ]
-        },
-        {
-                "type": "divider"
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": getstatus
-            },
-        },
-        {
-            "type": "divider"
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": sanc
-            },
-        },
-        {
-            "type": "divider"
-        }]
-    block_content.extend(common_content)
-    skill_content = []
-    cnt = 0
-    if skill_list:
-        for skill in skill_list:
-            cnt += 1
-            skill_name = skill[0]
-            skill_targ = skill[1]
-            skill_content.append({"type": "mrkdwn",
-                                  "text": f"*{skill_name}* (target point *{skill_targ}*)\n`/cc {skill_name}  [+-*/][number]`"})
-            if cnt == 10:
-                break
-        block_content.append({"type": "section",
-                              "fields": skill_content})
+    block_content.append(divider_builder())
 
-    add_content = []
-    cnt = 0
-    for k, v in dict_function.items():
-        if k.startswith('easteregg'):
-            continue
-        cnt += 1
-        add_content.append({"type": "mrkdwn",
-                            "text": v["function"].__doc__})
-        if cnt == 8:
-            break
-    block_content.append({"type": "section",
-                          "fields": add_content})
+    block_content.append(section_builder([dict_function.pop('init_charasheet_with_vampire'),
+                                          dict_function.pop('update_charasheet_with_vampire')]))
 
-    help_content = {
-        'blocks': json.dumps(block_content)
-    }
+    block_content.append(section_builder([dict_function.pop('show_status'),
+                                          dict_function.pop('update_user_status'),
+                                          dict_function.pop('show_memo')]))
+
+    block_content.append(divider_builder())
+
+    block_content.append(section_builder([dict_function.pop('sanity_check'),
+                                          dict_function.pop('dice_roll')]))
+
+    block_content.append(section_builder([dict_function.pop('icon_save_image'),
+                                          dict_function.pop('icon_load_image')]))
+
+    block_content.append(section_builder([dict_function.pop('hide_roll'),
+                                          dict_function.pop('show_list_chara')]))
+
+    block_content.append(divider_builder())
+    block_content.append(section_builder([dict_function.pop('session_start')]))
+
+    lst_session = [k for k in dict_function.keys() if k.startswith('session')]
+    lst_session_docs = list(map(dict_function.pop, lst_session))
+    block_content.append(section_builder(lst_session_docs))
+
+    block_content.append(divider_builder())
+    block_content.append(section_builder(dict_function.values()))
+
+    battle_content = search_content = action_content = negotiate_content = knowledge_content = None
+
+    def lst_to_content(lst_content):
+        lst = []
+        i_pre = 0
+        lst_message = []
+        for i, content in enumerate(lst_content):
+            skill_name = content[0]
+            skill_targ = content[1]
+            lst_message.append(f"*{skill_name}* (target point *{skill_targ}*)\n`/cc {skill_name} [+|-|*|/][number]`")
+            print(i, len(lst_content))
+            if i > 0 and i % 9 == 0 or len(lst_content) == i + 1:
+                lst.append(section_builder(lst_message))
+                lst_message = []
+                i_pre = i
+        return lst
+
+    i_pre = 0
+    for i, skill in enumerate(skill_list):
+        if skill[0] == '応急手当':
+            battle_content = [divider_builder()]
+            battle_content.append(section_builder([":crossed_swords: *battle roll*"]))
+            battle_content.extend(lst_to_content(skill_list[0:i]))
+            i_pre = i
+        elif not search_content and skill[0].startswith('運転'):
+            search_content = [divider_builder()]
+            search_content.append(section_builder([":mag: *quest roll*"]))
+            search_content.extend(lst_to_content(skill_list[i_pre:i]))
+            i_pre = i
+        elif not action_content and skill[0].startswith('言いくるめ'):
+            action_content = [divider_builder()]
+            action_content.append(section_builder([":hammer_and_wrench: *action roll*"]))
+            action_content.extend(lst_to_content(skill_list[i_pre:i]))
+            i_pre = i
+        elif not negotiate_content and skill[0].startswith('医学'):
+            negotiate_content = [divider_builder()]
+            negotiate_content.append(section_builder([":money_with_wings: *negotiate roll*"]))
+            negotiate_content.extend(lst_to_content(skill_list[i_pre:i]))
+            i_pre = i
+        elif not knowledge_content and len(skill_list) == i+1:
+            knowledge_content = [divider_builder()]
+            knowledge_content.append(section_builder([":scales: *knowledge roll*"]))
+            knowledge_content.extend(lst_to_content(skill_list[i_pre:i]))
+
+    help_content = [
+        {
+            'blocks': json.dumps(block_content, ensure_ascii=False)
+        },
+        {
+            'blocks': json.dumps(battle_content, ensure_ascii=False)
+        },
+        {
+            'blocks': json.dumps(search_content, ensure_ascii=False)
+        },
+        {
+            'blocks': json.dumps(action_content, ensure_ascii=False)
+        },
+        {
+            'blocks': json.dumps(negotiate_content, ensure_ascii=False)
+        },
+        {
+            'blocks': json.dumps(knowledge_content, ensure_ascii=False)
+        }
+
+    ]
     return help_content, None
 
+
+def section_builder(lst_document):
+    section_content = []
+    for document in lst_document:
+        section_content.append({"type": "mrkdwn",
+                                "text": document})
+    section = {"type": "section",
+               "fields": section_content}
+    return section
+
+def divider_builder():
+    return {"type": "divider"}
