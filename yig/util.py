@@ -3,6 +3,7 @@ import json
 import boto3
 import imghdr
 import os
+import copy
 
 import yig.config
 
@@ -61,6 +62,11 @@ def post_result(token,
         "channel": channel_id,
         "response_type": response_type,
     }
+    def request(command_url, payload):
+        print(payload)
+        res = requests.post(command_url, params=payload)
+        print(res.text)
+
     if isinstance(return_content, str):
         normal_format = {
             "text": "<@{}>".format(user_id),
@@ -72,12 +78,15 @@ def post_result(token,
                 }])
         }
         payload.update(normal_format)
+        request(command_url, payload)
+    elif isinstance(return_content, list):
+        for one_payload in return_content:
+            use_payload = copy.copy(payload)
+            use_payload.update(one_payload)
+            request(command_url, use_payload)
     else:
         payload.update(return_content)
-        print(payload)
-
-    res = requests.post(command_url, params=payload)
-    print(res.text)
+        request(command_url, payload)
 
 
 def get_state_data(team_id, user_id):
