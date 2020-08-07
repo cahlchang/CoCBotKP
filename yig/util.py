@@ -4,6 +4,7 @@ import boto3
 import imghdr
 import os
 import copy
+from PIL import Image
 
 import yig.config
 
@@ -112,8 +113,7 @@ def set_state_data(team_id, user_id, state_data):
 
 
 def get_user_param(team_id, user_id, pc_id=None):
-    """get_user_params function is PC parameter from AWS S3
-    """
+    """get_user_params function is PC parameter from AWS S3"""
     key_pc_id = pc_id
     if pc_id is None:
         key_pc_id = get_state_data(team_id, user_id)["pc_id"]
@@ -121,19 +121,46 @@ def get_user_param(team_id, user_id, pc_id=None):
     return json.loads(read_user_data(team_id, user_id, f"{key_pc_id}.json").decode('utf-8'))
 
 
-def get_charaimage(user_id, pc_id):
+def write_pc_image(team_id, user_id, pc_id, url):
+    """Convert the image to a png image and write it in S3."""
+    image_origin_path = f"/tmp/origin_image"
+    image_converted_path = f"/tmp/{pc_id}.png"
+    image_key = f"{team_id}/{user_id}/{pc_id}.png"
+
+    response = requests.get(url, stream=True)
+    content_type = response.headers["content-type"]
+    if 'image' not in content_type:
+        exception = Exception("Content-Type: " + content_type)
+        raise exception
+
+    with open(image_origin_path, 'wb') as f:
+        f.write(response.content)
+
+    image = Image.open(image_origin_path)
+    image.save(image_converted_path)
+
+    s3_client = boto3.client('s3')
+    s3_client.upload_file(image_converted_path, yig.config.AWS_S3_BUCKET_NAME, image_key)
+
+    response = s3_client.put_object_tagging(
+        Bucket = yig.config.AWS_S3_BUCKET_NAME,
+        Key = image_key,
+        Tagging = {'TagSet': [ { 'Key': 'public-object', 'Value': 'yes' }, ]})
+    return image_key
+
+
+def get_charaimage(team_id, user_id, pc_id):
     """get chara image from pc_id"""
     s3_client = boto3.client('s3')
 
-    filename = "%s%s" % (pc_id, "_image")
-    key_image = "%s/%s" % (user_id, filename)
-    with open('/tmp/load_image', 'wb') as fp:
+    filename = f"{pc_id}.png"
+    key_image = "%s/%s/%s" % (team_id, user_id, filename)
+    print(key_image)
+    with open(f'/tmp/{filename}', 'wb') as fp:
         s3_client.download_fileobj(yig.config.AWS_S3_BUCKET_NAME, key_image, fp)
-    imagetype = imghdr.what('/tmp/load_image')
-    os.rename('/tmp/load_image', '/tmp/load_image.%s' % imagetype)
 
     image = None
-    with open('/tmp/load_image.%s' % imagetype, 'rb') as f:
+    with open(f'/tmp/{filename}', 'rb') as f:
         image = f.read()
 
     return image
@@ -167,5 +194,3 @@ def get_status_message(message_command, dict_param, dict_state):
         val_san = dict_param["現在SAN"]
 
     return f"【{name}】{message_command}\nHP {val_hp}/{c_hp}　　MP {val_mp}/{c_mp}　　DEX {dex}　　SAN {val_san}/{c_san}"
-
-#def get_charaimage_url(user_id, pc_id):
