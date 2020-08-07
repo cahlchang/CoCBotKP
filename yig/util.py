@@ -67,13 +67,11 @@ def post_result(token,
                 user_id,
                 channel_id,
                 return_content,
-                color,
-                response_type="in_channel"):
+                color):
     command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
         "token": token,
-        "channel": channel_id,
-        "response_type": response_type,
+        "channel": channel_id
     }
     def request(command_url, payload):
         print(payload)
