@@ -9,12 +9,25 @@ import json
 
 @listener("HELP")
 def help(bot):
-    """:question: *help message*`/cc help`"""
+    """:question: *help message*\n`/cc help`"""
+    channel = bot.user_id
+    help_content = help_content_builder(bot.team_id, bot.user_id, bot.get_listener())
+    return list(map(lambda c: dict(c, channel=channel), help_content)), None
+
+
+@listener("OPENHELP")
+def open_help(bot):
+    """:school: *open help message*\n`/cc openhelp`"""
+    help_content = help_content_builder(bot.team_id, bot.user_id, bot.get_listener())
+    return help_content, None
+
+
+def help_content_builder(team_id, user_id, listener):
     about = "This is the command to play Call of Cthulhu.\nEnjoy!"
     refer = "*<https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md|All Documents.>*\n\n"
 
     dict_function = {}
-    for list_function in bot.get_listener().values():
+    for list_function in listener.values():
         for datum in list_function:
             if datum["function"].__name__ == "roll_skill" or datum["function"].__name__.startswith("easteregg"):
                 continue
@@ -22,8 +35,8 @@ def help(bot):
 
     user_param = None
     try:
-        state_data = get_state_data(bot.team_id, bot.user_id)
-        user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+        state_data = get_state_data(team_id, user_id)
+        user_param = get_user_param(team_id, user_id, state_data["pc_id"])
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
             print('new_participant')
@@ -67,7 +80,7 @@ def help(bot):
             },
             "accessory": {
                 "type": "image",
-                "image_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+                "image_url": get_pc_icon_url(team_id, user_id, state_data["pc_id"]),
                 "alt_text": "image"
             }
         }
@@ -110,7 +123,7 @@ def help(bot):
     if user_param is not None:
         help_content.extend(user_roll_help_content(skill_list, user_param, state_data))
 
-    return help_content, None
+    return help_content
 
 
 def user_roll_help_content(skill_list, user_param, state_data):
