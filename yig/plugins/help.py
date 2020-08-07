@@ -1,7 +1,7 @@
 import botocore
 
 from yig.bot import listener
-from yig.util import get_user_param, get_state_data, get_pc_icon_url
+from yig.util import get_user_param, get_state_data, get_pc_icon_url, get_now_status
 
 import yig.config
 import json
@@ -52,15 +52,18 @@ def help(bot):
     if user_param is not None:
         block_content.append(divider_builder())
         pc_name = user_param['name']
-        now_hp = user_param['HP']
-        now_mp = user_param['MP']
-        now_san = user_param['現在SAN']
+        max_hp = user_param['HP']
+        now_hp = get_now_status('HP', user_param, state_data)
+        max_mp = user_param['MP']
+        now_mp = get_now_status('MP', user_param, state_data)
+        max_san = user_param['現在SAN']
+        now_san = get_now_status('SAN', user_param, state_data, '現在SAN')
         db = user_param['DB']
         user_content = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"*PC INFO*\n\n*Name:* {pc_name}\n*HP:*  {now_hp}/{now_hp}  *MP:* {now_mp}/{now_mp}  *SAN:* {now_san}/{now_san}  *DB:*  {db}"
+                "text": f"*PC INFO*\n\n*Name:* {pc_name}\n*HP:*  {now_hp}/{max_hp}  *MP:* {now_mp}/{max_mp}  *SAN:* {now_san}/{max_san}  *DB:*  {db}"
             },
             "accessory": {
                 "type": "image",

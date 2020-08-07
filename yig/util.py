@@ -166,6 +166,14 @@ def get_charaimage(team_id, user_id, pc_id):
     return image
 
 
+def get_now_status(status_name, user_param, state_data, status_name_alias=None):
+    current_status = user_param[status_name] if status_name_alias is None else user_param[status_name_alias]
+
+    if status_name in state_data:
+        current_status = int(current_status) + int(state_data[status_name])
+    return current_status
+
+
 # todo いい感じにする
 def get_status_message(message_command, dict_param, dict_state):
     name = dict_param['name']
