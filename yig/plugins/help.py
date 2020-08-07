@@ -1,3 +1,5 @@
+import botocore
+
 from yig.bot import listener
 from yig.util import get_user_param, get_state_data, get_pc_icon_url
 
@@ -7,9 +9,7 @@ import json
 
 @listener("HELP")
 def help(bot):
-    """:question: *help message*
-`/cc help`
-    """
+    """:question: *help message*`/cc help`"""
     about = "This is the command to play Call of Cthulhu.\nEnjoy!"
     refer = "*<https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md|All Documents.>*\n\n"
 
@@ -20,8 +20,18 @@ def help(bot):
                 continue
             dict_function[datum["function"].__name__] = datum["function"].__doc__
 
-    state_data = get_state_data(bot.team_id, bot.user_id)
-    user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+    user_param = None
+    try:
+        state_data = get_state_data(bot.team_id, bot.user_id)
+        user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            print('new_participant')
+        else:
+            raise Exception(e)
+    except Exception as e:
+        raise Exception(e)
+
     block_content = [
             {
                 "type": "header",
@@ -36,13 +46,11 @@ def help(bot):
                     "type": "mrkdwn",
                     "text": refer
                 }
-            },
-            {
-                "type": "divider"
             }]
 
     skill_list = []
     if user_param is not None:
+        block_content.append(divider_builder())
         pc_name = user_param['name']
         now_hp = user_param['HP']
         now_mp = user_param['MP']
@@ -95,8 +103,15 @@ def help(bot):
     block_content.append(divider_builder())
     block_content.append(section_builder(dict_function.values()))
 
-    battle_content = search_content = action_content = negotiate_content = knowledge_content = None
+    help_content = [{'blocks': json.dumps(block_content, ensure_ascii=False)}]
+    if user_param is not None:
+        help_content.extend(user_roll_help_content(skill_list, user_param, state_data))
 
+    return help_content, None
+
+
+def user_roll_help_content(skill_list, user_param, state_data):
+    battle_content = search_content = action_content = negotiate_content = knowledge_content = None
     def lst_to_content(lst_content):
         lst = []
         i_pre = 0
@@ -139,29 +154,11 @@ def help(bot):
             knowledge_content.append(section_builder([":scales: *knowledge roll*"]))
             knowledge_content.extend(lst_to_content(skill_list[i_pre:i]))
 
-    help_content = [
-        {
-            'blocks': json.dumps(block_content, ensure_ascii=False)
-        },
-        {
-            'blocks': json.dumps(battle_content, ensure_ascii=False)
-        },
-        {
-            'blocks': json.dumps(search_content, ensure_ascii=False)
-        },
-        {
-            'blocks': json.dumps(action_content, ensure_ascii=False)
-        },
-        {
-            'blocks': json.dumps(negotiate_content, ensure_ascii=False)
-        },
-        {
-            'blocks': json.dumps(knowledge_content, ensure_ascii=False)
-        }
+    content = []
 
-    ]
-    return help_content, None
-
+    for each_content in [battle_content, search_content, action_content, negotiate_content, knowledge_content]:
+        content.append({'blocks': json.dumps(each_content, ensure_ascii=False)})
+    return content
 
 def section_builder(lst_document):
     section_content = []
