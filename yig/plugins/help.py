@@ -123,7 +123,6 @@ def user_roll_help_content(skill_list, user_param, state_data):
             skill_name = content[0]
             skill_targ = content[1]
             lst_message.append(f"*{skill_name}* (target point *{skill_targ}*)\n`/cc {skill_name} [+|-|*|/][number]`")
-            print(i, len(lst_content))
             if i > 0 and i % 9 == 0 or len(lst_content) == i + 1:
                 lst.append(section_builder(lst_message))
                 lst_message = []
