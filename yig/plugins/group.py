@@ -46,7 +46,7 @@ def session_leave(bot):
         return "%s\nLEAVEコマンドが不正です" % bot.message, color
 
 
-@listener("kp+.*[order|sort].*", RE_MATCH_FLAG)
+@listener("kp.(order|sort).*", RE_MATCH_FLAG)
 def session_member_order(bot):
     """:telescope:　*kp order member*\n`/cc order [PARAM]`\n`/cc sort [PARAM]`"""
     target_status = analyze_kp_order_command(bot.key)
