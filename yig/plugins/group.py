@@ -4,6 +4,7 @@ from yig.util import get_state_data, set_state_data, get_user_param, write_user_
 import yig.config
 import re
 import json
+import random
 
 KP_FILE_PATH = "kp.json"
 
@@ -61,6 +62,17 @@ def session_member_order(bot):
     return msg, yig.config.COLOR_ATTENTION
 
 
+@listener("kp.select", RE_MATCH_FLAG)
+def session_select_user(bot):
+    """:point_left: *kp select member*\n`/cc select`"""
+    body = read_user_data(bot.team_id, bot.user_id, KP_FILE_PATH)
+    dict_kp = json.loads(body)
+    lst_user = dict_kp["lst_user"]
+    user_target = random.choices(lst_user)
+    user_target_param = get_user_param(bot.team_id, user_target[0][0], user_target[0][1])
+    return user_target_param["name"], yig.config.COLOR_ATTENTION
+
+
 def set_start_session(team_id, user_id):
     """
     set_start_session function is starting game session.
@@ -83,7 +95,6 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_id):
 
 def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
-    print(body)
     dict_kp = json.loads(body)
     lst_reduce = []
     lst = [lst_joined for lst_joined in dict_kp["lst_user"] if lst_joined[0] != user_id]
