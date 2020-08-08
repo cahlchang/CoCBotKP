@@ -67,13 +67,11 @@ def post_result(token,
                 user_id,
                 channel_id,
                 return_content,
-                color,
-                response_type="in_channel"):
+                color):
     command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
         "token": token,
-        "channel": channel_id,
-        "response_type": response_type,
+        "channel": channel_id
     }
     def request(command_url, payload):
         print(payload)
@@ -164,6 +162,14 @@ def get_charaimage(team_id, user_id, pc_id):
         image = f.read()
 
     return image
+
+
+def get_now_status(status_name, user_param, state_data, status_name_alias=None):
+    current_status = user_param[status_name] if status_name_alias is None else user_param[status_name_alias]
+
+    if status_name in state_data:
+        current_status = int(current_status) + int(state_data[status_name])
+    return current_status
 
 
 # todo いい感じにする
