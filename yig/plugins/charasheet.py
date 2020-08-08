@@ -14,11 +14,13 @@ def init_charasheet_with_vampire(bot):
 `/cc init YOUR_CHARACTER_SHEET_URL`
     """
     matcher = re.match(r".*<(https.*)>", bot.message)
-    url = matcher.group(1) + ".json"
+    url_plane = matcher.group(1)
+    url = f"{url_plane}.json"
     response = requests.get(url)
 
     request_json = json.loads(response.text)
     param_json = format_param_json(bot, request_json)
+    param_json["url"] = url_plane
 
     pc_id = param_json["pc_id"]
     key = f"{pc_id}.json"
@@ -160,13 +162,13 @@ def format_param_json(bot, request_json):
             lst.append(request_json[f"{key}P"][idx])
             return_data[param] = [i if i != "" else 0 for i in lst]
         return return_data
-    
+
     param_json.update(replace_role_param("TBA", tba_replace))
     param_json.update(replace_role_param("TFA", tfa_replace))
     param_json.update(replace_role_param("TAA", taa_replace))
     param_json.update(replace_role_param("TCA", tca_replace))
     param_json.update(replace_role_param("TKA", tka_replace))
-    
+
     def add_spec_param(spec_param, name):
         param = request_json[spec_param]
         return {f"{name}（{param}）": param_json[name]}
@@ -185,5 +187,17 @@ def format_param_json(bot, request_json):
     param_json["pc_id"] = request_json["data_id"]
     param_json["DB"] = request_json["dmg_bonus"]
     param_json["memo"] = request_json["pc_making_memo"]
+    param_json["job"] = request_json["shuzoku"]
+    param_json["age"] = request_json["age"]
+    param_json["arms_name"] = request_json["arms_name"]
+    param_json["arms_hit"] = request_json["arms_hit"]
+    param_json["arms_damage"] = request_json["arms_damage"]
+    param_json["arms_attack_count"] = request_json["arms_attack_count"]
+    param_json["item_name"] = request_json["item_name"]
+    param_json["item_tanka"] = request_json["item_tanka"]
+    param_json["item_num"] = request_json["item_num"]
+    param_json["item_price"] = request_json["item_price"]
+    param_json["item_memo"] = request_json["item_memo"]
+    param_json["money"] = request_json["money"]
 
     return param_json
