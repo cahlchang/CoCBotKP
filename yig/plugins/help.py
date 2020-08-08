@@ -164,7 +164,7 @@ def user_roll_help_content(skill_list, user_param, state_data):
             negotiate_content.append(section_builder([":money_with_wings: *negotiate roll*"]))
             negotiate_content.extend(lst_to_content(skill_list[i_pre:i]))
             i_pre = i
-        elif not knowledge_content and len(skill_list) == i+1:
+        elif not knowledge_content and skill[0].startswith('arms_name'):
             knowledge_content = [divider_builder()]
             knowledge_content.append(section_builder([":scales: *knowledge roll*"]))
             knowledge_content.extend(lst_to_content(skill_list[i_pre:i]))
