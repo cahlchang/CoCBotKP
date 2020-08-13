@@ -55,7 +55,7 @@ def post_command(message,
 
     payload = {
         "username": data_user["profile"]["display_name"],
-        "icon_url": data_user["profile"]["image_1024"],
+        "icon_url": data_user["profile"]["image_256"],
         "channel": channel_id,
         "text": f"/cc {message}"
     }
@@ -64,7 +64,7 @@ def post_command(message,
         set_payload["token"] = token
     else:
         set_payload = json.dumps(payload)
-    print(payload)
+    print(set_payload)
     res = requests.post(command_url, params=set_payload)
     print(res.text)
     print(res.url)
