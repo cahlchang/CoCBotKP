@@ -61,6 +61,7 @@ def post_command(message,
     }
     if response_url == "no":
         payload["token"] = token
+    print(payload)
     res = requests.post(command_url, params=payload)
     print(res.text)
     print(res.url)
