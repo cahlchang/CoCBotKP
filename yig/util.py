@@ -45,10 +45,11 @@ def get_pc_icon_url(team_id, user_id, pc_id):
 
 def post_command(message,
                  token,
+                 response_url,
                  data_user,
                  channel_id,
                  is_replace_plus=False):
-    command_url = "https://slack.com/api/chat.postMessage?"
+    command_url = "https://slack.com/api/chat.postMessage?" if response_url is not None else response_url
     if is_replace_plus:
         message = message.replace("+", " ")
 

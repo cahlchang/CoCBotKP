@@ -38,6 +38,7 @@ def hide_roll(bot):
     """:love_letter: *hide roll*\n`/cc hide [PARAM|ANY_COMMENT]` """
     post_command("hide ？？？",
                  bot.token,
+                 bot.response_url,
                  bot.data_user,
                  bot.channel_id)
 

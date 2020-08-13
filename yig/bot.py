@@ -100,6 +100,7 @@ class Bot(object):
         def process():
             post_command(self.message,
                          self.token,
+                         self.response_url,
                          self.data_user,
                          self.channel_id)
             return_content, color = command_datum["function"](self)
