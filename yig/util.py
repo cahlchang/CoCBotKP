@@ -64,10 +64,11 @@ def post_command(message,
         set_payload["token"] = token
         res = requests.post(command_url, params=set_payload)
     else:
+        payload["response_type"] = "in_channel"
+        payload["as_user"] = "false"
         set_payload = json.dumps(payload)
         res = requests.post(command_url, data=set_payload)
     print(set_payload)
-    
     print(res.text)
     print(res.url)
 
