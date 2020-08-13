@@ -58,7 +58,6 @@ def post_command(message,
         "username": data_user["profile"]["display_name"],
         "icon_url": data_user["profile"]["image_1024"],
         "channel": channel_id,
-        "as_user": False,
         "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)

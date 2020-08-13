@@ -61,17 +61,12 @@ def bootstrap(event: dict, _context) -> str:
                    message,
                    channel_id,
                    team_id)
-
-    is_bot_command = bot.dispatch()
-
-    if is_bot_command:
-        return None
-    return None
+    bot.dispatch()
 
 
 def lambda_handler(event: dict, _context) -> str:
     try:
-        return bootstrap(event, _context)
+        bootstrap(event, _context)
     except Exception as e:
         channel_id = 'CNCM21Z9T'
         payload = {
