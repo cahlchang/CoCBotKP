@@ -55,7 +55,6 @@ def post_command(message,
         message = message.replace("+", " ")
 
     payload = {
-        "token": token,
         "username": data_user["profile"]["display_name"],
         "icon_url": data_user["profile"]["image_1024"],
         "channel": channel_id,
@@ -73,7 +72,6 @@ def post_result(token,
                 return_content,
                 color):
     payload = {
-        "token": token,
         "channel": channel_id
     }
     command_url_for_list = "https://slack.com/api/chat.postMessage?"
