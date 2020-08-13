@@ -58,10 +58,12 @@ def post_command(message,
         "username": data_user["profile"]["display_name"],
         "icon_url": data_user["profile"]["image_1024"],
         "channel": channel_id,
+        "as_user": False,
         "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)
     print(res.text)
+    print(res.url)
 
 
 def post_result(token,
@@ -78,6 +80,7 @@ def post_result(token,
         print(payload)
         res = requests.post(command_url, params=payload)
         print(res.text)
+        print(res.url)
 
     if isinstance(return_content, str):
         normal_format = {
