@@ -49,6 +49,7 @@ def post_command(message,
                  data_user,
                  channel_id,
                  is_replace_plus=False):
+    print(">> "+ response_url)
     command_url = "https://slack.com/api/chat.postMessage?" if response_url is not None else response_url
     if is_replace_plus:
         message = message.replace("+", " ")
