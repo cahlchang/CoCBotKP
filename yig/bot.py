@@ -106,6 +106,7 @@ class Bot(object):
                          self.channel_id)
             return_content, color = command_datum["function"](self)
             post_result(self.token,
+                        self.response_url,
                         self.user_id,
                         self.channel_id,
                         return_content,
@@ -116,6 +117,7 @@ class Bot(object):
             if re.match(command_datum["command"], self.message, flags=re.IGNORECASE):
                 return_content, color = command_datum["function"](self)
                 post_result(self.token,
+                            self.response_url,
                             self.user_id,
                             self.channel_id,
                             return_content,

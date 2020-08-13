@@ -102,6 +102,7 @@ def hide_roll(bot):
             ])
         }
         post_result(bot.token,
+                    "https://slack.com/api/chat.postMessage?",
                     user_id,
                     channel,
                     payload,

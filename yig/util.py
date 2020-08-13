@@ -49,8 +49,8 @@ def post_command(message,
                  data_user,
                  channel_id,
                  is_replace_plus=False):
-    print(">> "+ response_url)
-    command_url = "https://slack.com/api/chat.postMessage?" if response_url is not None else response_url
+
+    command_url = response_url
     if is_replace_plus:
         message = message.replace("+", " ")
 
@@ -67,15 +67,16 @@ def post_command(message,
 
 
 def post_result(token,
+                command_url,
                 user_id,
                 channel_id,
                 return_content,
                 color):
-    command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
         "token": token,
         "channel": channel_id
     }
+    command_url_for_list = "https://slack.com/api/chat.postMessage?"
     def request(command_url, payload):
         print(payload)
         res = requests.post(command_url, params=payload)
