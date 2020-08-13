@@ -50,25 +50,15 @@ def bootstrap(event: dict, _context) -> str:
     message = urllib.parse.unquote_plus(evt_slack["text"])
     if message.split(' ') and message.split(' ')[-1].isnumeric():
         message = ' '.join(message.split(' ')[:-1]) + "+" + message.split(' ')[-1]
-
     channel_id = urllib.parse.unquote(evt_slack["channel_id"])
     team_id = urllib.parse.unquote(evt_slack["team_id"])
 
-    token = bot.get_token(team_id)
-    user_url = "https://slack.com/api/users.profile.get"
-    payload = { "token": token,
-                "user": user_id}
-
-    res = requests.get(user_url, params=payload, headers={
-        'Content-Type': 'application/json'})
-    data_user = json.loads(res.text)
     key = format_as_command(message)
 
     bot.init_param(user_id,
                    response_url,
                    key,
                    message,
-                   data_user,
                    channel_id,
                    team_id)
 

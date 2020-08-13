@@ -44,16 +44,21 @@ class Bot(object):
                    response_url,
                    key,
                    message,
-                   data_user,
                    channel_id,
                    team_id):
         self.user_id = user_id
         self.response_url = response_url
         self.key = key
         self.message = message
-        self.data_user = data_user
         self.channel_id = channel_id
         self.team_id = team_id
+
+        payload = {"token": self.get_token(self.team_id),
+                   "user": self.user_id}
+        res = requests.get("https://slack.com/api/users.profile.get",
+                           params=payload,
+                           headers={'Content-Type': 'application/json'})
+        self.data_user = json.loads(res.text)
 
     def init_plugins(self):
         module_list = glob('yig/plugins/*.py')
