@@ -61,7 +61,7 @@ def post_command(message,
     }
     set_payload = payload
     if response_url == "no":
-        payload["token"] = token
+        set_payload["token"] = token
     else:
         set_payload = json.dumps(payload)
     print(payload)
