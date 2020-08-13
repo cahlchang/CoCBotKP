@@ -59,10 +59,13 @@ def post_command(message,
         "channel": channel_id,
         "text": f"/cc {message}"
     }
+    set_payload = payload
     if response_url == "no":
         payload["token"] = token
+    else:
+        set_payload = json.dumps(payload)
     print(payload)
-    res = requests.post(command_url, params=payload)
+    res = requests.post(command_url, params=set_payload)
     print(res.text)
     print(res.url)
 
