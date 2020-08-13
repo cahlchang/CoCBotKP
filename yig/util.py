@@ -45,23 +45,25 @@ def get_pc_icon_url(team_id, user_id, pc_id):
 
 def post_command(message,
                  token,
+                 response_url,
                  data_user,
                  channel_id,
                  is_replace_plus=False):
-    command_url = "https://slack.com/api/chat.postMessage?"
+    command_url = "https://slack.com/api/chat.postMessage?" if response_url == "no" else response_url
     if is_replace_plus:
         message = message.replace("+", " ")
 
     payload = {
-        "token": token,
         "username": data_user["profile"]["display_name"],
         "icon_url": data_user["profile"]["image_1024"],
         "channel": channel_id,
         "text": f"/cc {message}"
     }
-    res = requests.get(command_url, params=payload)
+    if response_url == "no":
+        payload["token"] = token
+    res = requests.post(command_url, params=payload)
     print(res.text)
-
+    print(res.url)
 
 def post_result(token,
                 user_id,
