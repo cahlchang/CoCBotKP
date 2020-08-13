@@ -55,7 +55,7 @@ def post_command(message,
 
     payload = {
         "username": data_user["profile"]["display_name"],
-        "icon_url": data_user["profile"]["image_256"],
+        "icon_url": data_user["profile"]["image_512"],
         "channel": channel_id,
         "text": f"/cc {message}"
     }
