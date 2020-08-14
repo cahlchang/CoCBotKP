@@ -1,7 +1,7 @@
 import botocore
 
 from yig.bot import listener
-from yig.util import get_user_param, get_state_data, get_pc_icon_url, get_now_status
+from yig.util import get_user_param, get_state_data, get_pc_icon_url, get_now_status, section_builder, divider_builder
 
 import yig.config
 import json
@@ -175,14 +175,3 @@ def user_roll_help_content(skill_list, user_param, state_data):
         content.append({'blocks': json.dumps(each_content, ensure_ascii=False)})
     return content
 
-def section_builder(lst_document):
-    section_content = []
-    for document in lst_document:
-        section_content.append({"type": "mrkdwn",
-                                "text": document})
-    section = {"type": "section",
-               "fields": section_content}
-    return section
-
-def divider_builder():
-    return {"type": "divider"}

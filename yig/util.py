@@ -181,6 +181,21 @@ def get_basic_status(user_param, state_data):
     db = user_param['DB']
     return now_hp, max_hp, now_mp, max_mp, now_san, max_san, db
 
+
+def section_builder(lst_document):
+    section_content = []
+    for document in lst_document:
+        section_content.append({"type": "mrkdwn",
+                                "text": document})
+    section = {"type": "section",
+               "fields": section_content}
+    return section
+
+
+def divider_builder():
+    return {"type": "divider"}
+
+
 # todo いい感じにする
 def get_status_message(message_command, dict_param, dict_state):
     name = dict_param['name']
