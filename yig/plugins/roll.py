@@ -135,14 +135,10 @@ def roll_skill(bot):
         "attachments": json.dumps([{
             "thumb_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
             "color": color,
-            "footer": "<%s|%s>" % (state_data["url"],user_param["name"]),
+            "footer": "<%s|%s>\nHP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (user_param["url"], user_param["name"], now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
             "fields": [
                 {
                     "value": "<@%s>" % (bot.user_id),
-                    "type": "mrkdwn"
-                },
-                {
-                    "value": "HP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
                     "type": "mrkdwn"
                 },
                 {
