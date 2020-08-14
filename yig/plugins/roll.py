@@ -6,7 +6,7 @@ from typing import List, Tuple
 from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
-from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result
+from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_pc_icon_url, get_basic_status
 import yig.config
 
 
@@ -44,51 +44,36 @@ def hide_roll(bot):
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
         dict_state = get_state_data(bot.team_id, bot.user_id)
-        param = get_user_param(bot.team_id, bot.user_id, dict_state["pc_id"])
-        color_hide = "gray"
+        user_param = get_user_param(bot.team_id, bot.user_id, dict_state["pc_id"])
         channel = '@' + dict_state["kp_id"]
         key = bot.key
         text = ""
         m = re.match(r"HIDE\s(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
-        if m is None:
-            text = "role not found"
-            post_message = f"技能名が解釈できません。\n{key}"
-        elif m.group(1) and m.group(1) not in param:
-            text = "role miss"
-            name_role = m.group(1)
-            post_message = f"この技能は所持していません。\n{key}"
+        if m.group(1) not in user_param.keys():
+            text = f"<@{user_id}> try talk"
+            post_message = f"{key}"
+            color = "gray"
         else:
-            name_role = m.group(1)
-            n_targ = 0
-            msg_rev = "+0"
-            if type(param[name_role]) == list:
-                n_targ = int(param[name_role][5])
+            hide_message = "".join(['' if v is None else v for v in m.groups()])
+            roll, operant, num_arg = analysis_roll_and_calculation(hide_message)
+
+            alias_roll = {"こぶし": "こぶし（パンチ）"}
+            if roll in alias_roll.keys():
+                roll = alias_roll[roll]
+
+            data = user_param[roll]
+
+            num_rand = int(random.randint(1, 100))
+            if roll.upper() in yig.config.LST_USER_STATUS_NAME:
+                num = int(data)
             else:
-                n_targ = int(param[name_role])
+                num = int(data[-1])
 
-            msg_disp = n_targ
+            num_targ = calculation(num, operant, num_arg)
+            result, color = judge_1d100(num_targ, num_rand)
 
-            if name_role in dict_state:
-                n_targ += dict_state[name_role]
-            if m.group(2) is not None:
-                if m.group(2) == "+":
-                    n_targ += int(m.group(3))
-                    msg_rev = "+" + str(m.group(3))
-                elif m.group(2) == "-":
-                    n_targ -= int(m.group(3))
-                    msg_rev = "-" + str(m.group(3))
-                elif m.group(2) == "*":
-                    n_targ *= int(m.group(3))
-                    msg_rev = "*" + str(m.group(3))
-                elif m.group(2) == "/":
-                    n_targ /= int(m.group(3))
-                    msg_rev = "/" + str(m.group(3))
-
-            num = int(random.randint(1, 100))
-
-            str_result, color_hide = judge_1d100(int(n_targ), num)
-            post_message = f"{str_result} 【{name_role}】 {num}/{n_targ} ({msg_disp}{msg_rev})"
-            text = f"<@{user_id}> try {name_role}"
+            text = f"<@{user_id}> try {roll}"
+            post_message = f"{result} 【{roll}】 {num_rand}/{num_targ} ({num}{operant}{num_arg})"
 
         payload = {
             'text': text,
@@ -96,7 +81,7 @@ def hide_roll(bot):
                 {
                     "text": post_message,
                     "type": "mrkdwn",
-                    "color": "gray"
+                    "color": color
                 }
             ])
         }
@@ -110,7 +95,7 @@ def hide_roll(bot):
         future_hide.result()
 
     return_payload = {
-        "text": "結果は公開されず、KPが描写だけ行います",
+        "text": "",
         "attachments": json.dumps([
             {
                 "text": "【シークレットダイス】？？？",
@@ -124,55 +109,49 @@ def hide_roll(bot):
 
 @listener("roll_skill", LAST_EVALUATION_FLAG)
 def roll_skill(bot):
-    user_param = get_user_param(bot.team_id, bot.user_id)
-
-    lst_trigger_status = ["知識",
-                          "アイデア",
-                          "幸運",
-                          "STR",
-                          "CON",
-                          "POW",
-                          "DEX",
-                          "APP",
-                          "SIZ",
-                          "INT",
-                          "EDU",
-                          "HP",
-                          "MP"]
-
-    proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
-
-    result_parse = re.match(proc, bot.message)
-    is_correction = False
-    msg_correction = "+0"
-    if result_parse:
-        bot.message = result_parse.group(1)
-        operant = result_parse.group(2)
-        args = result_parse.group(3)
-        msg_correction = operant + args
-        is_correction = True
+    state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+    roll, operant, num_arg = analysis_roll_and_calculation(bot.message)
 
     alias_roll = {"こぶし": "こぶし（パンチ）"}
+    if roll in alias_roll.keys():
+        roll = alias_roll[roll]
 
-    if bot.message in alias_roll.keys():
-        bot.message = alias_roll[bot.message]
+    if roll not in user_param:
+        return f"{roll} その技能は覚えていません", "gray"
+    data = user_param[roll]
 
-    data = user_param[bot.message]
-
-    num = int(random.randint(1, 100))
-    if "現在SAN" == bot.message or bot.message.upper() in lst_trigger_status:
-        num_targ = data
+    num_rand = int(random.randint(1, 100))
+    if roll.upper() in yig.config.LST_USER_STATUS_NAME:
+        num = int(data)
     else:
-        num_targ = data[-1]
+        num = int(data[-1])
 
-    msg_num_targ = num_targ
-    if is_correction:
-        num_targ = eval('{}{}{}'.format(num_targ, operant, args))
-        num_targ = math.ceil(num_targ)
+    num_targ = calculation(num, operant, num_arg)
+    result, color = judge_1d100(num_targ, num_rand)
+    now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
-    str_result, color = judge_1d100(int(num_targ), num)
-    message = bot.message
-    return f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})", color
+    payload = {
+        "attachments": json.dumps([{
+            "thumb_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+            "color": color,
+            "footer": "<%s|%s>" % (state_data["url"],user_param["name"]),
+            "fields": [
+                {
+                    "value": "<@%s>" % (bot.user_id),
+                    "type": "mrkdwn"
+                },
+                {
+                    "value": "HP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
+                    "type": "mrkdwn"
+                },
+                {
+                    "title": f"*{result}* 【{roll}】 *{num_rand}*/{num_targ} ({num}{operant}{num_arg})",
+                    "type": "mrkdwn"
+                }
+            ]
+        }])}
+    return payload, None
 
 
 def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
@@ -326,7 +305,7 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
     return str_message, str_detail, sum_result
 
 def judge_1d100(target: int, dice: int):
-    """"
+    """
     Judge 1d100 dice result, and return text and color for message.
     Result is critical, success, failure or fumble.
     Arguments:
@@ -344,3 +323,48 @@ def judge_1d100(target: int, dice: int):
     if dice >= 96:
         return "ファンブル", yig.config.COLOR_FUMBLE
     return "失敗", yig.config.COLOR_FAILURE
+
+
+def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int]:
+    """
+    Based on the given string, we analyze the object of the die
+    and the supplementary formula.
+    Arguments:
+        message {str} -- target string (ex. DEX*5)
+    Returns:
+        roll {str}
+        operant {str}
+        number_argument {int}
+    """
+    proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
+    result_parse = re.match(proc, message)
+    operant = "+"
+    number = 0
+    if result_parse:
+        roll = result_parse.group(1)
+        operant = result_parse.group(2)
+        number = int(result_parse.group(3))
+    else:
+        roll = message
+
+    return roll, operant, number
+
+
+def calculation(number_x:int, operant:str, number_y:int) -> int:
+    """
+    Perform a calculation from two values.
+    Arguments:
+        number_x {int} -- target int (ex. 30)
+        operant  {str} -- target str (ex. +)
+        number_y {int} -- target int (ex. 20)
+    Returns:
+        result_number {int}
+    """
+    if operant == '+':
+        return number_x + number_y
+    elif operant == '-':
+        return number_x - number_y
+    elif operant == '*':
+        return number_x * number_y
+    elif operant == '/':
+        return math.ceil(number_x / number_y)

@@ -83,7 +83,7 @@ def post_result(token,
             "text": "<@{}>".format(user_id),
             "attachments": json.dumps([
                 {
-                "text": return_content,
+                    "text": return_content,
                     "type": "mrkdwn",
                     "color": color
                 }])
@@ -171,6 +171,15 @@ def get_now_status(status_name, user_param, state_data, status_name_alias=None):
         current_status = int(current_status) + int(state_data[status_name])
     return current_status
 
+def get_basic_status(user_param, state_data):
+    now_hp = get_now_status('HP', user_param, state_data)
+    max_hp = user_param['HP']
+    now_mp = get_now_status('MP', user_param, state_data)
+    max_mp = user_param['MP']
+    now_san = get_now_status('SAN', user_param, state_data, '現在SAN')
+    max_san = user_param['現在SAN']
+    db = user_param['DB']
+    return now_hp, max_hp, now_mp, max_mp, now_san, max_san, db
 
 # todo いい感じにする
 def get_status_message(message_command, dict_param, dict_state):
