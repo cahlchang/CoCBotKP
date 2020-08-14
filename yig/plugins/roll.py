@@ -137,7 +137,7 @@ def roll_skill(bot):
     data = user_param[roll]
 
     num_rand = int(random.randint(1, 100))
-    if "現在SAN" == roll or roll.upper() in yig.config.LST_USER_STATUS_NAME:
+    if roll.upper() in yig.config.LST_USER_STATUS_NAME:
         num = int(data)
     else:
         num = int(data[-1])
