@@ -3,7 +3,7 @@ import re
 import json
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util import get_state_data, write_user_data, get_status_message
+from yig.util import get_state_data, write_user_data, get_status_message, section_builder, divider_builder, get_basic_status, get_pc_icon_url, get_user_param
 
 import yig.config
 
@@ -19,24 +19,46 @@ def init_charasheet_with_vampire(bot):
     response = requests.get(url)
 
     request_json = json.loads(response.text)
-    param_json = format_param_json(bot, request_json)
-    param_json["url"] = url_plane
+    user_param = format_param_json(bot, request_json)
+    user_param["url"] = url_plane
 
-    pc_id = param_json["pc_id"]
+    pc_id = user_param["pc_id"]
     key = f"{pc_id}.json"
 
-    write_pc_json = json.dumps(param_json, ensure_ascii=False).encode('utf-8')
+    write_pc_json = json.dumps(user_param, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, key, write_pc_json)
 
     dict_state = {
         "url": url,
-        "pc_id": "%s" % param_json["pc_id"]
+        "pc_id": "%s" % user_param["pc_id"]
     }
 
     write_state_json = json.dumps(dict_state, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
 
-    return get_status_message("INIT CHARA", param_json, dict_state), yig.config.COLOR_ATTENTION
+    now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, dict_state)
+    pc_name = user_param["name"]
+    dex = user_param["DEX"]
+    block_content = []
+    block_content.append(divider_builder())
+    image_url = get_pc_icon_url(bot.team_id, bot.user_id, pc_id)
+    user_content = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": f"*INIT CHARACTER*\n\n*Name:* <{image_url}|{pc_name}>\n*HP:* {now_hp}/{max_hp} *MP:* {now_mp}/{max_mp} *SAN:* {now_san}/{max_san}\n*DEX:* {dex} *DB:* {db}"
+        },
+        "accessory": {
+            "type": "image",
+            "image_url": image_url,
+            "alt_text": "image"
+        }
+    }
+    block_content.append(user_content)
+    block_content.append(divider_builder())
+
+    payload = [{'blocks': json.dumps(block_content, ensure_ascii=False)}]
+    return payload, None
 
 
 @listener(('U', 'UPDATE'), KEY_IN_FLAG)
