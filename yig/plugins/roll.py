@@ -132,6 +132,8 @@ def roll_skill(bot):
     if roll in alias_roll.keys():
         roll = alias_roll[roll]
 
+    if roll not in user_param:
+        return f"{roll} その技能は覚えていません", "gray"
     data = user_param[roll]
 
     num_rand = int(random.randint(1, 100))
