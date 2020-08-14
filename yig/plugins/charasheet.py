@@ -46,11 +46,13 @@ def update_charasheet_with_vampire(bot):
 `/cc update`
     """
     state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param_old = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+
     url = state_data["url"]
     res = requests.get(url)
     request_json = json.loads(res.text)
     param_json = format_param_json(bot, request_json)
-
+    param_json["url"] = user_param_old["url"]
     pc_id = param_json["pc_id"]
     key = f"{pc_id}.json"
 
