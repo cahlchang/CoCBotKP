@@ -6,7 +6,7 @@ from typing import List, Tuple
 from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
-from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result
+from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_pc_icon_url, get_basic_status
 import yig.config
 
 
@@ -109,7 +109,8 @@ def hide_roll(bot):
 
 @listener("roll_skill", LAST_EVALUATION_FLAG)
 def roll_skill(bot):
-    user_param = get_user_param(bot.team_id, bot.user_id)
+    state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
     roll, operant, num_arg = analysis_roll_and_calculation(bot.message)
 
     alias_roll = {"こぶし": "こぶし（パンチ）"}
@@ -128,7 +129,29 @@ def roll_skill(bot):
 
     num_targ = calculation(num, operant, num_arg)
     result, color = judge_1d100(num_targ, num_rand)
-    return f"{result} 【{roll}】 {num_rand}/{num_targ} ({num}{operant}{num_arg})", color
+    now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
+
+    payload = {
+        "attachments": json.dumps([{
+            "thumb_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+            "color": color,
+            "footer": "<%s|%s>" % (state_data["url"],user_param["name"]),
+            "fields": [
+                {
+                    "value": "<@%s>" % (bot.user_id),
+                    "type": "mrkdwn"
+                },
+                {
+                    "value": "HP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
+                    "type": "mrkdwn"
+                },
+                {
+                    "title": f"*{result}* 【{roll}】 *{num_rand}*/{num_targ} ({num}{operant}{num_arg})",
+                    "type": "mrkdwn"
+                }
+            ]
+        }])}
+    return payload, None
 
 
 def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
