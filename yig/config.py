@@ -7,3 +7,18 @@ COLOR_SUCCESS = '#36a64f'
 COLOR_FAILURE = '#E01E5A'
 COLOR_FUMBLE = '#3F0F3F'
 COLOR_ATTENTION = '#80D2DE'
+
+LST_USER_STATUS_NAME = ["知識",
+                        "アイデア",
+                        "幸運",
+                        "STR",
+                        "CON",
+                        "POW",
+                        "DEX",
+                        "APP",
+                        "SIZ",
+                        "INT",
+                        "EDU",
+                        "HP",
+                        "MP"]
+

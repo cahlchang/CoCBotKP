@@ -125,54 +125,24 @@ def hide_roll(bot):
 @listener("roll_skill", LAST_EVALUATION_FLAG)
 def roll_skill(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
-
-    lst_trigger_status = ["知識",
-                          "アイデア",
-                          "幸運",
-                          "STR",
-                          "CON",
-                          "POW",
-                          "DEX",
-                          "APP",
-                          "SIZ",
-                          "INT",
-                          "EDU",
-                          "HP",
-                          "MP"]
-
-    proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
-
-    result_parse = re.match(proc, bot.message)
-    is_correction = False
-    msg_correction = "+0"
-    if result_parse:
-        bot.message = result_parse.group(1)
-        operant = result_parse.group(2)
-        args = result_parse.group(3)
-        msg_correction = operant + args
-        is_correction = True
+    roll, operant, num_arg = analysis_roll_and_calculation(bot.message)
 
     alias_roll = {"こぶし": "こぶし（パンチ）"}
 
-    if bot.message in alias_roll.keys():
-        bot.message = alias_roll[bot.message]
+    if roll in alias_roll.keys():
+        roll = alias_roll[roll]
 
-    data = user_param[bot.message]
+    data = user_param[roll]
 
-    num = int(random.randint(1, 100))
-    if "現在SAN" == bot.message or bot.message.upper() in lst_trigger_status:
-        num_targ = data
+    num_rand = int(random.randint(1, 100))
+    if "現在SAN" == roll or roll.upper() in yig.config.LST_USER_STATUS_NAME:
+        num = int(data)
     else:
-        num_targ = data[-1]
+        num = int(data[-1])
 
-    msg_num_targ = num_targ
-    if is_correction:
-        num_targ = eval('{}{}{}'.format(num_targ, operant, args))
-        num_targ = math.ceil(num_targ)
-
-    str_result, color = judge_1d100(int(num_targ), num)
-    message = bot.message
-    return f"{str_result} 【{message}】 {num}/{num_targ} ({msg_num_targ}{msg_correction})", color
+    num_targ = calculation(num, operant, num_arg)
+    result, color = judge_1d100(num_targ, num_rand)
+    return f"{result} 【{roll}】 {num_rand}/{num_targ} ({num}{operant}{num_arg})", color
 
 
 def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
@@ -326,7 +296,7 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
     return str_message, str_detail, sum_result
 
 def judge_1d100(target: int, dice: int):
-    """"
+    """
     Judge 1d100 dice result, and return text and color for message.
     Result is critical, success, failure or fumble.
     Arguments:
@@ -344,3 +314,48 @@ def judge_1d100(target: int, dice: int):
     if dice >= 96:
         return "ファンブル", yig.config.COLOR_FUMBLE
     return "失敗", yig.config.COLOR_FAILURE
+
+
+def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int]:
+    """
+    Based on the given string, we analyze the object of the die
+    and the supplementary formula.
+    Arguments:
+        message {str} -- target string (ex. DEX*5)
+    Returns:
+        roll {str}
+        operant {str}
+        number_argument {int}
+    """
+    proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
+    result_parse = re.match(proc, message)
+    operant = "+"
+    number = 0
+    if result_parse:
+        roll = result_parse.group(1)
+        operant = result_parse.group(2)
+        number = int(result_parse.group(3))
+    else:
+        roll = message
+
+    return roll, operant, number
+
+
+def calculation(number_x:int, operant:str, number_y:int) -> int:
+    """
+    Perform a calculation from two values.
+    Arguments:
+        number_x {int} -- target int (ex. 30)
+        operant  {str} -- target str (ex. +)
+        number_y {int} -- target int (ex. 20)
+    Returns:
+        result_number {int}
+    """
+    if operant == '+':
+        return number_x + number_y
+    elif operant == '-':
+        return number_x - number_y
+    elif operant == '*':
+        return number_x * number_y
+    elif operant == '/':
+        return math.ceil(number_x / number_y)
