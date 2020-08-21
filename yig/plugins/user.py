@@ -4,7 +4,7 @@ import json
 
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message
+from yig.util.data import get_user_param, get_state_data ,set_state_data, get_status_message
 import yig.config
 
 

@@ -2,7 +2,8 @@ import requests
 
 
 from yig.bot import listener
-from yig.util import get_state_data, write_pc_image, get_charaimage
+from yig.util.data import get_state_data
+from yig.util.view import write_pc_image, get_charaimage
 import yig.config
 
 

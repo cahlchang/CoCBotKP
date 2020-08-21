@@ -1,7 +1,8 @@
 import botocore
 
 from yig.bot import listener
-from yig.util import get_user_param, get_state_data, get_pc_icon_url, get_now_status, section_builder, divider_builder
+from yig.util.data import get_user_param, get_state_data, get_now_status
+from yig.util.view import get_pc_icon_url, divider_builder, section_builder
 
 import yig.config
 import json

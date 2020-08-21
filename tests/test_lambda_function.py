@@ -7,7 +7,7 @@ import lambda_function as main
 from yig.plugins.group import analyze_join_command, analyze_kp_order_command
 from yig.plugins.roll import judge_1d100, split_alternative_roll_or_value, create_post_message_rolls_result, get_sanc_result, eval_roll_or_value
 from yig.plugins.user import analyze_update_command
-from yig.util import get_status_message
+from yig.util.data import get_status_message
 from yig.config import COLOR_CRITICAL, COLOR_SUCCESS, COLOR_FAILURE, COLOR_FUMBLE
 
 

@@ -6,7 +6,8 @@ from typing import List, Tuple
 from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
-from yig.util import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_pc_icon_url, get_basic_status
+from yig.util.data import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_basic_status
+from yig.util.view import get_pc_icon_url
 import yig.config
 
 

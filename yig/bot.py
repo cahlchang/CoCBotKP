@@ -1,7 +1,6 @@
 from importlib import import_module
 from glob import glob
-from yig.util import post_command
-from yig.util import post_result
+from yig.util.data import post_command, post_result
 
 import yig.config
 

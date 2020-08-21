@@ -1,5 +1,5 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
-from yig.util import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data
+from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data
 
 import yig.config
 import re

@@ -3,8 +3,8 @@ import re
 import json
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util import get_state_data, write_user_data, get_status_message, section_builder, divider_builder, get_basic_status, get_pc_icon_url, get_user_param
-
+from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
+from yig.util.view import get_pc_icon_url, section_builder, divider_builder
 import yig.config
 
 
@@ -35,7 +35,6 @@ def init_charasheet_with_vampire(bot):
 
     write_state_json = json.dumps(dict_state, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
-
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, dict_state)
     pc_name = user_param["name"]
     dex = user_param["DEX"]
