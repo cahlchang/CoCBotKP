@@ -4,7 +4,7 @@ import json
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
 from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
-from yig.util.view import get_pc_icon_url, section_builder, divider_builder
+from yig.util.view import create_param_image, get_pc_icon_url, get_param_image_path, save_param_image, section_builder, divider_builder
 import yig.config
 
 
@@ -33,19 +33,59 @@ def init_charasheet_with_vampire(bot):
         "pc_id": "%s" % user_param["pc_id"]
     }
 
+    image = create_param_image(bot.team_id,
+                               bot.user_id,
+                               user_param["pc_id"],
+                               user_param)
+    param_image_path = get_param_image_path(bot.team_id,
+                                            bot.user_id,
+                                            user_param["pc_id"])
+    param_image_url = save_param_image(image,
+                                       param_image_path,
+                                       bot.team_id,
+                                       bot.user_id,
+                                       user_param["pc_id"])
+
     write_state_json = json.dumps(dict_state, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, dict_state)
     pc_name = user_param["name"]
     dex = user_param["DEX"]
+    chara_url = user_param["url"]
+    job = user_param["job"]
+    age = user_param["age"]
+    sex = user_param["sex"]
+    skill_data = {}
+    for key, param in user_param.items():
+        if isinstance(param, list) and len(param) == 6: #保管庫のjson都合
+            if sum([int(s) for s in param][1:4]) == 0:
+                continue
+            if key in ("製作", "芸術", "母国語"):
+                continue
+            skill_point = int(param[5])
+            if skill_point != 0:
+                skill_data[key] = skill_point
+    sorted_skill_data = sorted(skill_data.items(), key=lambda x:x[1], reverse=True)
     block_content = []
     block_content.append(divider_builder())
     image_url = get_pc_icon_url(bot.team_id, bot.user_id, pc_id)
+    skill_message = ""
+    for cnt, skill_data in enumerate(sorted_skill_data):
+        skill_name, skill_point = skill_data
+        if skill_name == "クトゥルフ神話":
+            skill_message += f"*{skill_name}:* `{skill_point}`%　"
+        else:
+            skill_message += f"*{skill_name}:* {skill_point}%　"
+        if cnt % 4 == 3:
+            skill_message += "\n"
+
     user_content = {
         "type": "section",
         "text": {
             "type": "mrkdwn",
-            "text": f"*INIT CHARACTER*\n\n*Name:* <{image_url}|{pc_name}>\n*HP:* {now_hp}/{max_hp} *MP:* {now_mp}/{max_mp} *SAN:* {now_san}/{max_san}\n*DEX:* {dex} *DB:* {db}"
+            "text": (f"*INIT CHARACTER*\n*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
+                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n"
+                     f"*HP: * `{now_hp}`/{max_hp}　 *MP:* `{now_mp}`/{max_mp}　 *SAN:* `{now_san}`/{max_san}　 *DEX: * `{dex}`　  *DB:* `{db}`")
         },
         "accessory": {
             "type": "image",
@@ -55,6 +95,21 @@ def init_charasheet_with_vampire(bot):
     }
     block_content.append(user_content)
     block_content.append(divider_builder())
+
+    append_content = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": (f"*SKILL*\n" +
+                     skill_message)
+        },
+        "accessory": {
+            "type": "image",
+            "image_url": param_image_url,
+            "alt_text": "image"
+        }
+    }
+    block_content.append(append_content)
 
     payload = [{'blocks': json.dumps(block_content, ensure_ascii=False)}]
     return payload, None
@@ -212,6 +267,7 @@ def format_param_json(bot, request_json):
     param_json["memo"] = request_json["pc_making_memo"]
     param_json["job"] = request_json["shuzoku"]
     param_json["age"] = request_json["age"]
+    param_json["sex"] = request_json["sex"]
     param_json["arms_name"] = request_json["arms_name"]
     param_json["arms_hit"] = request_json["arms_hit"]
     param_json["arms_damage"] = request_json["arms_damage"]
