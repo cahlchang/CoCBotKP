@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.1.0] 2020-08-26
+
+### Added
+
+- Added parameter image with initial game.
+
 ## [0.0.3] 2020-05-15
 
 ### Added
