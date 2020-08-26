@@ -32,3 +32,8 @@ Coc Bot Keeper
 
 - [Wiki](https://github.com/cahlchang/CoCNonKP/wiki/Command-Reference)
 - [Doc(JP)](./command_reference.md)
+
+## Thanks
+
+焚火フォント  
+https://fontgraphic.booth.pm/items/2073492
