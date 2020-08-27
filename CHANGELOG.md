@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.1.1] 2020-08-27
+
+- Added parameter image with update status.
+- fix UI
+
 ## [0.1.0] 2020-08-26
 
 ### Added
