@@ -60,9 +60,8 @@ def create_param_image(team_id, user_id, pc_id, user_param):
 
     canvas = Image.new('RGB', (W, H), white)
     draw = ImageDraw.Draw(canvas)
-
     lst_coord =[]
-    for i in range(1, 9):
+    for i in range(0, 9):
         cood = (math.cos(i*radian)*r+W/2,
                 math.sin(i*radian)*r+H/2)
         lst_coord.append(cood)
