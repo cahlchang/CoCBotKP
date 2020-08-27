@@ -2,6 +2,7 @@ import requests
 import re
 import json
 import unicodedata
+import datetime
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
 from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
@@ -29,14 +30,17 @@ def init_charasheet_with_vampire(bot):
     write_pc_json = json.dumps(user_param, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, key, write_pc_json)
 
+    tz = datetime.timezone.utc
+    now = datetime.datetime.now(tz)
     state_data = {
         "url": url,
-        "pc_id": "%s" % user_param["pc_id"]
+        "pc_id": "%s" % user_param["pc_id"],
+        "ts": now.timestamp()
     }
 
     write_state_json = json.dumps(state_data, ensure_ascii=False).encode('utf-8')
     write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
-    return build_chara_response(user_param, {}, "INIT CHARACTER", bot.team_id, bot.user_id, pc_id), None
+    return build_chara_response(user_param, state_data, "INIT CHARACTER", bot.team_id, bot.user_id, pc_id), None
 
 
 @listener(('U', 'UPDATE'), KEY_IN_FLAG)
@@ -46,6 +50,9 @@ def update_charasheet_with_vampire(bot):
 `/cc update`
     """
     state_data = get_state_data(bot.team_id, bot.user_id)
+    tz = datetime.timezone.utc
+    now = datetime.datetime.now(tz)
+    state_data["ts"] = now.timestamp()
     user_param_old = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
     url = state_data["url"]
     res = requests.get(url)
@@ -99,10 +106,8 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         if 70 < cnt_word:
             skill_message += "\n"
             cnt_word = 0
-        if skill_name == "クトゥルフ神話":
-            skill_message += f"*{skill_name}:* `{skill_point}`%　"
-        else:
-            skill_message += f"*{skill_name}:* {skill_point}%　"
+
+        skill_message += f"*{skill_name}:* {skill_point}%　"
 
     image = create_param_image(team_id,
                                user_id,
@@ -116,7 +121,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
                                        team_id,
                                        user_id,
                                        user_param["pc_id"])
-
+    param_image_url += "?%s" % state_data["ts"]
     user_content = {
         "type": "section",
         "text": {
