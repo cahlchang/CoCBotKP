@@ -49,7 +49,8 @@ def create_param_image(team_id, user_id, pc_id, user_param):
     # color define
     white = (255, 255, 255)
     black = (0, 0, 0)
-    dimgray = (105,105,105)
+    dimgray = (105, 105, 105)
+    gray = (127, 135, 143)
     light_sky_blue =  (180,235,250)
 
     font = ImageFont.truetype("font/04Takibi-Medium.otf", 45)
@@ -101,6 +102,30 @@ def create_param_image(team_id, user_id, pc_id, user_param):
                   name,
                   dimgray,
                   font=font)
+
+    lst_auxiliary_line = [[(W/2, 0), (W/2, H)],[(0, H/2), (W, H/2)],
+                          [(math.cos(1*radian)*r+W/2, math.sin(1*radian)*r+H/2),
+                           (math.cos(5*radian)*r+W/2, math.sin(5*radian)*r+H/2)],
+                          [(math.cos(3*radian)*r+W/2, math.sin(3*radian)*r+H/2),
+                           (math.cos(7*radian)*r+W/2, math.sin(7*radian)*r+H/2)]]
+
+    for auxiliary_line in lst_auxiliary_line:
+        draw.line(auxiliary_line,
+                  fill=gray,
+                  width=1)
+
+    lst_inner_line = []
+    for j in [1/3, 2/3]:
+        lst_each = []
+        for i in range(0,9):
+            lst_each.append((math.cos(i*radian)*r*j+W/2,
+                             math.sin(i*radian)*r*j+H/2))
+        lst_inner_line.append(lst_each)
+
+    for inner_line in lst_inner_line:
+        draw.line(inner_line,
+                  fill=gray,
+                  width=1)
 
     return canvas
 
