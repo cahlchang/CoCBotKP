@@ -106,10 +106,8 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         if 70 < cnt_word:
             skill_message += "\n"
             cnt_word = 0
-        if skill_name == "クトゥルフ神話":
-            skill_message += f"*{skill_name}:* `{skill_point}`%　"
-        else:
-            skill_message += f"*{skill_name}:* {skill_point}%　"
+
+        skill_message += f"*{skill_name}:* {skill_point}%　"
 
     image = create_param_image(team_id,
                                user_id,
