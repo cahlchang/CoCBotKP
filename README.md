@@ -26,7 +26,7 @@ Coc Bot Keeper
 
 ## deploy
 
-- When commits are merged to master, lambda code is deployed by GitHub Actions automatically.
+- When commits are merged to main, lambda code is deployed by GitHub Actions automatically.
 
 ## Command Reference
 
@@ -35,5 +35,5 @@ Coc Bot Keeper
 
 ## Thanks
 
-焚火フォント  
-https://fontgraphic.booth.pm/items/2073492
+- 焚火フォント
+- https://fontgraphic.booth.pm/items/2073492

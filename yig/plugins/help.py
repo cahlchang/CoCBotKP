@@ -25,7 +25,7 @@ def open_help(bot):
 
 def help_content_builder(team_id, user_id, listener):
     about = "This is the command to play Call of Cthulhu.\nEnjoy!"
-    refer = "*<https://github.com/cahlchang/CoCNonKP/blob/master/command_reference.md|All Documents.>*\n\n"
+    refer = "*<https://github.com/cahlchang/CoCNonKP/blob/main/command_reference.md|All Documents.>*\n\n"
 
     dict_function = {}
     for list_function in listener.values():
