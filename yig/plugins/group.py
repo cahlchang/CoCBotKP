@@ -64,7 +64,7 @@ def session_member_order(bot):
 
 @listener("kp.select", RE_MATCH_FLAG)
 def session_select_user(bot):
-    """:point_left: *kp select member*\n`/cc select`"""
+    """:point_left: *kp select member*\n`/cc kp select`"""
     body = read_user_data(bot.team_id, bot.user_id, KP_FILE_PATH)
     dict_kp = json.loads(body)
     lst_user = dict_kp["lst_user"]
