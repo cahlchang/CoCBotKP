@@ -137,7 +137,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         }
     }
     block_content.append(user_content)
-    block_content.append(divider_builder())
+
 
     append_content = {
         "type": "section",
