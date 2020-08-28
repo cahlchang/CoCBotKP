@@ -51,12 +51,12 @@ def create_param_image(team_id, user_id, pc_id, user_param):
     black = (0, 0, 0)
     dimgray = (105, 105, 105)
     gray = (127, 135, 143)
-    light_sky_blue =  (180,235,250)
+    light_sky_blue = (180, 235, 250)
 
-    font = ImageFont.truetype("font/04Takibi-Medium.otf", 45)
-    lst_param_name = ["STR", "CON", "POW", "DEX",
-                      "APP", "SIZ", "INT", "EDU"]
-
+    font = ImageFont.truetype("font/04Takibi-Medium.otf", 48)
+    font_max = ImageFont.truetype("font/04Takibi-Medium.otf", 35)
+    lst_param = [("STR", 18), ("CON", 18), ("POW", 18), ("DEX", 18),
+                 ("APP", 18), ("SIZ", 18), ("INT", 18), ("EDU", 21)]
 
     canvas = Image.new('RGB', (W, H), white)
     draw = ImageDraw.Draw(canvas)
@@ -88,19 +88,28 @@ def create_param_image(team_id, user_id, pc_id, user_param):
                  outline=black,
                  fill=light_sky_blue)
 
-
     def get_point(w, h, i):
-        yield [((W-w)/2,h_o), (W-w-h_o,h_o*7),
-               (W-w,W/2-h/2), (W-w-h_o,H-h_o*7-h),
-               ((W-w)/2,H-h-h_o), (h_o,H-h_o*7-h),
-               (0,(H-h)/2), (h_o*1,h_o*7)][i]
+        yield [((W-w)/2, h_o), (W-w-h_o, h_o*7),
+               (W-w, H/2-h/2), (W-w-h_o, H-h_o*7-h),
+               ((W-w)/2, H-h-h_o), (h_o, H-h_o*7-h),
+               (0, (H-h)/2), (h_o*1, h_o*7)][i]
 
-    for i, name in enumerate(lst_param_name):
+    def get_max_point(w, ww, h, hh, i):
+        yield [((W-w)/2+w+ww*0.1, h_o), (W-w-h_o+w-ww, h_o*7+h+hh*0.2),
+               (W-ww*1.5, H/2-h/2+h), (W-w-h_o+(w-ww)/2, H-h_o*7),
+               ((W-w)/2-ww*1.2, H-hh-h_o), (h_o+(w-ww)/2, H-h_o*7),
+               (ww*0.5,(H-h)/2+h), (h_o*1, h_o*7+h+hh*0.2)][i]
+
+    for i, param in enumerate(lst_param):
+        name = param[0]
+        max_message = str(param[1])
         w, h = draw.textsize(name, font=font)
+        ww, hh = draw.textsize(max_message, font=font_max)
         draw.text(next(get_point(w, h, i)),
                   name,
                   dimgray,
                   font=font)
+        draw.text(next(get_max_point(w, ww, h, hh, i)), max_message, dimgray, font=font_max)
 
     lst_auxiliary_line = [[(W/2, 0), (W/2, H)],[(0, H/2), (W, H/2)],
                           [(math.cos(1*radian)*r+W/2, math.sin(1*radian)*r+H/2),
