@@ -77,7 +77,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     sex = user_param["sex"]
     skill_data = {}
     for key, param in user_param.items():
-        if isinstance(param, list) and len(param) == 6: #保管庫のjson都合
+        if isinstance(param, list) and len(param) == 6: # 保管庫のjson都合
             if sum([int(s) for s in param][1:4]) == 0:
                 continue
             if key in ("製作", "芸術", "母国語"):
