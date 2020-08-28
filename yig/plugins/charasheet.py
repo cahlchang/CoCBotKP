@@ -77,7 +77,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     sex = user_param["sex"]
     skill_data = {}
     for key, param in user_param.items():
-        if isinstance(param, list) and len(param) == 6: #保管庫のjson都合
+        if isinstance(param, list) and len(param) == 6: # 保管庫のjson都合
             if sum([int(s) for s in param][1:4]) == 0:
                 continue
             if key in ("製作", "芸術", "母国語"):
@@ -122,13 +122,21 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
                                        user_id,
                                        user_param["pc_id"])
     param_image_url += "?%s" % state_data["ts"]
+    param_message = ""
+    for name in ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]:
+        if name != "EDU":
+            param_message += "*%s:%s* | " % (name, user_param[name])
+        else:
+            param_message += "*%s:%s*" % (name, user_param[name])
+
     user_content = {
         "type": "section",
         "text": {
             "type": "mrkdwn",
             "text": (f"*{message}*\n*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
                      f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n"
-                     f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*")
+                     f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n" +
+                     param_message)
         },
         "accessory": {
             "type": "image",
@@ -137,7 +145,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         }
     }
     block_content.append(user_content)
-    block_content.append(divider_builder())
+
 
     append_content = {
         "type": "section",
