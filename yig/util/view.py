@@ -77,7 +77,7 @@ def create_param_image(team_id, user_id, pc_id, user_param):
               float(user_param['CON'])/18]
 
     lst_param_cood = []
-    for i in range(0,7):
+    for i in range(0, 8):
         param_cood = (math.cos(i*radian)*r*params[i]+W/2,
                       math.sin(i*radian)*r*params[i]+H/2)
         lst_param_cood.append(param_cood)
@@ -88,7 +88,7 @@ def create_param_image(team_id, user_id, pc_id, user_param):
 
     def get_point(w, h, i):
         yield [((W-w)/2, h_o), (W-w-h_o, h_o*7), (W-w, H/2-h/2), (W-w-h_o, H-h_o*7-h),
-               ((W-w)/2, H-h-h_o), (h_o, H-h_o*7-h), (0, (H-h)/2), (h_o*1, h_o*7)][i]
+               ((W-w)/2, H-h-h_o), (h_o, H-h_o*7-h), (0, (H-h)/2), (h_o*1, h_o*7), ((W-w)/2, h_o)][i]
 
     for i, name in enumerate(lst_param_name):
         w, h = draw.textsize(name, font=font)
