@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.1.2] 2020-08-31
+
+- Added `/cc result` command.
+- fix any bug.
+
 ## [0.1.1] 2020-08-27
 
 - Added parameter image with update status.
