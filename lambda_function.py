@@ -1,8 +1,6 @@
 import os
 import json
 import logging
-import urllib.request
-import urllib.parse
 import random
 import traceback
 import requests
@@ -20,12 +18,6 @@ state: PC's HP, MP, SAN, キャラクター保管庫URL, etc...
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def format_as_command(text: str) -> str:
-    """
-    Make text uppercased and remove edge spaces
-    """
-    return text.upper().strip()
-
 
 def bootstrap(event: dict, _context) -> str:
     logging.info(json.dumps(event))
@@ -41,31 +33,11 @@ def bootstrap(event: dict, _context) -> str:
     for datum in body_split:
         lst = datum.split("=")
         evt_slack[lst[0]] = lst[1]
-    user_id = evt_slack["user_id"]
 
-    response_url = urllib.parse.unquote(evt_slack["response_url"])
     if "subtype" in evt_slack:
         return None
-
-    message = urllib.parse.unquote_plus(evt_slack["text"])
-    if message.split(' ') and message.split(' ')[-1].isnumeric():
-        message = ' '.join(message.split(' ')[:-1]) + "+" + message.split(' ')[-1]
-    channel_id = urllib.parse.unquote(evt_slack["channel_id"])
-    team_id = urllib.parse.unquote(evt_slack["team_id"])
-
-    key = format_as_command(message)
-
-    bot.init_param(user_id,
-                   response_url,
-                   key,
-                   message,
-                   channel_id,
-                   team_id)
-
-    is_bot_command = bot.dispatch()
-
-    if is_bot_command:
-        return None
+    bot.init_param(evt_slack)
+    bot.dispatch()
     return None
 
 

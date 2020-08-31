@@ -1,6 +1,7 @@
 from importlib import import_module
 from glob import glob
-from yig.util.data import post_command, post_result
+from yig.util.data import post_command, post_result, format_as_command
+import urllib.parse
 
 import yig.config
 
@@ -26,31 +27,26 @@ command_manager = {
 
 class Bot(object):
     global command_list
-    user_id = ""
-    response_url = ""
-    key = ""
-    message = ""
-    token = ""
-    data_user = None
-    channel_id = ""
-    team_id = ""
+    user_id = response_url = key = message = token = data_user = channel_id = channel_name = team_id = ""
 
     def __init__(self):
         self.init_plugins()
 
     def init_param(self,
-                   user_id,
-                   response_url,
-                   key,
-                   message,
-                   channel_id,
-                   team_id):
-        self.user_id = user_id
-        self.response_url = response_url
-        self.key = key
-        self.message = message
-        self.channel_id = channel_id
-        self.team_id = team_id
+                   evt_slack):
+
+        self.user_id = evt_slack["user_id"]
+        self.response_url = urllib.parse.unquote(evt_slack["response_url"])
+        self.message = urllib.parse.unquote_plus(evt_slack["text"])
+
+        # bad hack
+        if self.message.split(' ') and self.message.split(' ')[-1].isnumeric():
+            self.message = ' '.join(self.message.split(' ')[:-1]) + "+" + self.message.split(' ')[-1]
+
+        self.channel_id = urllib.parse.unquote(evt_slack["channel_id"])
+        self.channel_name = urllib.parse.unquote(evt_slack["channel_name"])
+        self.team_id = urllib.parse.unquote(evt_slack["team_id"])
+        self.key = format_as_command(self.message)
 
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}

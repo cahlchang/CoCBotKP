@@ -126,6 +126,13 @@ def get_basic_status(user_param, state_data):
     return now_hp, max_hp, now_mp, max_mp, now_san, max_san, db
 
 
+def format_as_command(text: str) -> str:
+    """
+    Make text uppercased and remove edge spaces
+    """
+    return text.upper().strip()
+
+
 # todo いい感じにする
 def get_status_message(message_command, dict_param, dict_state):
     name = dict_param['name']
