@@ -1,5 +1,5 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
-from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data
+from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data
 
 import yig.config
 import re
@@ -22,9 +22,16 @@ def session_join(bot):
     """:+1: *join TRPG session*\n`/cc join [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
     state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param = get_user_param(bot.team_id, bot.user_id, state_data['pc_id'])
     kp_id = analyze_join_command(bot.key)
     if kp_id:
-        add_gamesession_user(bot.team_id, kp_id, bot.user_id, state_data['pc_id'])
+        add_gamesession_user(bot.team_id,
+                            kp_id,
+                             bot.user_id,
+                             user_param['name'],
+                             state_data['pc_id'],
+                             bot.channel_name,
+                             bot.data_user)
         state_data["kp_id"] = kp_id
         set_state_data(bot.team_id, bot.user_id, state_data)
         return "セッションに参加しました", color
@@ -87,7 +94,7 @@ def set_start_session(team_id, user_id, channel_name, data_user):
                     "scenario": channel_name}
     write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
 
-def add_gamesession_user(team_id, kp_id, user_id, pc_id):
+def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, data_user):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
     dict_kp = json.loads(body)
 
@@ -98,6 +105,13 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_id):
     body_write = json.dumps(dict_kp, ensure_ascii=False).encode('utf-8')
     write_user_data(team_id, kp_id, KP_FILE_PATH, body_write)
 
+    session_data = json.loads(read_session_data(team_id, f"{channel_name}/session.json"))
+    session_data["PL"].append({"id": user_id,
+                               "name": data_user["profile"]["display_name"],
+                               "pc_id": pc_id,
+                               "pc_name": pc_name})
+    write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
+    write_session_data(team_id, f"{channel_name}/{pc_id}.json" ,json.dumps([], ensure_ascii=False))
 
 def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
