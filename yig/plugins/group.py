@@ -1,5 +1,6 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
-from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data
+from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status
+from yig.util.view import get_pc_icon_url
 
 import yig.config
 import re
@@ -26,7 +27,7 @@ def session_join(bot):
     kp_id = analyze_join_command(bot.key)
     if kp_id:
         add_gamesession_user(bot.team_id,
-                            kp_id,
+                             kp_id,
                              bot.user_id,
                              user_param['name'],
                              state_data['pc_id'],
@@ -37,6 +38,58 @@ def session_join(bot):
         return "セッションに参加しました", color
     else:
         return "%s\nJOINコマンドが不正です" % bot.message, color
+
+
+@listener("RESULT", KEY_MATCH_FLAG)
+def session_result(bot):
+    """:bell: *Result session Data*\n`/cc result`"""
+    user_id = bot.user_id
+    state_data = get_state_data(bot.team_id, bot.user_id)
+    user_param = get_user_param(bot.team_id, bot.user_id, state_data['pc_id'])
+    dex = user_param["DEX"]
+    pc_name = user_param["name"]
+    job = user_param["job"]
+    age = user_param["age"]
+    sex = user_param["sex"]
+    now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
+    session_data = json.loads(read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name, state_data["pc_id"])))
+    block_content = []
+    image_url = get_pc_icon_url(bot.team_id, bot.user_id, state_data['pc_id'])
+    chara_url = user_param["url"]
+    user_content = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": (f"<@{user_id}> *ROLL RESULT*\n*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
+                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n"
+                     f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n")
+        },
+        "accessory": {
+            "type": "image",
+            "image_url": image_url,
+            "alt_text": "image"
+        }
+    }
+    block_content.append(user_content)
+
+    result_massage = ""
+    for data in session_data:
+        symbols = {"クリティカル": ":sparkles:",
+                   "成功": ":ok:",
+                   "失敗": ":ng:",
+                   "ファンブル": ":skull_and_crossbones:"}
+
+        result_massage += "%s TRY *%s* RESULT *%s* *%s* (%s)\n" % (symbols[data["result"]], data["roll"], data["result"], data["num_rand"], data["num_targ"])
+
+    result_content = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": result_massage
+        }}
+    block_content.append(result_content)
+
+    return [{'blocks': json.dumps(block_content, ensure_ascii=False)}], None
 
 
 @listener("leave+.*", RE_MATCH_FLAG)
@@ -93,6 +146,7 @@ def set_start_session(team_id, user_id, channel_name, data_user):
                     "PL": [],
                     "scenario": channel_name}
     write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
+
 
 def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, data_user):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
