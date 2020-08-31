@@ -13,7 +13,7 @@ KP_FILE_PATH = "kp.json"
 def session_start(bot):
     """:sparkles: *TRPG session start*\n`/cc kp start`"""
     color = yig.config.COLOR_ATTENTION
-    set_start_session(bot.team_id, bot.user_id)
+    set_start_session(bot.team_id, bot.user_id, bot.channel_name, bot.data_user)
     return "セッションを開始します。\n参加コマンド\n`/cc join %s`" % bot.user_id, color
 
 
@@ -73,13 +73,19 @@ def session_select_user(bot):
     return user_target_param["name"], yig.config.COLOR_ATTENTION
 
 
-def set_start_session(team_id, user_id):
+def set_start_session(team_id, user_id, channel_name, data_user):
     """
     set_start_session function is starting game session.
     create s3 file.
     """
     write_user_data(team_id, user_id, KP_FILE_PATH, json.dumps({}, ensure_ascii=False))
 
+    session_data = {"KP":
+                    {"id": user_id,
+                     "name": data_user["profile"]["display_name"]},
+                    "PL": [],
+                    "scenario": channel_name}
+    write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
 
 def add_gamesession_user(team_id, kp_id, user_id, pc_id):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
