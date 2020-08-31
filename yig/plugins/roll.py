@@ -131,12 +131,14 @@ def roll_skill(bot):
     num_targ = calculation(num, operant, num_arg)
     result, color = judge_1d100(num_targ, num_rand)
 
-    session_data = json.loads(read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"])))
-    session_data.append({"roll": roll.upper(),
-                         "num_targ": f"{num}{operant}{num_arg}",
-                         "num_rand": num_rand,
-                         "result": result})
-    write_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]), json.dumps(session_data, ensure_ascii=False))
+    raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
+    if raw_session_data:
+        session_data = json.loads(raw_session_data)
+        session_data.append({"roll": roll.upper(),
+                             "num_targ": f"{num}{operant}{num_arg}",
+                             "num_rand": num_rand,
+                             "result": result})
+        write_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]), json.dumps(session_data, ensure_ascii=False))
 
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
