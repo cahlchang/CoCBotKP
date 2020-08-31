@@ -6,7 +6,7 @@ from typing import List, Tuple
 from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
-from yig.util.data import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_basic_status
+from yig.util.data import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_basic_status, write_session_data, read_session_data
 from yig.util.view import get_pc_icon_url
 import yig.config
 
@@ -130,6 +130,16 @@ def roll_skill(bot):
 
     num_targ = calculation(num, operant, num_arg)
     result, color = judge_1d100(num_targ, num_rand)
+
+    raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
+    if raw_session_data:
+        session_data = json.loads(raw_session_data)
+        session_data.append({"roll": roll.upper(),
+                             "num_targ": f"{num}{operant}{num_arg}",
+                             "num_rand": num_rand,
+                             "result": result})
+        write_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]), json.dumps(session_data, ensure_ascii=False))
+
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
     payload = {
