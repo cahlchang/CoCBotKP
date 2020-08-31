@@ -4,6 +4,7 @@ import boto3
 import imghdr
 import os
 import copy
+from botocore.exceptions import ClientError
 from PIL import Image
 
 import yig.config
@@ -22,14 +23,17 @@ def write_user_data(team_id, user_id, filename, content):
 
 
 def write_session_data(team_id, path, content):
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    obj = bucket.Object(f"{team_id}/{path}")
-    response = obj.put(
-        Body=content,
-        ContentEncoding='utf-8',
-        ContentType='text/plane'
-    )
+    try:
+        s3_client = boto3.resource('s3')
+        bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+        obj = bucket.Object(f"{team_id}/{path}")
+        response = obj.put(
+            Body=content,
+            ContentEncoding='utf-8',
+            ContentType='text/plane'
+        )
+    except ClientError as e:
+        print(e)
 
 
 def read_user_data(team_id, user_id, filename):
@@ -37,17 +41,20 @@ def read_user_data(team_id, user_id, filename):
     bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
     user_dir = f"{team_id}/{user_id}"
     obj = bucket.Object(f"{user_dir}/{filename}")
-    print(f"{user_dir}/{filename}")
     response = obj.get()
     return response['Body'].read()
 
 
 def read_session_data(team_id, path):
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    obj = bucket.Object(f"{team_id}/{path}")
-    response = obj.get()
-    return response['Body'].read()
+    try:
+        s3_client = boto3.resource('s3')
+        bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+        obj = bucket.Object(f"{team_id}/{path}")
+        response = obj.get()
+        return response['Body'].read()
+    except ClientError as e:
+        print(e)
+        return None
 
 
 def post_command(message,
