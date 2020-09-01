@@ -75,11 +75,11 @@ def session_result(bot):
     result_massage = ""
     for data in session_data:
         symbols = {"クリティカル": ":sparkles:",
-                   "成功": ":ok:",
-                   "失敗": ":ng:",
+                   "成功": ":large_blue_circle:",
+                   "失敗": ":x:",
                    "ファンブル": ":skull_and_crossbones:"}
 
-        result_massage += "%s TRY *%s* RESULT *%s* *%s* (%s)\n" % (symbols[data["result"]], data["roll"], data["result"], data["num_rand"], data["num_targ"])
+        result_massage += "%s *%s* *%s* *%s* (%s)\n" % (symbols[data["result"]], data["result"], data["roll"], data["num_rand"], data["num_targ"])
 
     result_content = {
         "type": "section",
