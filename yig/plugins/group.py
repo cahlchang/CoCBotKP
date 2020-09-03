@@ -81,6 +81,8 @@ def session_result(bot):
 
         result_massage += "%s *%s* *%s* *%s* (%s)\n" % (symbols[data["result"]], data["result"], data["roll"], data["num_rand"], data["num_targ"])
 
+    if len(result_message) == 0:
+        result_massage = "No Result"
     result_content = {
         "type": "section",
         "text": {
