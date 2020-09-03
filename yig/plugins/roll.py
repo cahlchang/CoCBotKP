@@ -44,9 +44,9 @@ def hide_roll(bot):
 
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
-        dict_state = get_state_data(bot.team_id, bot.user_id)
-        user_param = get_user_param(bot.team_id, bot.user_id, dict_state["pc_id"])
-        channel = '@' + dict_state["kp_id"]
+        state_data = get_state_data(bot.team_id, bot.user_id)
+        user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+        channel = '@' + state_data["kp_id"]
         key = bot.key
         text = ""
         m = re.match(r"HIDE\s(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
