@@ -72,20 +72,21 @@ def session_result(bot):
     }
     block_content.append(user_content)
 
-    result_massage = ""
+    result_message = ""
     for data in session_data:
         symbols = {"クリティカル": ":sparkles:",
                    "成功": ":large_blue_circle:",
                    "失敗": ":x:",
                    "ファンブル": ":skull_and_crossbones:"}
 
-        result_massage += "%s *%s* *%s* *%s* (%s)\n" % (symbols[data["result"]], data["result"], data["roll"], data["num_rand"], data["num_targ"])
-
+        result_message += "%s *%s* *%s* *%s* (%s)\n" % (symbols[data["result"]], data["result"], data["roll"], data["num_rand"], data["num_targ"])
+    if len(result_message) == 0:
+        result_message = "No Result"
     result_content = {
         "type": "section",
         "text": {
             "type": "mrkdwn",
-            "text": result_massage
+            "text": result_message
         }}
     block_content.append(result_content)
 

@@ -44,9 +44,9 @@ def hide_roll(bot):
 
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
-        dict_state = get_state_data(bot.team_id, bot.user_id)
-        user_param = get_user_param(bot.team_id, bot.user_id, dict_state["pc_id"])
-        channel = '@' + dict_state["kp_id"]
+        state_data = get_state_data(bot.team_id, bot.user_id)
+        user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
+        channel = '@' + state_data["kp_id"]
         key = bot.key
         text = ""
         m = re.match(r"HIDE\s(.*?)(\+|\-|\*|\/)?(\d{,})?$", key)
@@ -72,6 +72,14 @@ def hide_roll(bot):
 
             num_targ = calculation(num, operant, num_arg)
             result, color = judge_1d100(num_targ, num_rand)
+            raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
+            if raw_session_data:
+                session_data = json.loads(raw_session_data)
+                session_data.append({"roll": "hide " + roll.upper(),
+                                     "num_targ": f"{num}{operant}{num_arg}",
+                                     "num_rand": num_rand,
+                                     "result": result})
+                write_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]), json.dumps(session_data, ensure_ascii=False))
 
             text = f"<@{user_id}> try {roll}"
             post_message = f"{result} 【{roll}】 {num_rand}/{num_targ} ({num}{operant}{num_arg})"
