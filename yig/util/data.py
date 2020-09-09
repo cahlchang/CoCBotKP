@@ -112,6 +112,7 @@ def post_result(token,
     else:
         payload.update(return_content)
         request(command_url, payload)
+        print("request end")
 
 
 def get_state_data(team_id, user_id):
