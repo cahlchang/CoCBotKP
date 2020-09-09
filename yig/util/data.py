@@ -67,17 +67,16 @@ def post_command(message,
     command_url = "https://slack.com/api/chat.postMessage?"
     if is_replace_plus:
         message = message.replace("+", " ")
-    print("post start")
+
     payload = {
         "token": token,
         "username": data_user["profile"]["display_name"],
-        "icon_url": get_pc_icon_url(team_id, user_id),
+        "icon_url": data_user["profile"]["image_72"],
         "channel": channel_id,
         "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)
     print(res.text)
-    print("post end")
 
 
 def post_result(token,
@@ -115,7 +114,6 @@ def post_result(token,
     else:
         payload.update(return_content)
         request(command_url, payload)
-        print("request end")
 
 
 def get_pc_icon_url(team_id, user_id):
