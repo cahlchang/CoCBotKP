@@ -135,7 +135,7 @@ def save_param_image(image, path, team_id, user_id, pc_id):
         Key = image_param_key,
         Tagging = {'TagSet': [ { 'Key': 'public-object', 'Value': 'yes' }, ]})
 
-    return f"https://wheellab-coc-pcparams.s3.ap-northeast-1.amazonaws.com/{team_id}/{user_id}/{pc_id}_param.png"
+    return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}_param.png"
 
 
 def get_charaimage(team_id, user_id, pc_id):
@@ -161,9 +161,9 @@ def get_pc_icon_url(team_id, user_id, pc_id):
     file_name = f"{team_id}/{user_id}/{pc_id}.png"
     obj = list(bucket.objects.filter(Prefix=file_name))
     if len(obj) > 0:
-        return f"https://wheellab-coc-pcparams.s3.ap-northeast-1.amazonaws.com/{team_id}/{user_id}/{pc_id}.png"
+        return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
     else:
-        return "https://wheellab-coc-pcparams.s3.ap-northeast-1.amazonaws.com/public/noimage.png"
+        return "https://d13xcuicr0q687.cloudfront.net/public/noimage.png"
 
 
 def get_param_image_path(team_id, user_id, pc_id):
