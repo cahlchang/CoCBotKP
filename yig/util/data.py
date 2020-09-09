@@ -61,19 +61,23 @@ def post_command(message,
                  token,
                  data_user,
                  channel_id,
+                 team_id,
+                 user_id,
                  is_replace_plus=False):
     command_url = "https://slack.com/api/chat.postMessage?"
     if is_replace_plus:
         message = message.replace("+", " ")
+    print("post start")
     payload = {
         "token": token,
         "username": data_user["profile"]["display_name"],
-        "icon_url": data_user["profile"]["image_48"],
+        "icon_url": get_pc_icon_url(team_id, user_id),
         "channel": channel_id,
         "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)
     print(res.text)
+    print("post end")
 
 
 def post_result(token,
@@ -114,6 +118,15 @@ def post_result(token,
         print("request end")
 
 
+def get_pc_icon_url(team_id, user_id):
+    url = f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/icon.png"
+    response = requests.head(url)
+    if response.status_code == 403:
+        return "https://d13xcuicr0q687.cloudfront.net/public/noimage.png"
+    else:
+        return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/icon.png"
+
+
 def get_state_data(team_id, user_id):
     """get_state_data function is get state file."""
     return json.loads(read_user_data(team_id, user_id, yig.config.STATE_FILE_PATH).decode('utf-8'))
@@ -139,6 +152,7 @@ def get_now_status(status_name, user_param, state_data, status_name_alias=None):
     if status_name in state_data:
         current_status = int(current_status) + int(state_data[status_name])
     return current_status
+
 
 def get_basic_status(user_param, state_data):
     now_hp = get_now_status('HP', user_param, state_data)

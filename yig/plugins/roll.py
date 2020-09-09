@@ -7,7 +7,7 @@ from concurrent import futures
 
 from yig.bot import listener, RE_MATCH_FLAG, RE_NOPOST_COMMANG_FLAG, LAST_EVALUATION_FLAG
 from yig.util.data import get_user_param, get_state_data ,set_state_data, get_status_message, post_command, post_result, get_basic_status, write_session_data, read_session_data
-from yig.util.view import get_pc_icon_url
+from yig.util.view import get_pc_image_url
 import yig.config
 
 
@@ -40,7 +40,9 @@ def hide_roll(bot):
     post_command("hide ？？？",
                  bot.token,
                  bot.data_user,
-                 bot.channel_id)
+                 bot.channel_id,
+                 bot.team_id,
+                 bot.user_id)
 
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
@@ -155,7 +157,7 @@ def roll_skill(bot):
 
     payload = {
         "attachments": json.dumps([{
-            "thumb_url": get_pc_icon_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+            "thumb_url": get_pc_image_url(bot.team_id, bot.user_id, state_data["pc_id"]),
             "color": color,
             "footer": "<%s|%s>\nHP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (user_param["url"], user_param["name"], now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
             "fields": [
