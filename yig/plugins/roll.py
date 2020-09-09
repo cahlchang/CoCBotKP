@@ -118,6 +118,7 @@ def hide_roll(bot):
 
 @listener("roll_skill", LAST_EVALUATION_FLAG)
 def roll_skill(bot):
+    print("skill start")
     state_data = get_state_data(bot.team_id, bot.user_id)
     user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
     roll, operant, num_arg = analysis_roll_and_calculation(bot.message)
@@ -138,6 +139,7 @@ def roll_skill(bot):
 
     num_targ = calculation(num, operant, num_arg)
     result, color = judge_1d100(num_targ, num_rand)
+    print("skill end")
 
     raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
     if raw_session_data:
@@ -147,6 +149,7 @@ def roll_skill(bot):
                              "num_rand": num_rand,
                              "result": result})
         write_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]), json.dumps(session_data, ensure_ascii=False))
+    print("skill write")
 
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
@@ -166,6 +169,7 @@ def roll_skill(bot):
                 }
             ]
         }])}
+    print("payload ready")
     return payload, None
 
 
