@@ -65,11 +65,10 @@ def post_command(message,
     command_url = "https://slack.com/api/chat.postMessage?"
     if is_replace_plus:
         message = message.replace("+", " ")
-
     payload = {
         "token": token,
         "username": data_user["profile"]["display_name"],
-        "icon_url": data_user["profile"]["image_1024"],
+        "icon_url": data_user["profile"]["image_48"],
         "channel": channel_id,
         "text": f"/cc {message}"
     }
