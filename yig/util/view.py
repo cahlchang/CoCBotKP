@@ -13,8 +13,6 @@ def write_pc_image(team_id, user_id, pc_id, url):
     """Convert the image to a png image and write it in S3."""
     image_origin_path = f"/tmp/origin_image"
     image_converted_path = f"/tmp/{pc_id}.png"
-    image_icon_path = f"/tmp/icon.png"
-    image_icon_key = f"{team_id}/{user_id}/icon.png"
     image_org_key = f"{team_id}/{user_id}/{pc_id}.png"
 
     response = requests.get(url, stream=True)
@@ -36,17 +34,6 @@ def write_pc_image(team_id, user_id, pc_id, url):
     s3_client.put_object_tagging(
         Bucket = yig.config.AWS_S3_BUCKET_NAME,
         Key = image_org_key,
-        Tagging = {'TagSet': [ { 'Key': 'public-object', 'Value': 'yes' }, ]})
-
-    image_icon = Image.open(image_origin_path)
-    image_icon.resize((48, 48))
-    image_icon.save(image_icon_path)
-
-    s3_client.upload_file(image_icon_path, yig.config.AWS_S3_BUCKET_NAME, image_icon_key)
-
-    s3_client.put_object_tagging(
-        Bucket = yig.config.AWS_S3_BUCKET_NAME,
-        Key = image_icon_key,
         Tagging = {'TagSet': [ { 'Key': 'public-object', 'Value': 'yes' }, ]})
 
     return image_org_key
@@ -158,7 +145,6 @@ def get_charaimage(team_id, user_id, pc_id):
 
     filename = f"{pc_id}.png"
     key_image = "%s/%s/%s" % (team_id, user_id, filename)
-    print(key_image)
     with open(f'/tmp/{filename}', 'wb') as fp:
         s3_client.download_fileobj(yig.config.AWS_S3_BUCKET_NAME, key_image, fp)
 
