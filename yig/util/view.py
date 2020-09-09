@@ -156,14 +156,22 @@ def get_charaimage(team_id, user_id, pc_id):
 
 
 def get_pc_icon_url(team_id, user_id, pc_id):
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    file_name = f"{team_id}/{user_id}/{pc_id}.png"
-    obj = list(bucket.objects.filter(Prefix=file_name))
-    if len(obj) > 0:
-        return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
-    else:
+    url = f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
+    response = requests.head(url)
+    print(response.status_code)
+    if response.status_code == 403:
         return "https://d13xcuicr0q687.cloudfront.net/public/noimage.png"
+    else:
+        return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
+
+    # s3_client = boto3.resource('s3')
+    # bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    # file_name = f"{team_id}/{user_id}/{pc_id}.png"
+    # obj = list(bucket.objects.filter(Prefix=file_name))
+    # if len(obj) > 0:
+    #     return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
+    # else:
+    #     return "https://d13xcuicr0q687.cloudfront.net/public/noimage.png"
 
 
 def get_param_image_path(team_id, user_id, pc_id):
