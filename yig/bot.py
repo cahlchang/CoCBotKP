@@ -96,7 +96,9 @@ class Bot(object):
             post_command(self.message,
                          self.token,
                          self.data_user,
-                         self.channel_id)
+                         self.channel_id,
+                         self.team_id,
+                         self.user_id)
             return_content, color = command_datum["function"](self)
             post_result(self.token,
                         self.user_id,

@@ -6,7 +6,7 @@ import datetime
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
 from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
-from yig.util.view import create_param_image, get_pc_icon_url, get_param_image_path, save_param_image, section_builder, divider_builder
+from yig.util.view import create_param_image, get_pc_image_url, get_param_image_path, save_param_image, section_builder, divider_builder
 import yig.config
 
 
@@ -87,7 +87,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
                 skill_data[key] = skill_point
     sorted_skill_data = sorted(skill_data.items(), key=lambda x:x[1], reverse=True)
     block_content = []
-    image_url = get_pc_icon_url(team_id, user_id, pc_id)
+    image_url = get_pc_image_url(team_id, user_id, pc_id)
     skill_message = ""
 
     def get_east_asian_width_count(text):

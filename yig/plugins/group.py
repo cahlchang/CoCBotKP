@@ -1,6 +1,6 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
 from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status
-from yig.util.view import get_pc_icon_url
+from yig.util.view import get_pc_image_url
 
 import yig.config
 import re
@@ -54,7 +54,7 @@ def session_result(bot):
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
     session_data = json.loads(read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name, state_data["pc_id"])))
     block_content = []
-    image_url = get_pc_icon_url(bot.team_id, bot.user_id, state_data['pc_id'])
+    image_url = get_pc_image_url(bot.team_id, bot.user_id, state_data['pc_id'])
     chara_url = user_param["url"]
     user_content = {
         "type": "section",
