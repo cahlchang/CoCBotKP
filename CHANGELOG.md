@@ -1,5 +1,22 @@
 # Change Log
 
+## [0.1.5] 2020-09-19
+
+- Update `/cc order` command.
+- Add Alias `/cc kp list`.
+- Fix `/cc list chara` command.
+- Fix roll lower case.
+
+## [0.1.4] 2020-09-10
+
+- Icon optimization
+- Speed ​​up image check
+- Introducing Cloud Front
+
+## [0.1.3] 2020-09-07
+
+- Add hide command to Result.
+
 ## [0.1.2] 2020-08-31
 
 - Added `/cc result` command.
