@@ -7,17 +7,17 @@ from yig.bot import listener, RE_MATCH_FLAG
 import yig.config
 
 
-@listener("list chara.*", RE_MATCH_FLAG)
+@listener("list.*chara.*", RE_MATCH_FLAG)
 def show_list_chara(bot):
     """:books: *show your PC List*\n`/cc list chara`\n`/cc list chara [>|<][PARAM]`"""
-    matcher_param = re.match("LIST CHARA (.*)", bot.key)
+    matcher_param = re.match("LIST.*CHARA (.*)", bot.key)
     param_condition = None
     operant_condition = None
     value_condition = None
 
     if matcher_param:
         condition = matcher_param.group(1)
-        matcher_operant = re.match(r"(.*)(\&GT;|\&LT;)(.*)", condition)
+        matcher_operant = re.match(r"(.*)(>|<)(.*)", condition)
         if matcher_operant:
             param_condition = matcher_operant.group(1)
             operant_condition = matcher_operant.group(2)
@@ -25,7 +25,7 @@ def show_list_chara(bot):
         else:
             param_condition = condition
 
-    lst_chara = get_all_chara_data(bot.user_id)
+    lst_chara = get_all_chara_data(bot.team_id, bot.user_id)
     lst_show = []
     lst_cond_data = []
     for chara_data in lst_chara:
@@ -35,6 +35,9 @@ def show_list_chara(bot):
             continue
 
         if "pc_id" not in chara_data:
+            continue
+
+        if param_condition is None or param_condition not in chara_data:
             continue
 
         name = chara_data["name"].replace('\u3000', '')
@@ -77,8 +80,8 @@ def show_list_chara(bot):
     return "%s" % ("\n").join(lst_show), yig.config.COLOR_ATTENTION
 
 
-def get_all_chara_data(user_id):
-    key_prefix = "%s/" % user_id
+def get_all_chara_data(team_id, user_id):
+    key_prefix = f"{team_id}/{user_id}/"
     s3_resource = boto3.resource('s3')
     bucket = s3_resource.Bucket(yig.config.AWS_S3_BUCKET_NAME)
     lst_object = bucket.objects.filter(Prefix=key_prefix).limit(count=1000)
