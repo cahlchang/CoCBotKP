@@ -115,13 +115,36 @@ def session_member_order(bot):
     lst_user_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
     msg = f"{target_status}順\n"
     cnt = 0
+    block_content = []
     for user_data in lst_user_data:
         cnt += 1
-        name = user_data["name"]
+        pc_name = user_data["name"]
         now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_data['user_param'], user_data['state_data'])
+        dex = user_data['user_param']['DEX']
         v = user_data['user_param'][target_status]
-        msg += f"{cnt}, {name} ({v}) \n"
-    return msg, yig.config.COLOR_ATTENTION
+        image_url = get_pc_image_url(bot.team_id,
+                                     user_data['user_id'],
+                                     user_data['user_param']['pc_id'],
+                                     user_data['state_data']['ts'])
+        chara_url = user_data['user_param']['url']
+        user_content = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (f"*No: * *{cnt}*\t*ROLL: * *{target_status}*\t*VALUE: * *{v}*\n"
+                         f"*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
+                         f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n")
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": image_url,
+                "alt_text": "image"
+            }
+        }
+        block_content.append(user_content)
+        block_content.append(divider_builder())
+
+    return [{'blocks': json.dumps(block_content, ensure_ascii=False)}], None
 
 
 @listener("kp.select", RE_MATCH_FLAG)
@@ -191,11 +214,12 @@ def get_lst_player_data(team_id, user_id, roll_targ):
         lst_user_data.append(
             {
                 'name': name,
+                'user_id': user[0],
                 'user_param': user_param,
                 'state_data': state_data,
             })
 
-    lst_user_data.sort(key=lambda x: x['user_param'][roll_targ])
+    lst_user_data.sort(key=lambda x: int(x['user_param'][roll_targ]))
     lst_user_data.reverse()
     return lst_user_data
 
