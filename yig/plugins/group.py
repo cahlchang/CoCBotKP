@@ -208,7 +208,7 @@ def get_lst_player_data(team_id, user_id, roll_targ):
     lst_user = dict_kp["lst_user"]
     lst_user_data = []
     for user in lst_user:
-        state_data = get_state_data(team_id, user_id)
+        state_data = get_state_data(team_id, user[0])
         user_param = get_user_param(team_id, user[0], user[1])
         name = user_param['name']
         lst_user_data.append(
