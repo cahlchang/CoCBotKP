@@ -153,7 +153,7 @@ def roll_skill(bot):
 
     payload = {
         "attachments": json.dumps([{
-            "thumb_url": get_pc_image_url(bot.team_id, bot.user_id, state_data["pc_id"]),
+            "thumb_url": get_pc_image_url(bot.team_id, bot.user_id, state_data["pc_id"], state_data["ts"]),
             "color": color,
             "footer": "<%s|%s>\nHP: *%s*/%s MP: *%s*/%s SAN: *%s*/%s DB: *%s*" % (user_param["url"], user_param["name"], now_hp, max_hp, now_mp, max_mp, now_san, max_san, db),
             "fields": [

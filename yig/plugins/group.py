@@ -54,7 +54,7 @@ def session_result(bot):
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
     session_data = json.loads(read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name, state_data["pc_id"])))
     block_content = []
-    image_url = get_pc_image_url(bot.team_id, bot.user_id, state_data['pc_id'])
+    image_url = get_pc_image_url(bot.team_id, bot.user_id, state_data['pc_id'], state_data['ts'])
     chara_url = user_param["url"]
     user_content = {
         "type": "section",

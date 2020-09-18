@@ -81,7 +81,7 @@ def help_content_builder(team_id, user_id, listener):
             },
             "accessory": {
                 "type": "image",
-                "image_url": get_pc_image_url(team_id, user_id, state_data["pc_id"]),
+                "image_url": get_pc_image_url(team_id, user_id, state_data["pc_id"], state_data['ts']),
                 "alt_text": "image"
             }
         }
