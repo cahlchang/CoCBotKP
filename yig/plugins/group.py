@@ -118,7 +118,8 @@ def session_member_order(bot):
     for user_data in lst_user_data:
         cnt += 1
         name = user_data["name"]
-        v = user_data[target_status]
+        now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_data['user_param'], user_data['state_data'])
+        v = user_data['user_param'][target_status]
         msg += f"{cnt}, {name} ({v}) \n"
     return msg, yig.config.COLOR_ATTENTION
 
@@ -168,6 +169,7 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, 
     write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
     write_session_data(team_id, f"{channel_name}/{pc_id}.json" ,json.dumps([], ensure_ascii=False))
 
+
 def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
     dict_kp = json.loads(body)
@@ -181,18 +183,21 @@ def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
 def get_lst_player_data(team_id, user_id, roll_targ):
     dict_kp = json.loads(read_user_data(team_id, user_id, KP_FILE_PATH).decode('utf-8'))
     lst_user = dict_kp["lst_user"]
-    lst_user_param = []
+    lst_user_data = []
     for user in lst_user:
-        param = get_user_param(team_id, user[0], user[1])
-        lst_user_param.append(
+        state_data = get_state_data(team_id, user_id)
+        user_param = get_user_param(team_id, user[0], user[1])
+        name = user_param['name']
+        lst_user_data.append(
             {
-                "name": param['name'],
-                roll_targ: int(param[roll_targ])
+                'name': name,
+                'user_param': user_param,
+                'state_data': state_data,
             })
 
-    lst_user_param.sort(key=lambda x: x[roll_targ])
-    lst_user_param.reverse()
-    return lst_user_param
+    lst_user_data.sort(key=lambda x: x['user_param'][roll_targ])
+    lst_user_data.reverse()
+    return lst_user_data
 
 
 def analyze_join_command(command: str) -> str:
