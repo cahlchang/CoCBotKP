@@ -129,7 +129,7 @@ def roll_skill(bot):
 
     if roll.upper() not in user_param:
         return f"{roll} その技能は覚えていません", "gray"
-    data = user_param[roll]
+    data = user_param[roll.upper()]
 
     num_rand = int(random.randint(1, 100))
     if roll.upper() in yig.config.LST_USER_STATUS_NAME:
