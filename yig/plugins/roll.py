@@ -23,7 +23,6 @@ def sanity_check(bot):
         d_san = 0
     sum_san = c_san + d_san
     message, color = get_sanc_result(bot.key, sum_san)
-
     return message, color
 
 
@@ -128,9 +127,9 @@ def roll_skill(bot):
     if roll in alias_roll.keys():
         roll = alias_roll[roll]
 
-    if roll not in user_param:
+    if roll.upper() not in user_param:
         return f"{roll} その技能は覚えていません", "gray"
-    data = user_param[roll]
+    data = user_param[roll.upper()]
 
     num_rand = int(random.randint(1, 100))
     if roll.upper() in yig.config.LST_USER_STATUS_NAME:
