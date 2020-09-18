@@ -1,8 +1,9 @@
 import requests
+import datetime
 
 
 from yig.bot import listener
-from yig.util.data import get_state_data
+from yig.util.data import get_state_data, set_state_data
 from yig.util.view import write_pc_image, get_charaimage
 import yig.config
 
@@ -13,6 +14,11 @@ def icon_save_image(bot):
     state_data = get_state_data(bot.team_id, bot.user_id)
     icon_url = bot.data_user["profile"]["image_512"]
     image_path = write_pc_image(bot.team_id, bot.user_id, state_data["pc_id"], icon_url)
+
+    tz = datetime.timezone.utc
+    now = datetime.datetime.now(tz)
+    state_data["ts"] = now.timestamp()
+    set_state_data(bot.team_id, bot.user_id, state_data)
     return "アイコンを保存しました。", yig.config.COLOR_ATTENTION
 
 

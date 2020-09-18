@@ -87,7 +87,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
                 skill_data[key] = skill_point
     sorted_skill_data = sorted(skill_data.items(), key=lambda x:x[1], reverse=True)
     block_content = []
-    image_url = get_pc_image_url(team_id, user_id, pc_id)
+    image_url = get_pc_image_url(team_id, user_id, pc_id, state_data['ts'])
     skill_message = ""
 
     def get_east_asian_width_count(text):

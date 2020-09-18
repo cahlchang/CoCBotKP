@@ -155,17 +155,18 @@ def get_charaimage(team_id, user_id, pc_id):
     return image
 
 
-def get_pc_image_url(team_id, user_id, pc_id):
-    url = f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
+def get_pc_image_url(team_id, user_id, pc_id, ts):
+    url = f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png?{ts}"
     response = requests.head(url)
     if response.status_code == 403:
         return "https://d13xcuicr0q687.cloudfront.net/public/noimage.png"
     else:
-        return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/{pc_id}.png"
+        return url
 
 
 def get_param_image_path(team_id, user_id, pc_id):
     return f"{team_id}/{user_id}/{pc_id}_param.png"
+
 
 def section_builder(lst_document):
     section_content = []

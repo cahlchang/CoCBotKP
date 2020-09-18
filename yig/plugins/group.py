@@ -1,6 +1,6 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
 from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status
-from yig.util.view import get_pc_image_url
+from yig.util.view import get_pc_image_url, divider_builder
 
 import yig.config
 import re
@@ -54,7 +54,7 @@ def session_result(bot):
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
     session_data = json.loads(read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name, state_data["pc_id"])))
     block_content = []
-    image_url = get_pc_image_url(bot.team_id, bot.user_id, state_data['pc_id'])
+    image_url = get_pc_image_url(bot.team_id, bot.user_id, state_data['pc_id'], state_data['ts'])
     chara_url = user_param["url"]
     user_content = {
         "type": "section",
@@ -108,19 +108,54 @@ def session_leave(bot):
         return "%s\nLEAVEコマンドが不正です" % bot.message, color
 
 
+@listener("kp.list", RE_MATCH_FLAG)
+def session_dex_order_alias(bot):
+    """:runner:　*kp list*\n`/cc kp list` is an alias for `kp order DEX`"""
+    bot.key = "KP ORDER DEX"
+    return session_order_wrapper(bot)
+
+
 @listener("kp.(order|sort).*", RE_MATCH_FLAG)
 def session_member_order(bot):
     """:telescope:　*kp order member*\n`/cc order [PARAM]`\n`/cc sort [PARAM]`"""
+    return session_order_wrapper(bot)
+
+
+def session_order_wrapper(bot):
     target_status = analyze_kp_order_command(bot.key)
     lst_user_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
     msg = f"{target_status}順\n"
     cnt = 0
+    block_content = []
     for user_data in lst_user_data:
         cnt += 1
-        name = user_data["name"]
-        v = user_data[target_status]
-        msg += f"{cnt}, {name} ({v}) \n"
-    return msg, yig.config.COLOR_ATTENTION
+        pc_name = user_data["name"]
+        now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_data['user_param'], user_data['state_data'])
+        dex = user_data['user_param']['DEX']
+        v = user_data['user_param'][target_status]
+        image_url = get_pc_image_url(bot.team_id,
+                                     user_data['user_id'],
+                                     user_data['user_param']['pc_id'],
+                                     user_data['state_data']['ts'])
+        chara_url = user_data['user_param']['url']
+        user_content = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (f"*No: * *{cnt}*\t*ROLL: * *{target_status}*\t*VALUE: * *{v}*\n"
+                         f"*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
+                         f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n")
+            },
+            "accessory": {
+                "type": "image",
+                "image_url": image_url,
+                "alt_text": "image"
+            }
+        }
+        block_content.append(user_content)
+        block_content.append(divider_builder())
+
+    return [{'blocks': json.dumps(block_content, ensure_ascii=False)}], None
 
 
 @listener("kp.select", RE_MATCH_FLAG)
@@ -168,6 +203,7 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, 
     write_session_data(team_id, f"{channel_name}/session.json", json.dumps(session_data, ensure_ascii=False))
     write_session_data(team_id, f"{channel_name}/{pc_id}.json" ,json.dumps([], ensure_ascii=False))
 
+
 def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
     body = read_user_data(team_id, kp_id, KP_FILE_PATH)
     dict_kp = json.loads(body)
@@ -181,18 +217,22 @@ def reduce_gamesession_user(team_id, kp_id, user_id, pc_id):
 def get_lst_player_data(team_id, user_id, roll_targ):
     dict_kp = json.loads(read_user_data(team_id, user_id, KP_FILE_PATH).decode('utf-8'))
     lst_user = dict_kp["lst_user"]
-    lst_user_param = []
+    lst_user_data = []
     for user in lst_user:
-        param = get_user_param(team_id, user[0], user[1])
-        lst_user_param.append(
+        state_data = get_state_data(team_id, user[0])
+        user_param = get_user_param(team_id, user[0], user[1])
+        name = user_param['name']
+        lst_user_data.append(
             {
-                "name": param['name'],
-                roll_targ: int(param[roll_targ])
+                'name': name,
+                'user_id': user[0],
+                'user_param': user_param,
+                'state_data': state_data,
             })
 
-    lst_user_param.sort(key=lambda x: x[roll_targ])
-    lst_user_param.reverse()
-    return lst_user_param
+    lst_user_data.sort(key=lambda x: int(x['user_param'][roll_targ]))
+    lst_user_data.reverse()
+    return lst_user_data
 
 
 def analyze_join_command(command: str) -> str:
