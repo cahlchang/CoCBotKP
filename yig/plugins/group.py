@@ -108,9 +108,20 @@ def session_leave(bot):
         return "%s\nLEAVEコマンドが不正です" % bot.message, color
 
 
+@listener("kp.list", RE_MATCH_FLAG)
+def session_dex_order_alias(bot):
+    """:runner:　*kp list*\n`/cc kp list` is an alias for `kp order DEX`"""
+    bot.key = "KP ORDER DEX"
+    return session_order_wrapper(bot)
+
+
 @listener("kp.(order|sort).*", RE_MATCH_FLAG)
 def session_member_order(bot):
     """:telescope:　*kp order member*\n`/cc order [PARAM]`\n`/cc sort [PARAM]`"""
+    return session_order_wrapper(bot)
+
+
+def session_order_wrapper(bot):
     target_status = analyze_kp_order_command(bot.key)
     lst_user_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
     msg = f"{target_status}順\n"
