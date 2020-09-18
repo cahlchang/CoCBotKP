@@ -1,6 +1,6 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
 from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status
-from yig.util.view import get_pc_image_url
+from yig.util.view import get_pc_image_url, divider_builder
 
 import yig.config
 import re
