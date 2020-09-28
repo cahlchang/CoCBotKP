@@ -64,7 +64,7 @@ def gui_receiver(bot):
 	    "text": {
 		"type": "mrkdwn",
                 "text": f"*{skill_name}* target *skill_targ*",
-		"emoji": true
+		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
 
