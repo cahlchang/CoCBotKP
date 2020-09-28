@@ -83,6 +83,7 @@ def gui_receiver(bot):
 	    },
 	    "options": option_list
 	}
+    }
     block_content = []
     block_content.append({
         "type": "section",
