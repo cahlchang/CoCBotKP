@@ -60,8 +60,9 @@ class Bot(object):
                    body):
         contents = body.split("=")
         print(contents[-1])
-        param_json = json.dumps(contents[-1])
+        param_json = json.dumps(urllib.parse.unquote(contents[-1]))
         print(param_json)
+
 
     def init_plugins(self):
         module_list = glob('yig/plugins/*.py')
@@ -69,6 +70,7 @@ class Bot(object):
             module = module.split(".")[0]
             print(".".join(module.split("/")))
             import_module(".".join(module.split("/")))
+
 
     def install_bot(self, event):
         if event["params"]["path"] == {}:
