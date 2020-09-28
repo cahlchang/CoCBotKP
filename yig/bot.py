@@ -67,6 +67,7 @@ class Bot(object):
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
+        print(command_manager)
         command_manager[KEY_MATCH_FLAG]["gui modal view"](self)
 
 
