@@ -4,7 +4,7 @@ import json
 
 
 from yig.bot import listener, KEY_MATCH_FLAG
-from yig.util.data import request_modal, get_user_param
+from yig.util.data import get_user_param
 
 
 @listener("", KEY_MATCH_FLAG)
