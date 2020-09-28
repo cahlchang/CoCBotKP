@@ -60,7 +60,7 @@ class Bot(object):
                    body):
         contents = body.split("=")
         print(contents[-1])
-        param_json = json.loads(contents[-1])
+        param_json = json.dumps(contents[-1])
         print(param_json)
 
     def init_plugins(self):
