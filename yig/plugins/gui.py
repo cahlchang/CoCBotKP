@@ -70,7 +70,7 @@ def gui_receiver(bot):
                 "type": "plain_text",
                 "text": "Just a modal"
                 }
-        },
-        'blocks': json.dumps(block_content, ensure_ascii=False)}}
+            },
+            'blocks': json.dumps(block_content, ensure_ascii=False)}
 
     return payload, None
