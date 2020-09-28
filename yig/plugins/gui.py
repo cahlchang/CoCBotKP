@@ -1,7 +1,7 @@
 import yig.config
 import re
 import json
-
+import requests
 
 from yig.bot import listener, KEY_MATCH_FLAG
 from yig.util.data import get_user_param
