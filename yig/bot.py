@@ -56,7 +56,7 @@ class Bot(object):
         self.data_user = json.loads(res.text)
 
 
-    def init_param(self,
+    def init_modal(self,
                    body):
         contents = body.split("=")
         param_json = json.loads(contents[-1])
