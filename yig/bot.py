@@ -68,6 +68,12 @@ class Bot(object):
         self.response_url = param_json["response_url"]
         print(command_manager)
         self.key = "VIEW_MODAL"
+        payload = {"token": self.get_token(self.team_id),
+                   "user": self.user_id}
+        res = requests.get("https://slack.com/api/users.profile.get",
+                           params=payload,
+                           headers={'Content-Type': 'application/json'})
+        self.data_user = json.loads(res.text)
         self.dispatch()
         # view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
         # view_function(self)
