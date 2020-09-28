@@ -60,7 +60,7 @@ class Bot(object):
                    body):
         contents = body.split("=")
         print(contents[-1])
-        param_json = json.dumps(urllib.parse.unquote(contents[-1])).encode("utf-8").decode("unicode-escape").strip('"\n ')
+        param_json = json.loads(urllib.parse.unquote(contents[-1])).encode("utf-8").decode("unicode-escape").strip('"\n ')
         print(param_json)
         self.team_Id = param_json["team"]["id"]
         self.channel_id = param_json["channel"]["id"]
