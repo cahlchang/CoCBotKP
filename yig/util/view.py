@@ -38,6 +38,7 @@ def write_pc_image(team_id, user_id, pc_id, url):
 
     return image_org_key
 
+
 def create_param_image(team_id, user_id, pc_id, user_param):
     # math define
     n = 8
