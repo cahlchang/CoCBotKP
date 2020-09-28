@@ -55,6 +55,13 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
+
+    def init_param(self,
+                   body):
+        contents = body.split("=")
+        param_json = json.loads(contents[-1])
+        print(param_json)
+
     def init_plugins(self):
         module_list = glob('yig/plugins/*.py')
         for module in module_list:
