@@ -56,10 +56,11 @@ def gui_receiver(bot):
 
     option_list = []
     for skill in skill_list:
+        print(skill)
         for i, content in enumerate(skill):
             skill_name = content[0]
             skill_targ = content[1]
-
+            
         option_list.append({
 	    "text": {
 		"type": "mrkdwn",
