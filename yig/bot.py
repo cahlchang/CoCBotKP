@@ -62,8 +62,9 @@ class Bot(object):
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         print(type(param_json))
-        self.team_Id = param_json["team"]["id"]
-        self.channel_id = param_json["channel"]["id"]
+        self.team_Id = param_json["user"]["team_id"]
+        print(self.team_id)
+        self.channel_id = param_json["container"]["channel_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
