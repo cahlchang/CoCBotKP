@@ -201,6 +201,7 @@ def view_modal(bot):
             },
             'blocks': json.dumps(block_content, ensure_ascii=False)}
     res = requests.post(command_url, params=payload)
+    print(res.text)
     return
 
 
