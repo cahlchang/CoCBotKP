@@ -59,7 +59,6 @@ class Bot(object):
     def init_modal(self,
                    body):
         contents = body.split("=")
-        print(contents[-1])
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         self.team_Id = param_json["team"]["id"]
@@ -68,7 +67,8 @@ class Bot(object):
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
         print(command_manager)
-        command_manager[KEY_MATCH_FLAG]["gui modal view"](self)
+        view_function = filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG])[0]
+        view_function(self)
 
 
     def init_plugins(self):
