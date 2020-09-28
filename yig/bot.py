@@ -76,7 +76,6 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
-        view_modal(self)
         view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
 
