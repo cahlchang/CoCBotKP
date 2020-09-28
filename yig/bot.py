@@ -167,6 +167,7 @@ class Bot(object):
         s3_resource = boto3.resource('s3')
         bucket = s3_resource.Bucket(yig.config.AWS_S3_BUCKET_NAME)
         key_ws = "%s/workspace.json" % team_id
+        print(key_ws)
         obj = bucket.Object(key_ws)
         response = obj.get()
         body = response['Body'].read()
