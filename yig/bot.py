@@ -5,6 +5,8 @@ import urllib.parse
 
 import yig.config
 
+import logging
+
 import re
 import json
 import boto3
@@ -62,6 +64,8 @@ class Bot(object):
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         print(type(param_json))
+        logging.info(param_json)
+
         self.team_Id = param_json["user"]["team_id"]
         print(self.team_id)
         self.channel_id = param_json["container"]["channel_id"]
