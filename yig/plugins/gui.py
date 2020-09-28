@@ -60,6 +60,7 @@ def gui_receiver(bot):
         skill_targ = skill[1]
         if skill_name == "arms_name":
             break
+        print(skill_name)
         option_list.append({
 	    "text": {
 		"type": "mrkdwn",
