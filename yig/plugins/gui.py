@@ -55,10 +55,12 @@ def gui_receiver(bot):
             skill_list.append((k, v[-1]))
 
     option_list = []
+    cnt = 0
     for skill in skill_list:
+        cnt += 1
         skill_name = skill[0]
         skill_targ = skill[1]
-        if skill_name == "arms_name":
+        if skill_name == "arms_name" or cnt == 15:
             break
         print(skill_name)
         option_list.append({
