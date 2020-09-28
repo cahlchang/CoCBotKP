@@ -62,11 +62,11 @@ def gui_receiver(bot):
         option_list.append({
 	    "text": {
 		"type": "mrkdwn",
-                "text": f"*{skill_name}* target *skill_targ*",
+                "text": f"*{skill_name}* target *{skill_targ}*",
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
-
+    print(option_list)
     roll_content = {
 	"type": "section",
 	"text": {
