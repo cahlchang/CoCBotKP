@@ -58,7 +58,8 @@ def gui_receiver(bot):
     for skill in skill_list:
         skill_name = skill[0]
         skill_targ = skill[1]
-
+        if skill_name == "arms_name":
+            break
         option_list.append({
 	    "text": {
 		"type": "mrkdwn",
@@ -66,7 +67,7 @@ def gui_receiver(bot):
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
-    print(option_list)
+
     roll_content = {
 	"type": "section",
 	"text": {
