@@ -59,6 +59,7 @@ class Bot(object):
     def init_modal(self,
                    body):
         contents = body.split("=")
+        print(contents[-1])
         param_json = json.loads(contents[-1])
         print(param_json)
 
