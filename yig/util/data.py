@@ -169,30 +169,31 @@ def view_modal(bot):
         "channel": bot.channel_id
     }
     view_content = {
-    "type": "modal",
-    "callback_id": "modal-identifier",
-    "title": {
-      "type": "plain_text",
-      "text": "Just a modal"
-    },
-    "blocks": [
-      {
-        "type": "section",
-        "block_id": "section-identifier",
-        "text": {
-          "type": "mrkdwn",
-          "text": "*Welcome* to ~my~ Block Kit _modal_!"
-        },
-        "accessory": {
-          "type": "button",
-          "text": {
+        "type": "modal",
+        "callback_id": "modal-identifier",
+        "title": {
             "type": "plain_text",
-            "text": "Just a button"
-          },
-          "action_id": "button-identifier"
-        }
-      }
-    ]
+            "text": "Just a modal"
+        },
+        "blocks": [
+            {
+                "type": "section",
+                "block_id": "section-identifier",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Welcome* to ~my~ Block Kit _modal_!"
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Just a button"
+                    },
+                    "action_id": "button-identifier"
+                }
+            }
+        ]
+    }
 
     payload = {
         "token": bot.token,
