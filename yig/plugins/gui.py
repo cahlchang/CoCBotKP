@@ -124,5 +124,5 @@ def gui_receiver(bot):
     }
 
     print(payload)
-    res = requests.post(command_url, params=payload)
+    res = requests.post(command_url, data=payload)
     print(res.text)
