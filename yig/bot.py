@@ -27,7 +27,7 @@ command_manager = {
 
 class Bot(object):
     global command_list
-    user_id = response_url = key = message = token = data_user = channel_id = channel_name = team_id = ""
+    user_id = response_url = key = message = token = data_user = channel_id = channel_name = team_id = trigger_id = ""
 
     def __init__(self):
         self.init_plugins()
@@ -62,6 +62,12 @@ class Bot(object):
         print(contents[-1])
         param_json = json.dumps(urllib.parse.unquote(contents[-1])).encode("utf-8").decode("unicode-escape").strip('"\n ')
         print(param_json)
+        self.team_Id = param_json["team"]["id"]
+        self.channel_id = param_json["channel"]["id"]
+        self.user_id = param_json["user"]["id"]
+        self.trigger_id = param_json["trigger_id"]
+        self.response_url = param_json["response_url"]
+        command_manager[KEY_MATCH_FLAG]["gui modal view"](self)
 
 
     def init_plugins(self):
