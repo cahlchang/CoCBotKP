@@ -60,13 +60,13 @@ def gui_receiver(bot):
         cnt += 1
         skill_name = skill[0]
         skill_targ = skill[1]
-        if skill_name == "arms_name" or cnt == 15:
+        if skill_name == "arms_name":
             break
         print(skill_name)
         option_list.append({
 	    "text": {
 		"type": "plain_text",
-                "text": f"*{skill_name}* target *{skill_targ}*",
+                "text": f"{skill_name} >= {skill_targ}",
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
