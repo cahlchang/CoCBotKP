@@ -67,8 +67,10 @@ class Bot(object):
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
         print(command_manager)
-        view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
-        view_function(self)
+        self.key = "VIEW_MODAL"
+        self.dispatch()
+        # view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
+        # view_function(self)
 
 
     def init_plugins(self):
