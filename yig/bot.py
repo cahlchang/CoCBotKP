@@ -1,6 +1,6 @@
 from importlib import import_module
 from glob import glob
-from yig.util.data import post_command, post_result, format_as_command, view_modal
+from yig.util.data import post_command, post_result, format_as_command
 import urllib.parse
 
 import yig.config
@@ -77,6 +77,8 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
         view_modal(self)
+        view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
+        view_function(self)
 
 
     def init_plugins(self):
