@@ -29,6 +29,9 @@ def bootstrap(event: dict, _context) -> str:
     random.seed()
     body = event["body"]
     logging.info(body)
+    if "trigger_id" in body:
+        bot.init_modal(body)
+        return None
 
     body_split = body.split("&")
     evt_slack = {}
