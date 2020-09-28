@@ -24,7 +24,7 @@ def gui_hook(bot):
                     "type": "plain_text",
                     "text": "Push button",
                 },
-                "action_id": "button-identifier",
+                "action_id": "modal-view-identifier",
             }
         }
     ]
