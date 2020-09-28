@@ -65,9 +65,8 @@ class Bot(object):
         print(param_json)
         print(type(param_json))
         logging.info(param_json)
-
+        print(json.dumps(urllib.parse.unquote(contents[-1]), sort_keys=True, indent=4))
         self.team_Id = param_json["user"]["team_id"]
-        print(self.team_id)
         self.channel_id = param_json["container"]["channel_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
