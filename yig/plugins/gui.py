@@ -66,7 +66,7 @@ def gui_receiver(bot):
         option_list.append({
 	    "text": {
 		"type": "plain_text",
-                "text": f"{skill_name} >= {skill_targ}",
+                "text": f"{skill_name} <= {skill_targ}",
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
