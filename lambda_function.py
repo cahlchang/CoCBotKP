@@ -28,6 +28,8 @@ def bootstrap(event: dict, _context) -> str:
         return "ok"
     random.seed()
     body = event["body"]
+    logging.info(body)
+
     body_split = body.split("&")
     evt_slack = {}
     for datum in body_split:
