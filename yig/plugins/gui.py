@@ -65,8 +65,7 @@ def gui_receiver(bot):
         print(skill_name)
         option_list.append({
 	    "text": {
-		"type": "mrkdwn",
-                "action_id": f"{skill_name}",
+		"type": "plain_text",
                 "text": f"*{skill_name}* target *{skill_targ}*",
 		"emoji": True
 	    },
