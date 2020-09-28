@@ -39,7 +39,7 @@ def gui_hook(bot):
     return payload, None
 
 
-@listener("gui modal view", KEY_MATCH_FLAG)
+@listener("VIEW_MODAL", KEY_MATCH_FLAG)
 def gui_receiver(bot):
     """dui"""
     block_content = [
