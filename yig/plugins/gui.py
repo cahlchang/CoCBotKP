@@ -70,7 +70,7 @@ def gui_receiver(bot):
     roll_content = {
 	"type": "section",
 	"text": {
-	    "type": "mrkdwn",
+	    "type": "plain_text",
 	    "text": "Select the skill you want to roll"
 	},
 	"accessory": {
