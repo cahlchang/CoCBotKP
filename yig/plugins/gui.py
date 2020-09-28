@@ -47,6 +47,61 @@ def gui_receiver(bot):
         "token": bot.token,
         "channel": bot.channel_id
     }
+    user_param = get_user_param(bot.team_id, bot.user_id)
+
+    skill_list = []
+    for k, v in user_param.items():
+        if isinstance(v, list):
+            skill_list.append((k, v[-1]))
+
+    option_list = []
+    for skill in skill_list:
+        for i, content in enumerate(skill):
+            skill_name = content[0]
+            skill_targ = content[1]
+
+        option_list.append({
+	    "text": {
+		"type": "mrkdwn",
+                "text": f"*{skill_name}* target *skill_targ*",
+		"emoji": true
+	    },
+	    "value": f"{skill_name}" })
+
+    roll_content = {
+	"type": "section",
+	"text": {
+	    "type": "mrkdwn",
+	    "text": "Select the skill you want to roll"
+	},
+	"accessory": {
+	    "type": "static_select",
+	    "placeholder": {
+		"type": "plain_text",
+		"text": "Select an item",
+		"emoji": true
+	    },
+	    "options": option_list
+	}
+    block_content = []
+    block_content.append({
+        "type": "section",
+        "block_id": "charasheet_init",
+        "text": {
+            "type": "mrkdwn",
+            "text": "init charasheet"
+        },
+        "accessory": {
+            "type": "input",
+            "text": {
+                "type": "plain_text",
+                "text": "https"
+            },
+            "action_id": "button-identifier"
+        }
+    })
+    block_content.append(roll_content)
+
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier",
@@ -54,24 +109,7 @@ def gui_receiver(bot):
             "type": "plain_text",
             "text": "Just a modal"
         },
-        "blocks": [
-            {
-                "type": "section",
-                "block_id": "section-identifier",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "*Welcome* to ~my~ Block Kit _modal_!"
-                },
-                "accessory": {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Just a button"
-                    },
-                    "action_id": "button-identifier"
-                }
-            }
-        ]
+        "blocks": block_content
     }
 
     payload = {
