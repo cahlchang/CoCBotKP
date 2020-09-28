@@ -67,7 +67,7 @@ class Bot(object):
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
         print(command_manager)
-        view_function = filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG])[0]
+        view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]
         view_function(self)
 
 
