@@ -165,8 +165,8 @@ def get_basic_status(user_param, state_data):
 def view_modal(bot):
     command_url = "https://slack.com/api/views.open"
     payload = {
-        "token": token,
-        "channel": channel_id
+        "token": bot.token,
+        "channel": bot.channel_id
     }
     block_content = [
         {
@@ -188,8 +188,8 @@ def view_modal(bot):
     ]
 
     payload = {
-        "token": token,
-        "channel": channel_id,
+        "token": bot.token,
+        "channel": bot.channel_id,
         "trigger_id": bot.trigger_id,
         "view": {
             "type": "modal",
