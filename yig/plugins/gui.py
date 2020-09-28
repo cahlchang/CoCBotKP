@@ -79,7 +79,7 @@ def gui_receiver(bot):
 	    "placeholder": {
 		"type": "plain_text",
 		"text": "Select an item",
-		"emoji": true
+		"emoji": True
 	    },
 	    "options": option_list
 	}
