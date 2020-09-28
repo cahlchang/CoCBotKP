@@ -162,6 +162,47 @@ def get_basic_status(user_param, state_data):
     db = user_param['DB']
     return now_hp, max_hp, now_mp, max_mp, now_san, max_san, db
 
+def view_modal(bot):
+    command_url = "https://slack.com/api/views.open"
+    payload = {
+        "token": token,
+        "channel": channel_id
+    }
+    block_content = [
+        {
+            "type": "section",
+            "block_id": "section-identifier",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Welcome* to ~my~ Block Kit _modal_!"
+            },
+            "accessory": {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Just a button"
+                },
+                "action_id": "button-identifier"
+            }
+        }
+    ]
+
+    payload = {
+        "token": token,
+        "channel": channel_id,
+        "trigger_id": bot.trigger_id,
+        "view": {
+            "type": "modal",
+            "callback_id": "modal-identifier",
+            "title": {
+                "type": "plain_text",
+                "text": "Just a modal"
+                }
+            },
+            'blocks': json.dumps(block_content, ensure_ascii=False)}
+    res = requests.post(command_url, params=payload)
+    return
+
 
 def format_as_command(text: str) -> str:
     """

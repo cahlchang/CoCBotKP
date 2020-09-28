@@ -1,6 +1,6 @@
 from importlib import import_module
 from glob import glob
-from yig.util.data import post_command, post_result, format_as_command
+from yig.util.data import post_command, post_result, format_as_command, view_modal
 import urllib.parse
 
 import yig.config
@@ -76,9 +76,7 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
-        self.dispatch()
-        # view_function = list(filter(lambda x: x["command"] == "gui modal view", command_manager[KEY_MATCH_FLAG]))[0]["function"]
-        # view_function(self)
+        view_modal(self)
 
 
     def init_plugins(self):
@@ -117,6 +115,7 @@ class Bot(object):
                 ContentType='text/plane'
             )
             return "ok"
+
 
     def dispatch(self):
         def process():
