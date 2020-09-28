@@ -88,22 +88,22 @@ def gui_receiver(bot):
 	}
     }
     block_content = []
-    block_content.append({
-        "type": "section",
-        "block_id": "charasheet_init",
-        "text": {
-            "type": "mrkdwn",
-            "text": "init charasheet"
-        },
-        "accessory": {
-            "type": "input",
-            "text": {
-                "type": "plain_text",
-                "text": "https"
-            },
-            "action_id": "button-identifier"
-        }
-    })
+    # block_content.append({
+    #     "type": "section",
+    #     "block_id": "charasheet_init",
+    #     "text": {
+    #         "type": "mrkdwn",
+    #         "text": "init charasheet"
+    #     },
+    #     "accessory": {
+    #         "type": "input",
+    #         "text": {
+    #             "type": "plain_text",
+    #             "text": "https"
+    #         },
+    #         "action_id": "button-identifier"
+    #     }
+    # })
     block_content.append(roll_content)
 
     view_content = {
