@@ -34,8 +34,7 @@ class Bot(object):
     def __init__(self):
         self.init_plugins()
 
-    def init_param(self,
-                   evt_slack):
+    def init_param(self, evt_slack):
 
         self.user_id = evt_slack["user_id"]
         self.response_url = urllib.parse.unquote(evt_slack["response_url"])
@@ -58,14 +57,13 @@ class Bot(object):
         self.data_user = json.loads(res.text)
 
 
-    def init_modal(self,
-                   body):
+    def init_modal(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         print(type(param_json))
         logging.info(param_json)
-        print(json.decode(urllib.parse.unquote(contents[-1]))
+        print(json.decode(urllib.parse.unquote(contents[-1])))
         self.team_Id = param_json["user"]["team_id"]
         self.channel_id = param_json["container"]["channel_id"]
         self.user_id = param_json["user"]["id"]
