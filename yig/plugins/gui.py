@@ -107,6 +107,11 @@ def gui_receiver(bot):
             "type": "plain_text",
             "text": "Call Of Cthulhu GUI Mode"
         },
+        "submit": {
+	    "type": "plain_text",
+	    "text": "Submit",
+	    "emoji": True
+	},
         "blocks": block_content
     }
 
