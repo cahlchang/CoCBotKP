@@ -88,7 +88,6 @@ class Bot(object):
         self.channel_id = param_json["view"]["callback_id"].split(":")[-1]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
-        self.response_url = param_json["response_url"]
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
         dispatch(self)
