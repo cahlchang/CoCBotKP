@@ -89,7 +89,7 @@ def gui_receiver(bot):
     }
     block_content = []
     block_content.append({
-        "type": "type",
+        "type": "action",
 	"element": {
 	    "type": "plain_text_input"
 	},
