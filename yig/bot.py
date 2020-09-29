@@ -88,6 +88,12 @@ class Bot(object):
         self.channel_id = param_json["view"]["callback_id"].split(":")[-1]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
+        payload = {"token": self.get_token(self.team_id),
+                   "user": self.user_id}
+        res = requests.get("https://slack.com/api/users.profile.get",
+                           params=payload,
+                           headers={'Content-Type': 'application/json'})
+        self.data_user = json.loads(res.text)
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
 
