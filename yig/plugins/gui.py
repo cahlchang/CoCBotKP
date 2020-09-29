@@ -43,10 +43,6 @@ def gui_hook(bot):
 def gui_receiver(bot):
     """dui"""
     command_url = "https://slack.com/api/views.open"
-    payload = {
-        "token": bot.token,
-        "channel": bot.channel_id
-    }
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     skill_list = []
@@ -114,7 +110,6 @@ def gui_receiver(bot):
     }
 
 
-    
     block_content = []
     block_content.append({
         "type": "input",
@@ -132,7 +127,7 @@ def gui_receiver(bot):
 
     view_content = {
         "type": "modal",
-        "callback_id": "modal-identifier",
+        "callback_id": "modal-identifier:%s" % bot.channel_id,
         "title": {
             "type": "plain_text",
             "text": "Call Of Cthulhu GUI Mode"
