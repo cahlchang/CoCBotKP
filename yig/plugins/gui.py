@@ -101,10 +101,10 @@ def gui_receiver(bot):
 	}
     }
 
-    param_list = []
-    lst_param_name = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
-    for param in param_list:
-        param_list.append({
+    param_content = []
+    param_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
+    for param in list_param_name:
+        param_content.append({
 	    "text": {
 		"type": "plain_text",
                 "text": f"{param}",
