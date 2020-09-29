@@ -57,7 +57,6 @@ def gui_receiver(bot):
     option_list = []
     cnt = 0
     for skill in skill_list:
-        cnt += 1
         skill_name = skill[0]
         skill_targ = skill[1]
         if skill_name == "arms_name":
@@ -69,7 +68,6 @@ def gui_receiver(bot):
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
-
     roll_content = {
 	"type": "section",
 	"text": {
@@ -86,6 +84,34 @@ def gui_receiver(bot):
 	    "options": option_list
 	}
     }
+    param_content = {
+	"type": "section",
+	"text": {
+	    "type": "plain_text",
+	    "text": "Select the param you want to roll"
+	},
+	"accessory": {
+	    "type": "static_select",
+	    "placeholder": {
+		"type": "plain_text",
+		"text": "List of params you have",
+		"emoji": True
+	    },
+	    "options": param_list
+	}
+    }
+
+    param_list = []
+    lst_param_name = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
+    for param in param_list:
+        param_list.append({
+	    "text": {
+		"type": "plain_text",
+                "text": f"{param}",
+		"emoji": True
+	    },
+	    "value": f"{param}" })
+
     block_content = []
     block_content.append({
         "type": "input",
@@ -99,6 +125,8 @@ def gui_receiver(bot):
 	}})
     block_content.append(divider_builder())
     block_content.append(roll_content)
+    block_content.append(divider_builder())
+    block_content.append(param_content)
 
     view_content = {
         "type": "modal",
