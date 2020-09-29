@@ -90,7 +90,8 @@ class Bot(object):
         self.trigger_id = param_json["trigger_id"]
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
-        dispatch(self)
+
+        self.dispatch(self)
 
 
     def init_plugins(self):
