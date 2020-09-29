@@ -97,7 +97,7 @@ def gui_receiver(bot):
 	    "type": "plain_text",
 	    "text": "Init charasheet",
 	    "emoji": False
-	})
+	}})
     block_content.append(divider_builder())
     block_content.append(roll_content)
 
