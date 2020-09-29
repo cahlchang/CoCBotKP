@@ -85,7 +85,7 @@ def gui_receiver(bot):
 	}
     }
 
-    param_name_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
+    param_name_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "幸運", "知識", "アイデア"]
     param_list = []
     for param in param_name_list:
         param_list.append({
@@ -113,6 +113,8 @@ def gui_receiver(bot):
 	}
     }
 
+
+    
     block_content = []
     block_content.append({
         "type": "input",
@@ -126,7 +128,6 @@ def gui_receiver(bot):
 	}})
     block_content.append(divider_builder())
     block_content.append(roll_content)
-    block_content.append(divider_builder())
     block_content.append(param_content)
 
     view_content = {

@@ -60,15 +60,11 @@ class Bot(object):
     def init_modal(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
-        print(param_json)
-        print(type(param_json))
-        logging.info(param_json)
         self.team_id = param_json["user"]["team_id"]
         self.channel_id = param_json["container"]["channel_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
-        print(command_manager)
         self.key = "VIEW_MODAL"
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
@@ -78,6 +74,24 @@ class Bot(object):
         self.data_user = json.loads(res.text)
         view_function = list(filter(lambda x: x["command"] == "VIEW_MODAL", command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
+        payload = {"token": self.get_token(self.team_id),
+                   "user": self.user_id}
+        res = requests.get("https://slack.com/api/users.profile.get",
+                           params=payload,
+                           headers={'Content-Type': 'application/json'})
+
+
+    def dispatch_modal(self, body):
+        contents = body.split("=")
+        param_json = json.loads(urllib.parse.unquote(contents[-1]))
+        self.team_id = param_json["user"]["team_id"]
+        self.channel_id = param_json["container"]["channel_id"]
+        self.user_id = param_json["user"]["id"]
+        self.trigger_id = param_json["trigger_id"]
+        self.response_url = param_json["response_url"]
+        if "static_select" in body:
+            self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
+        dispatch(self)
 
 
     def init_plugins(self):
