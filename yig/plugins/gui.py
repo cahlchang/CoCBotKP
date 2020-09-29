@@ -84,6 +84,18 @@ def gui_receiver(bot):
 	    "options": option_list
 	}
     }
+
+    param_name_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
+    param_list = []
+    for param in param_name_list:
+        param_list.append({
+	    "text": {
+		"type": "plain_text",
+                "text": f"{param}",
+		"emoji": True
+	    },
+	    "value": f"{param}" })
+
     param_content = {
 	"type": "section",
 	"text": {
@@ -100,17 +112,6 @@ def gui_receiver(bot):
 	    "options": param_list
 	}
     }
-
-    param_content = []
-    param_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
-    for param in param_list:
-        param_content.append({
-	    "text": {
-		"type": "plain_text",
-                "text": f"{param}",
-		"emoji": True
-	    },
-	    "value": f"{param}" })
 
     block_content = []
     block_content.append({
