@@ -5,7 +5,7 @@ import requests
 
 from yig.bot import listener, KEY_MATCH_FLAG
 from yig.util.data import get_user_param
-
+from yig.util.view import divider_builder
 
 @listener("", KEY_MATCH_FLAG)
 def gui_hook(bot):
@@ -81,29 +81,24 @@ def gui_receiver(bot):
 	    "type": "static_select",
 	    "placeholder": {
 		"type": "plain_text",
-		"text": "Select an item",
+		"text": "List of skills you have",
 		"emoji": True
 	    },
 	    "options": option_list
 	}
     }
     block_content = []
-    # block_content.append({
-    #     "type": "section",
-    #     "block_id": "charasheet_init",
-    #     "text": {
-    #         "type": "mrkdwn",
-    #         "text": "init charasheet"
-    #     },
-    #     "accessory": {
-    #         "type": "input",
-    #         "text": {
-    #             "type": "plain_text",
-    #             "text": "https"
-    #         },
-    #         "action_id": "button-identifier"
-    #     }
-    # })
+    block_content.append({
+        "type": "type",
+	"element": {
+	    "type": "plain_text_input"
+	},
+        "label": {
+	    "type": "plain_text",
+	    "text": "Init charasheet",
+	    "emoji": False
+	})
+    block_content.append(divider_builder())
     block_content.append(roll_content)
 
     view_content = {
@@ -111,7 +106,7 @@ def gui_receiver(bot):
         "callback_id": "modal-identifier",
         "title": {
             "type": "plain_text",
-            "text": "Just a modal"
+            "text": "Call Of Cthulhu GUI Mode"
         },
         "blocks": block_content
     }
