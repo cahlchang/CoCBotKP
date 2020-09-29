@@ -91,7 +91,7 @@ class Bot(object):
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
 
-        self.dispatch(self)
+        self.dispatch()
 
 
     def init_plugins(self):
