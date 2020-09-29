@@ -62,7 +62,6 @@ def gui_receiver(bot):
         skill_targ = skill[1]
         if skill_name == "arms_name":
             break
-        print(skill_name)
         option_list.append({
 	    "text": {
 		"type": "plain_text",
@@ -89,7 +88,7 @@ def gui_receiver(bot):
     }
     block_content = []
     block_content.append({
-        "type": "action",
+        "type": "input",
 	"element": {
 	    "type": "plain_text_input"
 	},
