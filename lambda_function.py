@@ -33,9 +33,8 @@ def bootstrap(event: dict, _context) -> str:
         bot.init_modal(body)
         return None
 
-    #取り敢えず
     if "selected_option" in body:
-        bot.dispatch_modal(body)
+        bot.confirm_modal(body)
         return None
 
     body_split = body.split("&")

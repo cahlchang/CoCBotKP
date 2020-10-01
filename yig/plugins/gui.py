@@ -47,7 +47,7 @@ def gui_receiver(bot):
 
     block_content = []
 
-    block_content.append(build_input_content('Init your character sheet'))
+    block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_button_content('San Check', 'Your Sanity check'))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
@@ -79,6 +79,7 @@ def gui_receiver(bot):
 	    "text": "Init Your Charasheet.",
 	    "emoji": True
 	},
+        "private_metadata": bot.channel_id,
         "blocks": block_content
     }
 
@@ -93,11 +94,62 @@ def gui_receiver(bot):
     res = requests.post(command_url, data=payload)
     print(res.text)
 
-def build_input_content(describe):
+
+@listener("CONFIRM_VIEW_SELECT_MODAL", KEY_MATCH_FLAG)
+def gui_confirm_receiver(bot):
+    """con"""
+    command_url = "https://slack.com/api/views.push"
+    user_param = get_user_param(bot.team_id, bot.user_id)
+
+    block_content = []
+
+    block_content.append(build_input_content('Init your character sheet'))
+    block_content.append(build_plain_text_content("Do you want to add a correction value?"))
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal-identifier:%s" % bot.channel_id,
+        "title": {
+            "type": "plain_text",
+            "text": "Call Of Cthulhu GUI Mode"
+        },
+        "submit": {
+	    "type": "plain_text",
+	    "text": "Init Your Charasheet.",
+	    "emoji": True
+	},
+        "private_metadata": bot.channel_id,
+        "blocks": block_content
+    }
+
+    payload = {
+        "token": bot.token,
+        "channel": bot.channel_id,
+        "trigger_id": bot.trigger_id,
+        "view": json.dumps(view_content, ensure_ascii=False)
+    }
+
+    print(payload)
+    res = requests.post(command_url, data=payload)
+    print(res.text)
+
+
+def build_plain_text_contentn(text):
+    return {
+	"type": "section",
+	"text": {
+	    "type": "plain_text",
+	    "text": text,
+	    "emoji": true
+	}
+    }
+
+
+def build_input_content(describe, initial_value):
     return {
         "type": "input",
 	"element": {
-	    "type": "plain_text_input"
+	    "type": "plain_text_input",
+            "initial_value": initial_value
 	},
         "label": {
 	    "type": "plain_text",
