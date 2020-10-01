@@ -153,18 +153,25 @@ def clear_view(bot):
 
 def build_channel_select_content():
     return {
-	"type": "actions",
-	"elements": [
-	    {
-		"type": "conversations_select",
-                "default_to_current_conversation": True,
-		"placeholder": {
-		    "type": "plain_text",
-		    "text": "Select private conversation",
-		    "emoji": True
-		}
-	    }
-	]
+	"type": "section",
+	"text": {
+	    "type": "plain_text",
+	    "text": f"Post channel"
+	},
+	"accessory": {
+	    "type": "actions",
+	    "elements": [
+	        {
+		    "type": "conversations_select",
+                    "default_to_current_conversation": True,
+		    "placeholder": {
+		        "type": "plain_text",
+		        "text": "Select private conversation",
+		        "emoji": True
+		    }
+	        }
+	    ]
+        }
     }
 
 def build_plain_text_content(text):
