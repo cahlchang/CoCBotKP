@@ -59,7 +59,7 @@ def gui_receiver(bot):
     block_content.append(build_param_content())
     block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_button_content('saveimg', 'Save your icon image'))
-    block_content.append(build_button_content('loadimg', 'Load your icon image'))
+    block_content.append(build_button_content('help', 'More command'))
 
     block_content.append(divider_builder())
 
