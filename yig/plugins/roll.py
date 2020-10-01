@@ -42,7 +42,7 @@ def hide_roll(bot):
                  bot.channel_id,
                  bot.team_id,
                  bot.user_id)
-
+    print(bot.key)
     def post_hide(user_id):
         post_url = 'https://slack.com/api/chat.postMessage'
         state_data = get_state_data(bot.team_id, bot.user_id)
