@@ -133,7 +133,7 @@ def gui_confirm_receiver(bot):
     print(res.text)
 
 
-def build_plain_text_contentn(text):
+def build_plain_text_content(text):
     return {
 	"type": "section",
 	"text": {
