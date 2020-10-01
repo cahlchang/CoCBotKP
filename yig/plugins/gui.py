@@ -46,7 +46,7 @@ def gui_receiver(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
-
+    block_content.append(build_channel_select_content())
     block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_button_content('San Check', 'Your Sanity check'))
@@ -151,6 +151,20 @@ def clear_view(bot):
     }
     
 
+def build_channel_select_content():
+    return {
+	"type": "actions",
+	"elements": [
+	    {
+		"type": "conversations_select",
+		"placeholder": {
+		    "type": "plain_text",
+		    "text": "Select private conversation",
+		    "emoji": True
+		}
+	    }
+	]
+    }
 
 def build_plain_text_content(text):
     return {
