@@ -42,7 +42,7 @@ def gui_hook(bot):
 @listener("VIEW_MODAL", KEY_MATCH_FLAG)
 def gui_receiver(bot):
     """dui"""
-    command_url = "https://slack.com/api/views.open"
+    command_url = "https://slack.com/api/views.update"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
@@ -98,7 +98,7 @@ def gui_receiver(bot):
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_receiver(bot):
     """con"""
-    command_url = "https://slack.com/api/views.open"
+    command_url = "https://slack.com/api/views.update"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
