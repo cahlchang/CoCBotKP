@@ -57,6 +57,7 @@ def gui_receiver(bot):
     block_content.append(build_skill_content(user_param))
     block_content.append(build_skill_content(user_param, 'hide '))
     block_content.append(build_param_content())
+    block_content.append(divider_builder())
     block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_button_content('saveimg', 'Save your icon image'))
     block_content.append(build_button_content('help', 'More command'))
