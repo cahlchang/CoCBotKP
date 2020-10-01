@@ -96,7 +96,29 @@ class Bot(object):
         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
 
-#        self.dispatch()
+
+    def modal_dispatch(self, body):
+        contents = body.split("=")
+        param_json = json.loads(urllib.parse.unquote(contents[-1]))
+        print(param_json)
+        self.team_id = param_json["user"]["team_id"]
+        self.channel_id = param_json["view"]["private_metadata"]
+        self.user_id = param_json["user"]["id"]
+        self.trigger_id = param_json["trigger_id"]
+        payload = {"token": self.get_token(self.team_id),
+                   "user": self.user_id}
+        res = requests.get("https://slack.com/api/users.profile.get",
+                           params=payload,
+                           headers={'Content-Type': 'application/json'})
+        self.data_user = json.loads(res.text)
+        if "static_select" in body:
+            self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
+#            modal = "VIEW_CONFIRM_SELECT_MODAL"
+
+        #view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
+        #view_function(self)
+
+        self.dispatch()
 
 
     def init_plugins(self):
