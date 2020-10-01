@@ -62,6 +62,7 @@ class Bot(object):
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
+        self.view_id = param_json["container"]["view_id"]
         self.trigger_id = param_json["trigger_id"]
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
@@ -79,7 +80,6 @@ class Bot(object):
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
-        self.view_id = param_json["container"]["view_id"]
         self.api_app_id = param_json["api_app_id"]
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
