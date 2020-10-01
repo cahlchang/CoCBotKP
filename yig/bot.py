@@ -112,9 +112,8 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
         if "modal-dispatch_in_select" in body:
-            for datum in param_json["view"]["state"]["values"]:
-                for each in datum:
-                    print(each, datum)
+            for k, datum in param_json["view"]["state"]["values"].items():
+                for kk, each in datum.items():
                     self.key = self.message = each["value"]
 #            modal = "VIEW_CONFIRM_SELECT_MODAL"
 
