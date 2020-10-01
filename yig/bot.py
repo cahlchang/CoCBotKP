@@ -35,7 +35,7 @@ class Bot(object):
         self.init_plugins()
 
     def init_param(self, evt_slack):
-
+        print(evt_slack)
         self.user_id = evt_slack["user_id"]
         self.response_url = urllib.parse.unquote(evt_slack["response_url"])
         self.message = urllib.parse.unquote_plus(evt_slack["text"])
@@ -65,7 +65,6 @@ class Bot(object):
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         self.response_url = param_json["response_url"]
-#        self.key = "VIEW_MODAL"
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
         res = requests.get("https://slack.com/api/users.profile.get",
@@ -115,11 +114,6 @@ class Bot(object):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
-#            modal = "VIEW_CONFIRM_SELECT_MODAL"
-
-        #view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
-        #view_function(self)
-
         self.dispatch()
 
 
