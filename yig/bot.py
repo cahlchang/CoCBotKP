@@ -63,7 +63,7 @@ class Bot(object):
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
-        self.view_id = param["view"]["id"]
+        self.view_id = param_json["view"]["id"]
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
         res = requests.get("https://slack.com/api/users.profile.get",
