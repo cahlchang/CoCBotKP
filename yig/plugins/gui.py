@@ -126,7 +126,7 @@ def gui_confirm_receiver(bot):
         "blocks": block_content
     }
 
-    view_id = read_user_data(bot.team_id, bot.user_id, "key_id", res_json["view"]["id"])
+    view_id = read_user_data(bot.team_id, bot.user_id, "key_id")
     print(view_id)
     payload = {
         "token": bot.token,
