@@ -156,21 +156,15 @@ def build_channel_select_content():
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
-	    "text": f"Post channel"
+	    "text": "Post channel"
 	},
 	"accessory": {
-	    "type": "actions",
-	    "elements": [
-	        {
-		    "type": "conversations_select",
-                    "default_to_current_conversation": True,
-		    "placeholder": {
-		        "type": "plain_text",
-		        "text": "Select private conversation",
-		        "emoji": True
-		    }
-	        }
-	    ]
+	    "type": "multi_conversations_select",
+            "default_to_current_conversation": True,
+	    "placeholder": {
+		"type": "plain_text",
+		"emoji": True
+	    }
         }
     }
 
