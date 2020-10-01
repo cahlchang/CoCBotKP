@@ -139,7 +139,7 @@ def build_plain_text_content(text):
 	"text": {
 	    "type": "plain_text",
 	    "text": text,
-	    "emoji": true
+	    "emoji": True
 	}
     }
 
