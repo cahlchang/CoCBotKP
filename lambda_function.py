@@ -37,7 +37,7 @@ def bootstrap(event: dict, _context) -> str:
         bot.confirm_modal(body)
         return None
 
-    if "modal-dispatch" in body or "cc menu start" in body:
+    if "modal-dispatch" in body or "ccmenustart" in body:
         bot.modal_dispatch(body)
         return {
             'statusCode': 200,
