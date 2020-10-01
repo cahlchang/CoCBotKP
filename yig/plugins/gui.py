@@ -79,7 +79,6 @@ def gui_receiver(bot):
 	    "text": "Init Your Charasheet.",
 	    "emoji": True
 	},
-        "private_metadata": bot.channel_id,
         "blocks": block_content
     }
 
