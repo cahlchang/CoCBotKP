@@ -45,13 +45,59 @@ def gui_receiver(bot):
     command_url = "https://slack.com/api/views.open"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
+    block_content = []
+    block_content.append({
+        "type": "input",
+	"element": {
+	    "type": "plain_text_input"
+	},
+        "label": {
+	    "type": "plain_text",
+	    "text": "Init charasheet",
+	    "emoji": False
+	}})
+    block_content.append(divider_builder())
+
+    block_content.append(build_button_content('update', 'Update your character sheet'))
+    skill_content = build_skill_content(user_param)
+    param_contett = build_param_content()
+
+    block_content.append(skill_content)
+    block_content.append(param_content)
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal-identifier:%s" % bot.channel_id,
+        "title": {
+            "type": "plain_text",
+            "text": "Call Of Cthulhu GUI Mode"
+        },
+        "submit": {
+	    "type": "plain_text",
+	    "text": "Submit",
+	    "emoji": True
+	},
+        "blocks": block_content
+    }
+
+    payload = {
+        "token": bot.token,
+        "channel": bot.channel_id,
+        "trigger_id": bot.trigger_id,
+        "view": json.dumps(view_content, ensure_ascii=False)
+    }
+
+    print(payload)
+    res = requests.post(command_url, data=payload)
+    print(res.text)
+
+
+def build_skill_content(user_param):
     skill_list = []
     for k, v in user_param.items():
         if isinstance(v, list):
             skill_list.append((k, v[-1]))
 
     option_list = []
-    cnt = 0
     for skill in skill_list:
         skill_name = skill[0]
         skill_targ = skill[1]
@@ -64,7 +110,7 @@ def gui_receiver(bot):
 		"emoji": True
 	    },
 	    "value": f"{skill_name}" })
-    roll_content = {
+    skill_content = {
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
@@ -80,7 +126,10 @@ def gui_receiver(bot):
 	    "options": option_list
 	}
     }
+    return skill_content
 
+
+def build_param_content():
     param_name_list = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU", "幸運", "知識", "アイデア"]
     param_list = []
     for param in param_name_list:
@@ -108,45 +157,23 @@ def gui_receiver(bot):
 	    "options": param_list
 	}
     }
+    return param_content
 
 
-    block_content = []
-    block_content.append({
-        "type": "input",
-	"element": {
-	    "type": "plain_text_input"
+def build_button_content(value, describe):
+    return {
+	"type": "section",
+	"text": {
+	    "type": "mrkdwn",
+	    "text": describe
 	},
-        "label": {
-	    "type": "plain_text",
-	    "text": "Init charasheet",
-	    "emoji": False
-	}})
-    block_content.append(divider_builder())
-    block_content.append(roll_content)
-    block_content.append(param_content)
-
-    view_content = {
-        "type": "modal",
-        "callback_id": "modal-identifier:%s" % bot.channel_id,
-        "title": {
-            "type": "plain_text",
-            "text": "Call Of Cthulhu GUI Mode"
-        },
-        "submit": {
-	    "type": "plain_text",
-	    "text": "Submit",
-	    "emoji": True
-	},
-        "blocks": block_content
+	"accessory": {
+	    "type": "button",
+	    "text": {
+		"type": "plain_text",
+		"text": "Click Me",
+		"emoji": True
+	    },
+	    "value": value
+	}
     }
-
-    payload = {
-        "token": bot.token,
-        "channel": bot.channel_id,
-        "trigger_id": bot.trigger_id,
-        "view": json.dumps(view_content, ensure_ascii=False)
-    }
-
-    print(payload)
-    res = requests.post(command_url, data=payload)
-    print(res.text)
