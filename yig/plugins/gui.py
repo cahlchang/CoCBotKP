@@ -159,7 +159,7 @@ def build_channel_select_content():
 	    "text": "Post channel"
 	},
 	"accessory": {
-	    "type": "multi_conversations_select",
+	    "type": "conversations_select",
             "default_to_current_conversation": True,
 	    "placeholder": {
 		"type": "plain_text",
