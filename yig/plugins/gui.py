@@ -102,7 +102,7 @@ def build_input_content(describe):
 	}}
 
 
-def build_skill_content(user_param, hide = None):
+def build_skill_content(user_param, hide = ''):
     skill_list = []
     for k, v in user_param.items():
         if isinstance(v, list):
@@ -125,7 +125,7 @@ def build_skill_content(user_param, hide = None):
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
-	    "text": "Select the skill you want to {hide}roll"
+	    "text": f"Select the skill you want to {hide}roll"
 	},
 	"accessory": {
 	    "type": "static_select",
