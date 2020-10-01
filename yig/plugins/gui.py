@@ -4,7 +4,7 @@ import json
 import requests
 
 from yig.bot import listener, KEY_MATCH_FLAG
-from yig.util.data import get_user_param
+from yig.util.data import get_user_param, write_user_data
 from yig.util.view import divider_builder
 
 @listener("", KEY_MATCH_FLAG)
@@ -49,7 +49,7 @@ def gui_receiver(bot):
     block_content.append(build_channel_select_content())
     block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet'))
-    block_content.append(build_button_content('San Check', 'Your Sanity check'))
+    block_content.append(build_button_content('SAN Check', 'Your Sanity check'))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
 
     block_content.append(divider_builder())
@@ -92,7 +92,9 @@ def gui_receiver(bot):
 
     print(payload)
     res = requests.post(command_url, data=payload)
-    print(res.text)
+    res_json = json.loads(res.text)
+    print(res_json)
+    write_user_data(bot.team_id, bot.user_id, res_json["view"]["id"]):
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
