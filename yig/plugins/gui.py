@@ -49,7 +49,7 @@ def gui_receiver(bot):
 
     block_content.append(build_input_content('Init your character sheet'))
     block_content.append(build_button_content('update', 'Update your character sheet'))
-    block_content.append(radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', 'of the character.')
+    block_content.append(radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', 'of the character.'))
 
     block_content.append(divider_builder())
 
