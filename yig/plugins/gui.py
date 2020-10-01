@@ -49,15 +49,19 @@ def gui_receiver(bot):
 
     block_content.append(build_input_content('Init your character sheet'))
     block_content.append(build_button_content('update', 'Update your character sheet'))
-    block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', 'of the character.'))
+    block_content.append(build_button_content('San Check', 'Your Sanity check'))
+    block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
 
     block_content.append(divider_builder())
 
     block_content.append(build_skill_content(user_param))
+    block_content.append(build_skill_content(user_param, 'hide '))
     block_content.append(build_param_content())
     block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_button_content('saveimg', 'Save your icon image'))
-    block_content.append(build_button_content('loadimg', 'Load your icon image'))
+    block_content.append(build_button_content('help', 'More command'))
+
+    block_content.append(divider_builder())
 
     view_content = {
         "type": "modal",
@@ -98,7 +102,7 @@ def build_input_content(describe):
 	}}
 
 
-def build_skill_content(user_param):
+def build_skill_content(user_param, hide = None):
     skill_list = []
     for k, v in user_param.items():
         if isinstance(v, list):
@@ -113,15 +117,15 @@ def build_skill_content(user_param):
         option_list.append({
 	    "text": {
 		"type": "plain_text",
-                "text": f"{skill_name} <= {skill_targ}",
+                "text": f"{hide}{skill_name} <= {skill_targ}",
 		"emoji": True
 	    },
-	    "value": f"{skill_name}" })
+	    "value": f"{hide}{skill_name}" })
     skill_content = {
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
-	    "text": "Select the skill you want to roll"
+	    "text": "Select the skill you want to {hide}roll"
 	},
 	"accessory": {
 	    "type": "static_select",
