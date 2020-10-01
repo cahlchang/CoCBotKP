@@ -163,6 +163,7 @@ def build_channel_select_content():
             "default_to_current_conversation": True,
 	    "placeholder": {
 		"type": "plain_text",
+		"text": "text",
 		"emoji": True
 	    }
         }
