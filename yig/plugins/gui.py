@@ -2,6 +2,7 @@ import yig.config
 import re
 import json
 import requests
+from datetime import datetime
 
 from yig.bot import listener, KEY_MATCH_FLAG
 from yig.util.data import get_user_param, write_user_data
@@ -66,9 +67,11 @@ def gui_receiver(bot):
     block_content.append(build_button_content('help', 'More command'))
 
     block_content.append(divider_builder())
+    now = datetime.now()
 
     view_content = {
         "type": "modal",
+        "external_id": str(bot.user_id) + str(now.timestamp())
         "callback_id": "modal-identifier:%s" % bot.channel_id,
         "title": {
             "type": "plain_text",
@@ -85,16 +88,13 @@ def gui_receiver(bot):
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
-        "view_id": bot.view_id,
+        "external_id": 
         "trigger_id": bot.trigger_id,
         "view": json.dumps(view_content, ensure_ascii=False)
     }
 
     print(payload)
     res = requests.post(command_url, data=payload)
-    res_json = json.loads(res.text)
-    print(res_json)
-    write_user_data(bot.team_id, bot.user_id, res_json["view"]["id"]):
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
