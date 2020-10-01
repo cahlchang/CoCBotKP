@@ -71,8 +71,8 @@ def gui_receiver(bot):
 
     view_content = {
         "type": "modal",
-        "external_id": str(bot.user_id) + str(now.timestamp())
-        "callback_id": "modal-identifier:%s" % bot.channel_id,
+        "external_id": str(bot.user_id) + str(now.timestamp()),
+        "callback_id": "modal-identifier",
         "title": {
             "type": "plain_text",
             "text": "Call Of Cthulhu GUI Mode"
