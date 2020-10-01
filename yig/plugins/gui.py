@@ -42,7 +42,7 @@ def gui_hook(bot):
 @listener("VIEW_MODAL", KEY_MATCH_FLAG)
 def gui_receiver(bot):
     """dui"""
-    command_url = "https://slack.com/api/views.update"
+    command_url = "https://slack.com/api/views.open"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
@@ -133,6 +133,23 @@ def gui_confirm_receiver(bot):
     print(payload)
     res = requests.post(command_url, data=payload)
     print(res.text)
+    # clear_view(bot)
+
+
+def clear_view(bot):
+    
+    payload = {
+        "type": "view_closed",
+        "team": {
+            "id": bot.team_id,
+        },
+        "user": {
+            "id": bot.user_id,
+        },
+        "api_app_id": bot.api_app_id,
+        "is_cleared": True
+    }
+    
 
 
 def build_plain_text_content(text):
