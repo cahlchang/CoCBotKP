@@ -124,6 +124,7 @@ def gui_confirm_receiver(bot):
         "blocks": block_content
     }
 
+    now = datetime.now()
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
