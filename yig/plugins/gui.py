@@ -167,7 +167,7 @@ def build_param_content():
     return param_content
 
 
-def radio_button_content(lst_button, prefix, surfix):
+def build_radio_button_content(lst_button, prefix, surfix):
     lst = []
     for button in lst_button:
         lst.append({
@@ -179,16 +179,14 @@ def radio_button_content(lst_button, prefix, surfix):
 	    "value": button
 	})
     return {"type": "actions",
-            "elements":
-            {
-                [
-	            {
-                        "type": "radio_buttons",
-                        "options": lst
-                    }
-                ]
+            "elements": [
+	    {
+                "type": "radio_buttons",
+                "options": lst
             }
+        ]
     }
+
 
 
 def build_button_content(value, describe):
