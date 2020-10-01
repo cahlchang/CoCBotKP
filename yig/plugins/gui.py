@@ -71,7 +71,6 @@ def gui_receiver(bot):
 
     view_content = {
         "type": "modal",
-        "external_id": str(bot.user_id) + str(now.timestamp()),
         "callback_id": "modal-identifier",
         "title": {
             "type": "plain_text",
@@ -88,7 +87,7 @@ def gui_receiver(bot):
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
-        "external_id": 
+        "external_id": str(bot.user_id) + str(now.timestamp()),
         "trigger_id": bot.trigger_id,
         "view": json.dumps(view_content, ensure_ascii=False)
     }
