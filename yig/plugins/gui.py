@@ -76,7 +76,7 @@ def gui_receiver(bot):
         },
         "submit": {
 	    "type": "plain_text",
-	    "text": "Submit",
+	    "text": "Init Your Charasheet.",
 	    "emoji": True
 	},
         "blocks": block_content
