@@ -29,7 +29,7 @@ def bootstrap(event: dict, _context) -> str:
     random.seed()
     body = event["body"]
     logging.info(body)
-    if "modal-view-identifier" in body:
+    if "modal-view-identifier" in body or "ccmenustart" in body:
         bot.init_modal(body)
         return None
 
@@ -37,7 +37,7 @@ def bootstrap(event: dict, _context) -> str:
         bot.confirm_modal(body)
         return None
 
-    if "modal-dispatch" in body or "ccmenustart" in body:
+    if "modal-dispatch" in body:
         bot.modal_dispatch(body)
         return {
             'statusCode': 200,

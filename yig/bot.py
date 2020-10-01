@@ -101,7 +101,6 @@ class Bot(object):
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         self.team_id = param_json["user"]["team_id"]
-        self.channel_id = param_json["view"]["private_metadata"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         payload = {"token": self.get_token(self.team_id),
