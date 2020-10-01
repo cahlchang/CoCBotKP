@@ -103,8 +103,10 @@ def gui_confirm_receiver(bot):
 
     block_content = []
 
-    block_content.append(build_input_content('Init your character sheet', ""))
-    block_content.append(build_plain_text_content("Do you want to add a correction value?"))
+    block_content.append(build_plain_text_content(("Do you want to add a correction value?\n"
+                                                   "For example\n"
+                                                   "%s+10 %s-20 %s*2 %s/2" % (bot.value))))
+    block_content.append(build_input_content('Roll correction value', "%s" % bot.value))
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier:%s" % bot.channel_id,
@@ -114,7 +116,7 @@ def gui_confirm_receiver(bot):
         },
         "submit": {
 	    "type": "plain_text",
-	    "text": "Init Your Charasheet.",
+	    "text": "Roll!",
 	    "emoji": True
 	},
         "private_metadata": bot.channel_id,
