@@ -46,21 +46,19 @@ def gui_receiver(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
-    block_content.append({
-        "type": "input",
-	"element": {
-	    "type": "plain_text_input"
-	},
-        "label": {
-	    "type": "plain_text",
-	    "text": "Init charasheet",
-	    "emoji": False
-	}})
+
+    block_content.append(build_input_content('Init your character sheet'))
+    block_content.append(build_button_content('update', 'Update your character sheet'))
+    block_content.append(radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', 'of the character.')
+
     block_content.append(divider_builder())
 
-    block_content.append(build_button_content('update', 'Update your character sheet'))
     block_content.append(build_skill_content(user_param))
     block_content.append(build_param_content())
+    block_content.append(build_button_content('update', 'Update your character sheet'))
+    block_content.append(build_button_content('saveimg', 'Save your icon image'))
+    block_content.append(build_button_content('loadimg', 'Load your icon image'))
+
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier:%s" % bot.channel_id,
@@ -86,6 +84,18 @@ def gui_receiver(bot):
     print(payload)
     res = requests.post(command_url, data=payload)
     print(res.text)
+
+def build_input_content(describe):
+    return {
+        "type": "input",
+	"element": {
+	    "type": "plain_text_input"
+	},
+        "label": {
+	    "type": "plain_text",
+	    "text": describe,
+	    "emoji": False
+	}}
 
 
 def build_skill_content(user_param):
@@ -157,6 +167,30 @@ def build_param_content():
     return param_content
 
 
+def radio_button_content(lst_button, prefix, surfix):
+    lst = []
+    for button in lst_button:
+        lst.append({
+	    "text": {
+		"type": "plain_text",
+		"text": f"{prefix}{button}{surfix}",
+		"emoji": True,
+	    },
+	    "value": button
+	})
+    option_content = {"type": "actions",
+                      "elements":
+                      {
+                          [
+	                      {
+                                  "type": "radio_buttons",
+                                  "options": lst
+                              }
+                          ]
+                      }
+    }
+
+
 def build_button_content(value, describe):
     return {
 	"type": "section",
@@ -168,7 +202,7 @@ def build_button_content(value, describe):
 	    "type": "button",
 	    "text": {
 		"type": "plain_text",
-		"text": "Click Me",
+		"text": value,
 		"emoji": True
 	    },
 	    "value": value
