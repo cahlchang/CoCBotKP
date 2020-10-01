@@ -127,6 +127,7 @@ def gui_confirm_receiver(bot):
         "token": bot.token,
         "channel": bot.channel_id,
         "trigger_id": bot.trigger_id,
+        "response_action": "clear",
         "view": json.dumps(view_content, ensure_ascii=False)
     }
 
