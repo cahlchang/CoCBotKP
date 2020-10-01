@@ -5,7 +5,7 @@ import requests
 from datetime import datetime
 
 from yig.bot import listener, KEY_MATCH_FLAG
-from yig.util.data import get_user_param, write_user_data
+from yig.util.data import get_user_param, write_user_data, read_user_data
 from yig.util.view import divider_builder
 
 @listener("", KEY_MATCH_FLAG)
@@ -87,13 +87,15 @@ def gui_receiver(bot):
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
-        "external_id": str(bot.user_id) + str(now.timestamp()),
         "trigger_id": bot.trigger_id,
         "view": json.dumps(view_content, ensure_ascii=False)
     }
 
     print(payload)
     res = requests.post(command_url, data=payload)
+    res_json = json.loads(res.text)
+    print(res_json)
+    write_user_data(bot.team_id, bot.user_id, "key_id", res_json["view"]["id"])
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
@@ -124,12 +126,13 @@ def gui_confirm_receiver(bot):
         "blocks": block_content
     }
 
-    now = datetime.now()
+    view_id = read_user_data(bot.team_id, bot.user_id, "key_id", res_json["view"]["id"])
+    print(view_id)
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
         "trigger_id": bot.trigger_id,
-        "external_id": str(bot.user_id) + str(now.timestamp()),
+        "view_id": view_id,
         "response_action": "clear",
         "view": json.dumps(view_content, ensure_ascii=False)
     }
