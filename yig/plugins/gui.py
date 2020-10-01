@@ -95,7 +95,7 @@ def gui_receiver(bot):
     print(res.text)
 
 
-@listener("CONFIRM_VIEW_SELECT_MODAL", KEY_MATCH_FLAG)
+@listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_receiver(bot):
     """con"""
     command_url = "https://slack.com/api/views.push"
