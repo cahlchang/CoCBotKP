@@ -179,15 +179,15 @@ def radio_button_content(lst_button, prefix, surfix):
 	    "value": button
 	})
     return {"type": "actions",
-              "elements":
-              {
-                  [
-	              {
-                          "type": "radio_buttons",
-                          "options": lst
-                      }
-                  ]
-              }
+            "elements":
+            {
+                [
+	            {
+                        "type": "radio_buttons",
+                        "options": lst
+                    }
+                ]
+            }
     }
 
 
