@@ -114,7 +114,7 @@ class Bot(object):
         if "modal-dispatch_in_select" in body:
             for datum in param_json["view"]["state"]["values"]:
                 for each in datum:
-                    print(each)
+                    print(each, datum)
                     self.key = self.message = each["value"]
 #            modal = "VIEW_CONFIRM_SELECT_MODAL"
 
