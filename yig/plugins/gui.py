@@ -103,7 +103,7 @@ def gui_confirm_receiver(bot):
 
     block_content = []
 
-    block_content.append(build_input_content('Init your character sheet'))
+    block_content.append(build_input_content('Init your character sheet', ""))
     block_content.append(build_plain_text_content("Do you want to add a correction value?"))
     view_content = {
         "type": "modal",
