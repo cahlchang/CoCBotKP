@@ -29,7 +29,7 @@ command_manager = {
 
 class Bot(object):
     global command_list
-    user_id = response_url = key = message = token = data_user = channel_id = channel_name = team_id = trigger_id = api_app_id = ""
+    user_id = response_url = key = message = token = data_user = channel_id = channel_name = team_id = trigger_id = api_app_id = view_id = ""
 
     def __init__(self):
         self.init_plugins()
@@ -79,6 +79,7 @@ class Bot(object):
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
+        self.view_id = param_json["container"]["view_id"]
         self.api_app_id = param_json["api_app_id"]
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
