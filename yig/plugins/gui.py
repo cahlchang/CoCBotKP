@@ -109,7 +109,7 @@ def gui_confirm_receiver(bot):
     block_content.append(build_input_content('Roll correction value', "%s" % bot.key))
     view_content = {
         "type": "modal",
-        "callback_id": "modal-dispatch",
+        "callback_id": "modal-dispatch_in_select",
         "title": {
             "type": "plain_text",
             "text": "Call Of Cthulhu GUI Mode"
