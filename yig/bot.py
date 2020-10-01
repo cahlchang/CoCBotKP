@@ -111,8 +111,10 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
-        if "static_select" in body:
-            self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
+        if "modal-dispatch_in_select" in body:
+            for datum in param_json["state"]["value"]:
+                for each in datum:
+                    self.key = self.message = each["value"]
 #            modal = "VIEW_CONFIRM_SELECT_MODAL"
 
         #view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
