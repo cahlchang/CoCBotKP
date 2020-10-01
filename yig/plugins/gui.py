@@ -105,7 +105,7 @@ def gui_confirm_receiver(bot):
 
     block_content.append(build_plain_text_content(("Do you want to add a correction value?\n"
                                                    "For example\n"
-                                                   "%s+10 %s-20 %s*2 %s/2" % (bot.key))))
+                                                   "%s+10 %s-20 %s*2 %s/2" % (bot.key, bot.key, bot.key, bot.key))))
     block_content.append(build_input_content('Roll correction value', "%s" % bot.key))
     view_content = {
         "type": "modal",
