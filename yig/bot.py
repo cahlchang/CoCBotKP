@@ -66,10 +66,10 @@ class Bot(object):
         write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"key_id": "", "channel_id": ""}))
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
-        res = requests.get("https://slack.com/api/users.profile.get",
-                           params=payload,
-                           headers={'Content-Type': 'application/json'})
-        self.data_user = json.loads(res.text)
+        # res = requests.get("https://slack.com/api/users.profile.get",
+        #                    params=payload,
+        #                    headers={'Content-Type': 'application/json'})
+        # self.data_user = json.loads(res.text)
         view_function = list(filter(lambda x: x["command"] == "VIEW_MODAL", command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
 
