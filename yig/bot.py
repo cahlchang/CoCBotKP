@@ -101,14 +101,12 @@ class Bot(object):
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
         if "actions" in param_json:
-            return
-
-        if param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
-            for k, data in param_json["view"]["state"]["values"].items():
-                for kk, datum in data.items():
-                    if datum["type"] == "conversations_select":
-                        channel_id = datum["selected_conversation"]
-                        write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"channel_id": channel_id}))
+            if param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
+                for k, data in param_json["view"]["state"]["values"].items():
+                    for kk, datum in data.items():
+                        if datum["type"] == "conversations_select":
+                            channel_id = datum["selected_conversation"]
+                            write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"channel_id": channel_id}))
             return
         self.team_id = param_json["user"]["team_id"]
         self.channel_id = param_json["view"]["private_metadata"]
