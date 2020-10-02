@@ -93,13 +93,17 @@ def gui_receiver(bot):
     print(payload)
     res = requests.post(command_url, data=payload)
     res_json = json.loads(res.text)
-    print(res_json)
-    for k, data in res_json["view"]["state"]["values"].items():
-        for kk, datum in data.items():
-            if datum["type"] == "conversations_select":
-                bot.channel_id = datum["selected_conversation"]
 
-    write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps([res_json["view"]["id"], bot.channel_id]))
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    if map_id["channel_id"]:
+        bot.channel_id = map_id["channel_id"]
+    else:
+        for k, data in res_json["view"]["state"]["values"].items():
+            for kk, datum in data.items():
+                if datum["type"] == "conversations_select":
+                    bot.channel_id = datum["selected_conversation"]
+
+    write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps({"view_id": res_json["view"]["id"], "channel_id": bot.channel_id]))
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
@@ -114,11 +118,9 @@ def gui_confirm_receiver(bot):
                                                    "For example\n"
                                                    "%s+10, %s-20, %s*2, %s/2" % (bot.key, bot.key, bot.key, bot.key))))
     block_content.append(build_input_content('Roll correction value', "%s" % bot.key))
-    lst = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
-    view_id = lst[0]
-    channel_id = lst[1]
-    print(view_id)
-    print(channel_id)
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    view_id = map_id["view_id"]
+    channel_id = map_id["channel_id"]
     view_content = {
         "type": "modal",
         "callback_id": "modal-dispatch_in_select",
@@ -159,7 +161,7 @@ def build_channel_select_content():
 	},
 	"accessory": {
 	    "type": "conversations_select",
-            "action_id": "modal-dispatch-no-trans",
+            "action_id": "modal-dispatch-no-trans-channel",
             "default_to_current_conversation": True,
 	    "placeholder": {
 		"type": "plain_text",
