@@ -140,23 +140,7 @@ def gui_confirm_receiver(bot):
     print(payload)
     res = requests.post(command_url, data=payload)
     print(res.text)
-    # clear_view(bot)
 
-
-def clear_view(bot):
-    
-    payload = {
-        "type": "view_closed",
-        "team": {
-            "id": bot.team_id,
-        },
-        "user": {
-            "id": bot.user_id,
-        },
-        "api_app_id": bot.api_app_id,
-        "is_cleared": True
-    }
-    
 
 def build_channel_select_content():
     return {
@@ -167,6 +151,7 @@ def build_channel_select_content():
 	},
 	"accessory": {
 	    "type": "conversations_select",
+            "action_id": "modal-nodispatch",
             "default_to_current_conversation": True,
 	    "placeholder": {
 		"type": "plain_text",
