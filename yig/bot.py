@@ -99,6 +99,7 @@ class Bot(object):
     def modal_dispatch(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
+        print(param_json)
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
