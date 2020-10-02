@@ -58,12 +58,12 @@ class Bot(object):
 
 
     def init_modal(self, body):
-        write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"key_id": "", "channel_id": ""}))
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
+        write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"key_id": "", "channel_id": ""}))
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
         res = requests.get("https://slack.com/api/users.profile.get",
