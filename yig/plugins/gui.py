@@ -151,7 +151,7 @@ def build_channel_select_content():
 	},
 	"accessory": {
 	    "type": "conversations_select",
-            "action_id": "modal-nodispatch",
+            "action_id": "modal-dispatch-no-trans",
             "default_to_current_conversation": True,
 	    "placeholder": {
 		"type": "plain_text",
