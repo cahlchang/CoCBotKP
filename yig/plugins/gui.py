@@ -126,7 +126,7 @@ def gui_confirm_receiver(bot):
 	    "text": "Roll!",
 	    "emoji": True
 	},
-        "private_metadata": bot.channel_id,
+        "private_metadata": channel_id,
         "blocks": block_content
     }
 
@@ -134,11 +134,13 @@ def gui_confirm_receiver(bot):
     view_id = lst[0]
     channel_id = lst[1]
     print(view_id)
+    print(channel_id)
     payload = {
         "token": bot.token,
         "channel": channel_id,
         "trigger_id": bot.trigger_id,
         "view_id": view_id,
+        "private_metadata": channel_id,
         "response_action": "clear",
         "view": json.dumps(view_content, ensure_ascii=False)
     }
