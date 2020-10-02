@@ -163,7 +163,7 @@ def gui_confirm_delete(bot):
         "trigger_id": bot.trigger_id,
         "view_id": view_id,
         "response_action": "clear",
-        "view": []
+        "view": None
     }
     print(payload)
     res = requests.post(command_url, data=payload)
