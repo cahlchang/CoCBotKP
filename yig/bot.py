@@ -111,6 +111,7 @@ class Bot(object):
             for k, data in param_json["view"]["state"]["values"].items():
                 for kk, datum in data.items():
                     if datum["type"] == "conversations_select":
+                        print(datum)
                         channel_id = datum["selected_conversation"]
                         map_id["channel_id"] = channel_id
                         write_user_data(self.team_id, self.user_id, "key_id", json.dumps(map_id))
