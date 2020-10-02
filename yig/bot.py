@@ -105,6 +105,7 @@ class Bot(object):
         map_id = json.loads(read_user_data(self.team_id, self.user_id, "key_id"))
         if "channel_id" in map_id:
             self.channel_id = map_id["channel_id"]
+            self.view_id = map_id["view_id"]
 
         # チャンネルのselecterが叩かれた場合
         if "actions" in param_json and param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
@@ -133,7 +134,6 @@ class Bot(object):
 
              view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
              view_function(self)
-             
 
 
     def init_plugins(self):
