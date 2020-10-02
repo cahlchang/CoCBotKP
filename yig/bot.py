@@ -108,6 +108,8 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
+        if param_json["actions"][0]["action_id"]["modal-nodispatch"]:
+            return
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
