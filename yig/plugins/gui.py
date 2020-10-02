@@ -71,8 +71,6 @@ def gui_receiver(bot):
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier",
-        "close": True,
-        "notify_on_close": True,
         "title": {
             "type": "plain_text",
             "text": "Call Of Cthulhu GUI Mode"
