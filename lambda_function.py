@@ -29,6 +29,10 @@ def bootstrap(event: dict, _context) -> str:
     random.seed()
     body = event["body"]
     logging.info(body)
+
+    if "modal-executed" in body:
+        return None
+
     if "modal-view-identifier" in body or "ccmenustart" in body:
         bot.init_modal(body)
         return None
