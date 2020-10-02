@@ -109,10 +109,10 @@ class Bot(object):
         # チャンネルのselecterが叩かれた場合
         if "actions" in param_json and param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
             for data in param_json["actions"]:
-            if data["type"] == "conversations_select":
-                channel_id = data["selected_conversation"]
-                map_id["channel_id"] = channel_id
-                write_user_data(self.team_id, self.user_id, "key_id", json.dumps(map_id))
+                if data["type"] == "conversations_select":
+                    channel_id = data["selected_conversation"]
+                    map_id["channel_id"] = channel_id
+                    write_user_data(self.team_id, self.user_id, "key_id", json.dumps(map_id))
             return
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
