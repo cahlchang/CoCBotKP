@@ -162,6 +162,10 @@ def gui_confirm_delete(bot):
     view_content = {
         "type": "modal",
         "callback_id": "modal",
+        "title": {
+            "type": "plain_text",
+            "text": "complete"
+        },
         "private_metadata": channel_id,
         "submit": {
 	    "type": "plain_text",
