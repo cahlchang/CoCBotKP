@@ -86,8 +86,6 @@ def gui_receiver(bot):
 
     payload = {
         "token": bot.token,
-        "channel": bot.channel_id,
-        "private_metadata": bot.channel_id,
         "trigger_id": bot.trigger_id,
         "view": json.dumps(view_content, ensure_ascii=False)
     }
@@ -96,7 +94,14 @@ def gui_receiver(bot):
     res = requests.post(command_url, data=payload)
     res_json = json.loads(res.text)
     print(res_json)
-    write_user_data(bot.team_id, bot.user_id, "key_id", res_json["view"]["id"])
+    for k, data in res_json["view"]["state"]["values"].items():
+        for kk, datum in data.items():
+            for kkk, each in datum.items():
+                print(each)
+                if each["type"] == "conversations_select":
+                    self.channel_id = one["selected_conversation"]
+
+    write_user_data(bot.team_id, bot.user_id, "key_id", [res_json["view"]["id"], self.channel_id])
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
@@ -127,11 +132,13 @@ def gui_confirm_receiver(bot):
         "blocks": block_content
     }
 
-    view_id = read_user_data(bot.team_id, bot.user_id, "key_id")
+    lst = read_user_data(bot.team_id, bot.user_id, "key_id")
+    view_id = lst[0]
+    channel_id = lst[1]
     print(view_id)
     payload = {
         "token": bot.token,
-        "channel": bot.channel_id,
+        "channel": channel_id,
         "trigger_id": bot.trigger_id,
         "view_id": view_id,
         "response_action": "clear",

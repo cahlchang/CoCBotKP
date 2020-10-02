@@ -103,12 +103,6 @@ class Bot(object):
             return
         self.team_id = param_json["user"]["team_id"]
         # if param_json["private_metadata"] != "":
-        for k, data in param_json["view"]["state"]["values"].items():
-            for kk, datum in data.items():
-                for kkk, each in datum.items():
-                    print(each)
-                    if each["type"] == "conversations_select":
-                        self.channel_id = one["selected_conversation"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         payload = {"token": self.get_token(self.team_id),
