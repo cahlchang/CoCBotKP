@@ -1,6 +1,6 @@
 import lambda_function
 
-command = 'kp order DEX'
+command = ''
 channel_id = 'CNCRFR7KP'
 team_id = 'TE4VDPM2L'
 user_id = 'UE6P69HFH'

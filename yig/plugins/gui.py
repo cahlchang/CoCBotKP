@@ -96,10 +96,8 @@ def gui_receiver(bot):
     print(res_json)
     for k, data in res_json["view"]["state"]["values"].items():
         for kk, datum in data.items():
-            for kkk, each in datum.items():
-                print(each)
-                if each["type"] == "conversations_select":
-                    self.channel_id = one["selected_conversation"]
+            if datum["type"] == "conversations_select":
+                self.channel_id = datum["selected_conversation"]
 
     write_user_data(bot.team_id, bot.user_id, "key_id", [res_json["view"]["id"], self.channel_id])
 
