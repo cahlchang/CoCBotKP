@@ -161,7 +161,7 @@ def gui_confirm_delete(bot):
     block_content.append(build_plain_text_content("command execute done."))
     view_content = {
         "type": "modal",
-        "callback_id": "modal",
+        "callback_id": "modal-executed",
         "title": {
             "type": "plain_text",
             "text": "complete"
