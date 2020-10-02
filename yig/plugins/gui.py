@@ -95,7 +95,7 @@ def gui_receiver(bot):
     res_json = json.loads(res.text)
 
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
-    if map_id["channel_id"] == "":
+    if map_id["channel_id"] != "":
         bot.channel_id = map_id["channel_id"]
     else:
         for k, data in res_json["view"]["state"]["values"].items():
