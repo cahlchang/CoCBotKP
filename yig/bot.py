@@ -124,10 +124,16 @@ class Bot(object):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
+                    self.dispatch()
+
         if "modal-dispatch_go_button" in body:
              self.key = self.message = param_json["actions"][0]["value"].upper()
+             self.dispatch()
+             modal = "VIEW_CONFIRM_DELETE_MODAL"
 
-        self.dispatch()
+             view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
+             view_function(self)
+             
 
 
     def init_plugins(self):
