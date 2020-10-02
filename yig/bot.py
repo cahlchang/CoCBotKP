@@ -99,7 +99,7 @@ class Bot(object):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
-        if param_json["actions"][0]["action_id"] == "modal-nodispatch":
+        if param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans":
             return
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
