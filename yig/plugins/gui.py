@@ -112,7 +112,6 @@ def gui_confirm_receiver(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
-
     block_content.append(build_plain_text_content(("Do you want to add a correction value?\n"
                                                    "For example\n"
                                                    "%s+10, %s-20, %s*2, %s/2" % (bot.key, bot.key, bot.key, bot.key))))
@@ -151,23 +150,26 @@ def gui_confirm_receiver(bot):
     print(res.text)
 
 
-@listener("VIEW_CONFIRM_DELETE_MODAL", KEY_MATCH_FLAG)
+@listener("VIEW_CONFIRM_EXECUTED_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_delete(bot):
     """con"""
     command_url = "https://slack.com/api/views.update"
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = map_id["view_id"]
     channel_id = map_id["channel_id"]
+    block_content = []
+    block_content.append(build_plain_text_content("command execute done."))
+
     payload = {
         "token": bot.token,
         "trigger_id": bot.trigger_id,
         "view_id": view_id,
         "response_action": "clear",
-        "view": None
+        "view": block_content
     }
-    print(payload)
     res = requests.post(command_url, data=payload)
     print(res.text)
+
 
 def build_channel_select_content():
     return {
@@ -187,6 +189,7 @@ def build_channel_select_content():
 	    }
         }
     }
+
 
 def build_plain_text_content(text):
     return {
