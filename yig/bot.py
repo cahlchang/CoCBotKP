@@ -124,6 +124,9 @@ class Bot(object):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
+        if "modal-dispatch_go_button" in body:
+             self.key = self.message = param_json["actions"][0]["value"].upper()
+
         self.dispatch()
 
 

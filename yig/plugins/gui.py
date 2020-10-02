@@ -49,8 +49,8 @@ def gui_receiver(bot):
     block_content = []
     block_content.append(build_channel_select_content())
     block_content.append(build_input_content('Init your character sheet', "https://~"))
-    block_content.append(build_button_content('update', 'Update your character sheet'))
-    block_content.append(build_button_content('SAN Check', 'Your Sanity check'))
+    block_content.append(build_button_content('update', 'Update your character sheet', "modal-dispatch_go_button"))
+    block_content.append(build_button_content('SAN Check', 'Your Sanity check', ""))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
 
     block_content.append(divider_builder())
@@ -61,10 +61,9 @@ def gui_receiver(bot):
 
     block_content.append(divider_builder())
 
-    block_content.append(build_button_content('join/leave session', 'session join or leave.'))
-    block_content.append(build_button_content('update', 'Update your character sheet'))
-    block_content.append(build_button_content('saveimg', 'Save your icon image'))
-    block_content.append(build_button_content('help', 'More command'))
+    block_content.append(build_button_content('join/leave session', 'session join or leave.', ""))
+    block_content.append(build_button_content('saveimg', 'Save your icon image', "modal-dispatch_go_button"))
+    block_content.append(build_button_content('help', 'More command', "modal-dispatch_go_button"))
 
     block_content.append(divider_builder())
     now = datetime.now()
@@ -287,7 +286,7 @@ def build_radio_button_content(lst_button, prefix, surfix):
 
 
 
-def build_button_content(value, describe):
+def build_button_content(value, describe, action_id):
     return {
 	"type": "section",
 	"text": {
@@ -296,6 +295,7 @@ def build_button_content(value, describe):
 	},
 	"accessory": {
 	    "type": "button",
+            "action_id": action_id,
 	    "text": {
 		"type": "plain_text",
 		"text": value,
