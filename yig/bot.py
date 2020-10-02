@@ -99,6 +99,8 @@ class Bot(object):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
+        if param_json["actions"][0]["action_id"] == "modal-nodispatch":
+            return
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
@@ -108,8 +110,6 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
-        if param_json["actions"][0]["action_id"]["modal-nodispatch"]:
-            return
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
