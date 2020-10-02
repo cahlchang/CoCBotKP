@@ -108,7 +108,7 @@ class Bot(object):
                 for kk, datum in data.items():
                     if datum["type"] == "conversations_select":
                         channel_id = datum["selected_conversation"]
-                        write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps({"channel_id": channel_id}))
+                        write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"channel_id": channel_id}))
             return
         self.team_id = param_json["user"]["team_id"]
         self.channel_id = param_json["view"]["private_metadata"]
