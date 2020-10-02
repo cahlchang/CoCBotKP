@@ -41,13 +41,9 @@ def bootstrap(event: dict, _context) -> str:
         bot.modal_dispatch(body)
         return {
             'statusCode': 200,
-            'headers': {
-                "x-custom-header": "my custom header value"
-            },
-            'body': json.dumps({"response_action": "clear"}),
+            'body': '',
             'isBase64Encoded': False
         }
-#        return None
 
     body_split = body.split("&")
     evt_slack = {}
