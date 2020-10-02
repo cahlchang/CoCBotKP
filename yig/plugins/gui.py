@@ -163,6 +163,16 @@ def gui_confirm_delete(bot):
         "type": "modal",
         "callback_id": "modal",
         "private_metadata": channel_id,
+        "submit": {
+	    "type": "plain_text",
+	    "text": "OK",
+	    "emoji": True
+	},
+	"close": {
+	    "type": "plain_text",
+	    "text": "Cancel",
+	    "emoji": True
+	},
         "blocks": block_content
     }
 
