@@ -102,8 +102,7 @@ class Bot(object):
         if "actions" in param_json and param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans":
             return
         self.team_id = param_json["user"]["team_id"]
-        self.channel_id = param_json["private_metadata"]
-        print("debug", self.channel_id)
+        self.channel_id = param_json["view"]["private_metadata"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         payload = {"token": self.get_token(self.team_id),
