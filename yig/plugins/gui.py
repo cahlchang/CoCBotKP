@@ -159,13 +159,19 @@ def gui_confirm_delete(bot):
     channel_id = map_id["channel_id"]
     block_content = []
     block_content.append(build_plain_text_content("command execute done."))
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal",
+        "private_metadata": channel_id,
+        "blocks": block_content
+    }
 
     payload = {
         "token": bot.token,
         "trigger_id": bot.trigger_id,
         "view_id": view_id,
         "response_action": "clear",
-        "view": block_content
+        "view": view_content
     }
     res = requests.post(command_url, data=payload)
     print(res.text)
