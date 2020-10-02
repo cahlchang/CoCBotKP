@@ -151,6 +151,22 @@ def gui_confirm_receiver(bot):
     print(res.text)
 
 
+@listener("VIEW_CONFIRM_DELETE_MODAL", KEY_MATCH_FLAG)
+def gui_confirm_delete(bot):
+    """con"""
+    command_url = "https://slack.com/api/views.update"
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    view_id = map_id["view_id"]
+    channel_id = map_id["channel_id"]
+    payload = {
+        "token": bot.token,
+        "trigger_id": bot.trigger_id,
+        "view_id": view_id,
+        "response_action": "clear",
+        "view": None
+    }
+
+
 def build_channel_select_content():
     return {
 	"type": "section",
