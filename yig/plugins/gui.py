@@ -87,6 +87,7 @@ def gui_receiver(bot):
     payload = {
         "token": bot.token,
         "channel": bot.channel_id,
+        "private_metadata": bot.channel_id,
         "trigger_id": bot.trigger_id,
         "view": json.dumps(view_content, ensure_ascii=False)
     }
