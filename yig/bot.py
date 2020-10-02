@@ -125,7 +125,7 @@ class Bot(object):
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
                     self.dispatch()
-                    
+
         if "modal-dispatch_go_button" in body:
              self.key = self.message = param_json["actions"][0]["value"].upper()
              self.dispatch()
