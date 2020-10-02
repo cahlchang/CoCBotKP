@@ -68,7 +68,7 @@ def gui_receiver(bot):
 
     block_content.append(divider_builder())
     now = datetime.now()
-
+    print("metadata", bot.channel_id)
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier",
