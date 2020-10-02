@@ -1,6 +1,6 @@
 from importlib import import_module
 from glob import glob
-from yig.util.data import post_command, post_result, format_as_command, write_user_data
+from yig.util.data import post_command, post_result, format_as_command, write_user_data, read_user_data
 import urllib.parse
 
 import yig.config
@@ -99,8 +99,15 @@ class Bot(object):
     def modal_dispatch(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
-        print(param_json)
-        if "actions" in param_json:
+        self.team_id = param_json["user"]["team_id"]
+        self.user_id = param_json["user"]["id"]
+        self.trigger_id = param_json["trigger_id"]
+        map_id = json.loads(read_user_data(self.team_id, self.user_id, "key_id"))
+        if "channel_id" in map_id:
+            self.channel_id = map_id["channel_id"]
+
+        # チャンネルのselecterが叩かれた場合
+        if "actions" in param_json or self.channel_id == "":
             if param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
                 for k, data in param_json["view"]["state"]["values"].items():
                     for kk, datum in data.items():
@@ -108,10 +115,6 @@ class Bot(object):
                             channel_id = datum["selected_conversation"]
                             write_user_data(self.team_id, self.user_id, "key_id", json.dumps({"channel_id": channel_id}))
             return
-        self.team_id = param_json["user"]["team_id"]
-        self.channel_id = param_json["view"]["private_metadata"]
-        self.user_id = param_json["user"]["id"]
-        self.trigger_id = param_json["trigger_id"]
         payload = {"token": self.get_token(self.team_id),
                    "user": self.user_id}
         res = requests.get("https://slack.com/api/users.profile.get",
