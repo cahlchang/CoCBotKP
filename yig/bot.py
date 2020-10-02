@@ -129,7 +129,7 @@ class Bot(object):
         if "modal-dispatch_go_button" in body:
              self.key = self.message = param_json["actions"][0]["value"].upper()
              self.dispatch()
-             modal = "VIEW_CONFIRM_DELETE_MODAL"
+             modal = "VIEW_CONFIRM_EXECUTED_MODAL"
 
              view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
              view_function(self)
