@@ -58,6 +58,7 @@ class Bot(object):
 
 
     def init_modal(self, body):
+        write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps({}))
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
@@ -99,7 +100,15 @@ class Bot(object):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         print(param_json)
-        if "actions" in param_json and param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans":
+        if "actions" in param_json:
+            return
+
+        if param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
+            for k, data in param_json["view"]["state"]["values"].items():
+                for kk, datum in data.items():
+                    if datum["type"] == "conversations_select":
+                        channel_id = datum["selected_conversation"]
+                        write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps({"channel_id": channel_id}))
             return
         self.team_id = param_json["user"]["team_id"]
         self.channel_id = param_json["view"]["private_metadata"]
