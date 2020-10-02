@@ -99,7 +99,7 @@ def gui_receiver(bot):
             if datum["type"] == "conversations_select":
                 bot.channel_id = datum["selected_conversation"]
 
-    write_user_data(bot.team_id, bot.user_id, "key_id", [res_json["view"]["id"], bot.channel_id])
+    write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps([res_json["view"]["id"]), bot.channel_id])
 
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
@@ -130,7 +130,7 @@ def gui_confirm_receiver(bot):
         "blocks": block_content
     }
 
-    lst = read_user_data(bot.team_id, bot.user_id, "key_id")
+    lst = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = lst[0]
     channel_id = lst[1]
     print(view_id)
