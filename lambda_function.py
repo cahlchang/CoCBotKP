@@ -39,11 +39,7 @@ def bootstrap(event: dict, _context) -> str:
 
     if "modal-dispatch" in body:
         bot.modal_dispatch(body)
-        return {
-            'statusCode': 200,
-            'body': '',
-            'isBase64Encoded': False
-        }
+        return None
 
     body_split = body.split("&")
     evt_slack = {}
