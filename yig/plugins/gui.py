@@ -169,7 +169,7 @@ def gui_confirm_delete(bot):
         "private_metadata": channel_id,
 	"close": {
 	    "type": "plain_text",
-	    "text": "Cancel",
+	    "text": "OK",
 	    "emoji": True
 	},
         "blocks": block_content
