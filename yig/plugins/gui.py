@@ -167,11 +167,6 @@ def gui_confirm_delete(bot):
             "text": "complete"
         },
         "private_metadata": channel_id,
-        "submit": {
-	    "type": "plain_text",
-	    "text": "OK",
-	    "emoji": True
-	},
 	"close": {
 	    "type": "plain_text",
 	    "text": "Cancel",
