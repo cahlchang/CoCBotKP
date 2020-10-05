@@ -109,7 +109,7 @@ def gui_confirm_select_receiver(bot):
     user_param = get_user_param(bot.team_id, bot.user_id)
 
     block_content = []
-    bot.key.replace('+', ' ')
+    bot.key = bot.key.replace('+', ' ')
     block_content.append(build_plain_text_content(("Do you want to add a correction value?\n"
                                                    "For example\n"
                                                    "%s+10, %s-20, %s*2, %s/2" % (bot.key, bot.key, bot.key, bot.key))))
