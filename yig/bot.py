@@ -111,9 +111,9 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
-        print(str(json.dump(param_json["view"]["state"]["values"])))
+        print(str(json.dumps(param_json["view"]["state"]["values"])))
         if "view" in param_json \
-           and "https://~" not in str(json.dump(param_json["view"]["state"]["values"])):
+           and "https://~" not in str(json.dumps(param_json["view"]["state"]["values"])):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     if each["type"] == "plain_text_input":
