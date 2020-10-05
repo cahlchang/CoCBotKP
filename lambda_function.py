@@ -28,7 +28,6 @@ def bootstrap(event: dict, _context) -> str:
         return "ok"
     random.seed()
     body = event["body"]
-    logging.info(body)
 
     if "modal-executed" in body:
         return None
@@ -62,10 +61,9 @@ def lambda_handler(event: dict, _context) -> str:
     try:
         return bootstrap(event, _context)
     except Exception as e:
-        channel_id = 'CNCM21Z9T'
         payload = {
             "token": os.environ["WS_TOKEN"],
-            "channel": channel_id,
+            "channel": 'CNCM21Z9T',
             "text": traceback.format_exc()
         }
         res = requests.get("https://slack.com/api/chat.postMessage?",
