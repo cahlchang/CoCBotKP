@@ -112,8 +112,7 @@ class Bot(object):
         self.data_user = json.loads(res.text)
 
         if "view" in param_json \
-           and "plain_text_input" in str(param_json["view"]["state"]["values"]) \
-           and "https://~" not in str(param_json["view"]["state"]["values"]):
+           and "https://~" not in str(json.dump(param_json["view"]["state"]["values"])):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     if each["type"] == "plain_text_input":
