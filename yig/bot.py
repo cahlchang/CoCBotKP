@@ -56,7 +56,7 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
-
+    # この辺りからmodal.pyへ移し替える
     def init_modal(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
@@ -118,14 +118,16 @@ class Bot(object):
                         modal = "VIEW_CONFIRM_EXECUTED_MODAL"
                         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
                         view_function(self)
-                        self.key = self.message = "INIT %s" % each["value"]
+                        self.key = self.message = "init <%s>" % each["value"]
                         self.dispatch()
+                        return
 
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
                     self.dispatch()
+                    return
 
         if "modal-dispatch_go_button" in body:
              modal = "VIEW_CONFIRM_EXECUTED_MODAL"
@@ -133,6 +135,7 @@ class Bot(object):
              view_function(self)
              self.key = self.message = param_json["actions"][0]["value"].upper()
              self.dispatch()
+             return
 
 
     def init_plugins(self):
