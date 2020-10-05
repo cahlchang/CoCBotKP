@@ -8,6 +8,7 @@ from yig.bot import listener, KEY_MATCH_FLAG
 from yig.util.data import get_user_param, write_user_data, read_user_data
 from yig.util.view import divider_builder
 
+
 @listener("", KEY_MATCH_FLAG)
 def gui_hook(bot):
     """gui test"""
@@ -67,7 +68,6 @@ def gui_receiver(bot):
 
     block_content.append(divider_builder())
     now = datetime.now()
-    print("metadata", bot.channel_id)
     view_content = {
         "type": "modal",
         "callback_id": "modal-identifier",
@@ -89,18 +89,12 @@ def gui_receiver(bot):
         "view": json.dumps(view_content, ensure_ascii=False)
     }
 
-    print(payload)
     res = requests.post(command_url, data=payload)
     res_json = json.loads(res.text)
-
-    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
-    if map_id["channel_id"] != "":
-        bot.channel_id = map_id["channel_id"]
-    else:
-        for k, data in res_json["view"]["state"]["values"].items():
-            for kk, datum in data.items():
-                if datum["type"] == "conversations_select":
-                    bot.channel_id = datum["selected_conversation"]
+    for k, data in res_json["view"]["state"]["values"].items():
+        for kk, datum in data.items():
+            if datum["type"] == "conversations_select":
+                bot.channel_id = datum["selected_conversation"]
 
     write_user_data(bot.team_id, bot.user_id, "key_id", json.dumps({"view_id": res_json["view"]["id"], "channel_id": bot.channel_id}))
 
