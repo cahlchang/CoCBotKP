@@ -2,6 +2,7 @@ import yig.config
 import re
 import json
 import requests
+import logging
 from datetime import datetime
 
 from yig.bot import listener, KEY_MATCH_FLAG
@@ -12,6 +13,7 @@ from yig.util.view import divider_builder
 @listener("", KEY_MATCH_FLAG)
 def gui_hook(bot):
     """gui test"""
+    logger = logging.getLogger()
     block_content = [
         {
             "type": "section",
@@ -91,6 +93,7 @@ def gui_receiver(bot):
 
     res = requests.post(command_url, data=payload)
     res_json = json.loads(res.text)
+    logging.info(json.dumps(res_json))
     for k, data in res_json["view"]["state"]["values"].items():
         for kk, datum in data.items():
             if datum["type"] == "conversations_select":
