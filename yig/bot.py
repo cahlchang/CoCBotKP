@@ -77,19 +77,15 @@ class Bot(object):
         self.trigger_id = param_json["trigger_id"]
         self.api_app_id = param_json["api_app_id"]
         self.get_token(self.team_id)
-        # res = requests.get("https://slack.com/api/users.profile.get",
-        #                    params=payload,
-        #                    headers={'Content-Type': 'application/json'})
-        # self.data_user = json.loads(res.text)
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
-
         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
 
 
     def modal_dispatch(self, body):
+        # init
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
@@ -114,6 +110,7 @@ class Bot(object):
                            params=payload,
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
+
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
@@ -121,12 +118,11 @@ class Bot(object):
                     self.dispatch()
 
         if "modal-dispatch_go_button" in body:
-             self.key = self.message = param_json["actions"][0]["value"].upper()
-             self.dispatch()
              modal = "VIEW_CONFIRM_EXECUTED_MODAL"
-
              view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
              view_function(self)
+             self.key = self.message = param_json["actions"][0]["value"].upper()
+             self.dispatch()
 
 
     def init_plugins(self):
