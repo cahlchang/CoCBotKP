@@ -76,12 +76,12 @@ class Bot(object):
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
         self.api_app_id = param_json["api_app_id"]
-        payload = {"token": self.get_token(self.team_id),
-                   "user": self.user_id}
-        res = requests.get("https://slack.com/api/users.profile.get",
-                           params=payload,
-                           headers={'Content-Type': 'application/json'})
-        self.data_user = json.loads(res.text)
+        # payload = {"token": self.get_token(self.team_id),
+        #            "user": self.user_id}
+        # res = requests.get("https://slack.com/api/users.profile.get",
+        #                    params=payload,
+        #                    headers={'Content-Type': 'application/json'})
+        # self.data_user = json.loads(res.text)
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
@@ -93,7 +93,6 @@ class Bot(object):
     def modal_dispatch(self, body):
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
-        print(param_json)
         self.team_id = param_json["user"]["team_id"]
         self.user_id = param_json["user"]["id"]
         self.trigger_id = param_json["trigger_id"]
@@ -135,7 +134,6 @@ class Bot(object):
         module_list = glob('yig/plugins/*.py')
         for module in module_list:
             module = module.split(".")[0]
-            print(".".join(module.split("/")))
             import_module(".".join(module.split("/")))
 
 
