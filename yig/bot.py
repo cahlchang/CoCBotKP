@@ -111,6 +111,7 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
+        print(str(json.dump(param_json["view"]["state"]["values"])))
         if "view" in param_json \
            and "https://~" not in str(json.dump(param_json["view"]["state"]["values"])):
             for k, datum in param_json["view"]["state"]["values"].items():
