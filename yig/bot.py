@@ -119,7 +119,7 @@ class Bot(object):
                     return
 
         if "view" in param_json \
-           and re.match(".*https://.*", str(json.dumps(param_json["view"]["state"]["values"])): #無理やりな実装
+           and re.match(".*https://.*", str(json.dumps(param_json["view"]["state"]["values"]))): #無理やりな実装
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     if each["type"] == "plain_text_input":
