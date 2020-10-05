@@ -219,7 +219,6 @@ def build_input_content(describe, initial_value):
 	"element": {
 	    "type": "plain_text_input",
             "initial_value": initial_value
-            "action_id": action_id,
 	},
         "label": {
 	    "type": "plain_text",
