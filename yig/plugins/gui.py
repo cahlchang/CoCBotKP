@@ -51,7 +51,7 @@ def gui_receiver(bot):
 
     block_content = []
     block_content.append(build_channel_select_content())
-    block_content.append(build_input_content('Init your character sheet', "https://~", "modal-dispatch_init"))
+    block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet', "modal-dispatch_go_button_0"))
     block_content.append(build_button_content('SAN Check', 'Your Sanity check', "dum01"))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
@@ -213,17 +213,17 @@ def build_plain_text_content(text):
     }
 
 
-def build_input_content(describe, initial_value, action_id):
+def build_input_content(describe, initial_value):
     return {
         "type": "input",
 	"element": {
 	    "type": "plain_text_input",
             "initial_value": initial_value
+            "action_id": action_id,
 	},
         "label": {
 	    "type": "plain_text",
 	    "text": describe,
-            "action_id": action_id,
 	    "emoji": False
 	}}
 
