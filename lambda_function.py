@@ -24,7 +24,7 @@ def bootstrap(event: dict, _context) -> str:
     bot = Bot()
     if "params" in event and "path" in event["params"]:
         bot.install_bot(event)
-        # todo redirectでワークスペースに飛ぶように
+        # todo redirectでワークスペースに飛ぶようにリダイレクト入れる
         return "ok"
     random.seed()
     body = event["body"]
