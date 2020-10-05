@@ -114,7 +114,7 @@ class Bot(object):
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
-                    self.key = self.message = each["value"]
+                    self.key = self.message = each["value"].replace('+', ' ')
                     self.dispatch()
                     return
 
