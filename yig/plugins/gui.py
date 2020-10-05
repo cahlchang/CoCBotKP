@@ -142,7 +142,6 @@ def gui_confirm_receiver(bot):
         "view": json.dumps(view_content, ensure_ascii=False)
     }
 
-    print(payload)
     res = requests.post(command_url, data=payload)
     logging.info(json.dumps(res.text))
 
