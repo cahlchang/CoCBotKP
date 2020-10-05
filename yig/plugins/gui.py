@@ -144,7 +144,7 @@ def gui_confirm_receiver(bot):
 
     print(payload)
     res = requests.post(command_url, data=payload)
-    print(res.text)
+    logging.info(json.dumps(res.text))
 
 
 @listener("VIEW_CONFIRM_EXECUTED_MODAL", KEY_MATCH_FLAG)
