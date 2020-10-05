@@ -111,22 +111,21 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
-        print(str(json.dumps(param_json["view"]["state"]["values"])))
-        if "view" in param_json \
-           and "https://~" not in str(json.dumps(param_json["view"]["state"]["values"])):
-            for k, datum in param_json["view"]["state"]["values"].items():
-                for kk, each in datum.items():
-                    if each["type"] == "plain_text_input":
-                        self.key = self.message = "init <%s>" % each["value"]
-                        self.dispatch()
-                        return
-
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
                     self.dispatch()
                     return
+
+        if "view" in param_json \
+           and re.match(".*https://.*", str(json.dumps(param_json["view"]["state"]["values"])): #無理やりな実装
+            for k, datum in param_json["view"]["state"]["values"].items():
+                for kk, each in datum.items():
+                    if each["type"] == "plain_text_input":
+                        self.key = self.message = "init <%s>" % each["value"]
+                        self.dispatch()
+                        return
 
         if "modal-dispatch_go_button" in body:
              modal = "VIEW_CONFIRM_EXECUTED_MODAL"
