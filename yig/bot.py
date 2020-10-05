@@ -111,6 +111,16 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
+        if "view" in param_json and "plain_text_input" in str(param_json["view"]["state"]["values"]):
+            for k, datum in param_json["view"]["state"]["values"].items():
+                for kk, each in datum.items():
+                    if each["type"] == "plain_text_input":
+                        modal = "VIEW_CONFIRM_EXECUTED_MODAL"
+                        view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
+                        view_function(self)
+                        self.key = self.message = "INIT %s" % each["value"]
+                        self.dispatch()
+
         if "modal-dispatch_in_select" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
