@@ -69,15 +69,13 @@ class Bot(object):
         view_function(self)
 
 
-    def confirm_modal(self, body):
-        contents = body.split("=")
-        param_json = json.loads(urllib.parse.unquote(contents[-1]))
-        self.team_id = param_json["user"]["team_id"]
-        self.user_id = param_json["user"]["id"]
-        self.trigger_id = param_json["trigger_id"]
-        self.api_app_id = param_json["api_app_id"]
+    def confirm_modal(self, payload_json):
+        self.team_id = payload_json["user"]["team_id"]
+        self.user_id = payload_json["user"]["id"]
+        self.trigger_id = payload_json["trigger_id"]
+        self.api_app_id = payload_json["api_app_id"]
         self.get_token(self.team_id)
-        if "static_select" in body:
+        if "static_select" in payload_json["actions"][0]:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
 
