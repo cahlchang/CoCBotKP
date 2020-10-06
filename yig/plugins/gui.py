@@ -53,7 +53,7 @@ def gui_receiver(bot):
     block_content.append(build_channel_select_content())
     block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet', "modal-dispatch_go_button_0"))
-    block_content.append(build_button_content('SAN Check', 'Your Sanity check', "dum01"))
+    block_content.append(build_button_content('SAN Check', 'Your Sanity check', "modal-dispatch_confirm_button_0"))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
 
     block_content.append(divider_builder())
