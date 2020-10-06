@@ -80,6 +80,11 @@ class Bot(object):
         if "static_select" in body:
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
+
+        if "modal-confirm_button_with_sanc" in body:
+            print(param_json)
+            modal = "VIEW_CONFIRM_SANC_MODAL"
+
         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
 
@@ -127,13 +132,6 @@ class Bot(object):
              return
 
 
-        if "modal-dispatch_confirm_button" in body:
-             modal = "VIEW_CONFIRM_EXECUTED_MODAL"
-             view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
-             view_function(self)
-             self.key = self.message = param_json["actions"][0]["value"].upper()
-             self.dispatch()
-             return
 
 
         if "view" in param_json \

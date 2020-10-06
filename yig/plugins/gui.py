@@ -53,7 +53,7 @@ def gui_receiver(bot):
     block_content.append(build_channel_select_content())
     block_content.append(build_input_content('Init your character sheet', "https://~"))
     block_content.append(build_button_content('update', 'Update your character sheet', "modal-dispatch_go_button_0"))
-    block_content.append(build_button_content('SAN Check', 'Your Sanity check', "modal-dispatch_confirm_button_0"))
+    block_content.append(build_button_content('SAN Check', 'Your Sanity check', "modal-confirm_button_with_sanc"))
     block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
 
     block_content.append(divider_builder())
@@ -183,6 +183,46 @@ def gui_confirm_delete(bot):
     print(res.text)
 
 
+@listener("VIEW_CONFIRM_SANC_MODAL", KEY_MATCH_FLAG)
+def gui_confirm_sanc(bot):
+    """con"""
+    command_url = "https://slack.com/api/views.update"
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    view_id = map_id["view_id"]
+    channel_id = map_id["channel_id"]
+    block_content = []
+    block_content.append(build_mrkdwn_content(("Enter the required SAN check value. `sanc [success]/[fail]`\n"
+                                               "If you only want to check the SAN, just [GO!] ahead\n"
+                                               "For example\n"
+                                               "sanc 0/1, sanc 1/1d6, 1d20/1d100"))
+    block_content.append(build_input_content('sanc'))
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal-executed",
+        "title": {
+            "type": "plain_text",
+            "text": "SAN CHECK MODAL"
+        },
+        "private_metadata": channel_id,
+	"close": {
+	    "type": "plain_text",
+	    "text": "GO!",
+	    "emoji": True
+	},
+        "blocks": block_content
+    }
+
+    payload = {
+        "token": bot.token,
+        "trigger_id": bot.trigger_id,
+        "view_id": view_id,
+        "response_action": "clear",
+        "view": json.dumps(view_content, ensure_ascii=False)
+    }
+    res = requests.post(command_url, data=payload)
+    print(res.text)
+
+
 def build_channel_select_content():
     return {
 	"type": "section",
@@ -208,6 +248,17 @@ def build_plain_text_content(text):
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
+	    "text": text,
+	    "emoji": True
+	}
+    }
+
+
+def build_mrkdwn_content(text):
+    return {
+	"type": "section",
+	"text": {
+	    "type": "mrkdwn",
 	    "text": text,
 	    "emoji": True
 	}
