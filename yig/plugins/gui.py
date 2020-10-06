@@ -204,9 +204,14 @@ def gui_confirm_sanc(bot):
             "text": "SAN CHECK MODAL"
         },
         "private_metadata": channel_id,
-	"close": {
+        "submit": {
 	    "type": "plain_text",
 	    "text": "GO!",
+	    "emoji": True
+	},
+	"close": {
+	    "type": "plain_text",
+	    "text": "Close",
 	    "emoji": True
 	},
         "blocks": block_content
