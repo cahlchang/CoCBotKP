@@ -4,6 +4,7 @@ import logging
 import random
 import traceback
 import requests
+import urllib.parse
 from yig.bot import Bot
 
 """
