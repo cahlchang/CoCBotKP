@@ -196,6 +196,7 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
 
     message = f"{result_word} 【SANチェック】 {dice_result}/{pc_san}"
     cmd_parts = cmd.split()
+    print(cmd_parts)
     if len(cmd_parts) == 2:
         match_result = split_alternative_roll_or_value(cmd_parts[1])
         if match_result:
@@ -220,6 +221,7 @@ def split_alternative_roll_or_value(cmd) -> Tuple[str, str]:
     """
     element_matcher = r"(\d+D?\d*)"
     result = re.fullmatch(f"{element_matcher}/{element_matcher}", cmd)
+    print(result)
     if result is None or len(result.groups()) != 2:
         return None
     return result.groups()
