@@ -36,7 +36,7 @@ def bootstrap(event: dict, _context) -> str:
         bot.init_modal(body)
         return None
 
-    if "selected_option" in body:
+    if "selected_option" in body or "modal-confirm" in body:
         bot.confirm_modal(body)
         return None
 
