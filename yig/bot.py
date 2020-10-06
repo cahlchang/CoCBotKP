@@ -126,15 +126,6 @@ class Bot(object):
                     self.dispatch()
                     return
 
-        if "modal-dispatch_go_button" in body:
-            print("go button block")
-            modal = "VIEW_CONFIRM_EXECUTED_MODAL"
-            view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
-            view_function(self)
-            self.key = self.message = param_json["actions"][0]["value"].upper()
-            self.dispatch()
-            return
-
         if "view" in param_json \
            and re.match(".*https://.*", str(json.dumps(param_json["view"]["state"]["values"]))): #無理やりな実装
             print("init block")
@@ -144,6 +135,15 @@ class Bot(object):
                         self.key = self.message = "init <%s>" % each["value"]
                         self.dispatch()
                         return
+
+        if "modal-dispatch_go_button" in body:
+            print("go button block")
+            modal = "VIEW_CONFIRM_EXECUTED_MODAL"
+            view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
+            view_function(self)
+            self.key = self.message = param_json["actions"][0]["value"].upper()
+            self.dispatch()
+            return
 
 
     def init_plugins(self):
