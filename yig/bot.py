@@ -79,8 +79,8 @@ class Bot(object):
             self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
 
-        if "modal-confirm_button_with_sanc" in body:
-            print(param_json)
+        if "modal-confirm_button_with_sanc" in payload_json["actions"][0]:
+            print(payload_json)
             modal = "VIEW_CONFIRM_SANC_MODAL"
 
         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
