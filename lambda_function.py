@@ -41,8 +41,8 @@ def bootstrap(event: dict, _context) -> str:
             bot.init_modal(body)
             return None
 
-        if "action" in payload_json and "selected_option" in payload_json["action"][0] or "modal-confirm" in payload_json["action"][0]:
-            bot.confirm_modal(body)
+        if "actions" in payload_json and "selected_option" in payload_json["actions"][0] or "modal-confirm" in payload_json["actions"][0]:
+            bot.confirm_modal(payload_json)
             return None
 
         if "modal-dispatch" in body:
