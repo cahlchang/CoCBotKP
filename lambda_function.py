@@ -29,31 +29,36 @@ def bootstrap(event: dict, _context) -> str:
     random.seed()
     body = event["body"]
 
-    if "modal-executed" in body:
-        return None
+    if "payload" in body:
+        contents = body.split("=")
+        payload_json = json.loads(urllib.parse.unquote(contents[-1]))
 
-    if "modal-view-identifier" in body or "ccmenustart" in body:
-        bot.init_modal(body)
-        return None
+        if "modal-executed" in body:
+            return None
 
-    if "selected_option" in body or "modal-confirm" in body:
-        bot.confirm_modal(body)
-        return None
+        if "modal-view-identifier" in body or "ccmenustart" in body:
+            bot.init_modal(body)
+            return None
 
-    if "modal-dispatch" in body:
-        bot.modal_dispatch(body)
-        return None
+        if "action" in payload_json and "selected_option" in payload_json["action"][0] or "modal-confirm" in payload_json["action"][0]:
+            bot.confirm_modal(body)
+            return None
 
-    body_split = body.split("&")
-    evt_slack = {}
-    for datum in body_split:
-        lst = datum.split("=")
-        evt_slack[lst[0]] = lst[1]
+        if "modal-dispatch" in body:
+            bot.modal_dispatch(body)
+            return None
+    else:
+        body_split = body.split("&")
+        evt_slack = {}
+        for datum in body_split:
+            lst = datum.split("=")
+            evt_slack[lst[0]] = lst[1]
 
-    if "subtype" in evt_slack:
-        return None
-    bot.init_param(evt_slack)
-    bot.dispatch()
+        if "subtype" in evt_slack:
+            return None
+        bot.init_param(evt_slack)
+        bot.dispatch()
+
     return None
 
 
