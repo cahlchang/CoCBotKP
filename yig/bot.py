@@ -77,7 +77,7 @@ class Bot(object):
         self.get_token(self.team_id)
         modal = ""
         if "selected_option" in payload_json["actions"][0]:
-            self.key = self.message = param_json["actions"][0]["selected_option"]["value"]
+            self.key = self.message = payload_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
 
         if "modal-confirm_button_with_sanc" in payload_json["actions"][0]:
