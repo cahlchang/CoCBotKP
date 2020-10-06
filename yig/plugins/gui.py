@@ -195,7 +195,7 @@ def gui_confirm_sanc(bot):
                                                "If you only want to check the SAN, just [GO!] ahead\n"
                                                "For example\n"
                                                "sanc 0/1, sanc 1/1d6, 1d20/1d100")))
-    block_content.append(build_input_content('sanc'))
+    block_content.append(build_input_content("Write the value of the SAN check", 'sanc'))
     view_content = {
         "type": "modal",
         "callback_id": "modal-executed",
