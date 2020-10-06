@@ -196,6 +196,7 @@ def get_sanc_result(cmd: str, pc_san: int) -> Tuple[str, str]:
 
     message = f"{result_word} 【SANチェック】 {dice_result}/{pc_san}"
     cmd_parts = cmd.split()
+    print(cmd_parts)
     if len(cmd_parts) == 2:
         match_result = split_alternative_roll_or_value(cmd_parts[1])
         if match_result:
