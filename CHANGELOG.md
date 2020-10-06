@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.2.6] 2020-10-06
+- Implement sanity check
+
 ## [0.2.5] 2020-10-05
 - Speeding up
 - Python Version up
