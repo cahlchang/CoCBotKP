@@ -58,6 +58,7 @@ class Bot(object):
 
     # この辺りからmodal.pyへ移し替える
     def init_modal(self, body):
+        print("init block")
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
@@ -70,6 +71,7 @@ class Bot(object):
 
 
     def confirm_modal(self, payload_json):
+        print("confirm modal")
         self.team_id = payload_json["user"]["team_id"]
         self.user_id = payload_json["user"]["id"]
         self.trigger_id = payload_json["trigger_id"]
@@ -89,6 +91,7 @@ class Bot(object):
 
     def modal_dispatch(self, body):
         # init
+        print("dispatch block")
         contents = body.split("=")
         param_json = json.loads(urllib.parse.unquote(contents[-1]))
         self.team_id = param_json["user"]["team_id"]
@@ -101,6 +104,7 @@ class Bot(object):
 
         # チャンネルのselecterが叩かれた場合
         if "actions" in param_json and param_json["actions"][0]["action_id"] == "modal-dispatch-no-trans-channel":
+            print("no trans block")
             for data in param_json["actions"]:
                 if data["type"] == "conversations_select":
                     channel_id = data["selected_conversation"]
@@ -115,23 +119,25 @@ class Bot(object):
         self.data_user = json.loads(res.text)
 
         if "modal-dispatch_in_" in body:
+            print("dispatch in block")
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
-                    self.key = self.message = each["value"]
+                    self.key = self.message = each["value"].replace("+", " ")
                     self.dispatch()
                     return
 
         if "modal-dispatch_go_button" in body:
-             modal = "VIEW_CONFIRM_EXECUTED_MODAL"
-             view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
-             view_function(self)
-             self.key = self.message = param_json["actions"][0]["value"].upper()
-             self.dispatch()
-             return
-
+            print("go button block")
+            modal = "VIEW_CONFIRM_EXECUTED_MODAL"
+            view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
+            view_function(self)
+            self.key = self.message = param_json["actions"][0]["value"].upper()
+            self.dispatch()
+            return
 
         if "view" in param_json \
            and re.match(".*https://.*", str(json.dumps(param_json["view"]["state"]["values"]))): #無理やりな実装
+            print("init block")
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     if each["type"] == "plain_text_input":
