@@ -122,6 +122,7 @@ class Bot(object):
             print("dispatch in block")
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
+                    print(each["value"].replace("+", " "))
                     self.key = self.message = each["value"].replace("+", " ")
                     self.dispatch()
                     return
