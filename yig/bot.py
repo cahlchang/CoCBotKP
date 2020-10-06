@@ -114,7 +114,7 @@ class Bot(object):
                            headers={'Content-Type': 'application/json'})
         self.data_user = json.loads(res.text)
 
-        if "modal-dispatch_in_select" in body:
+        if "modal-dispatch_in_" in body:
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"]
@@ -128,8 +128,6 @@ class Bot(object):
              self.key = self.message = param_json["actions"][0]["value"].upper()
              self.dispatch()
              return
-
-
 
 
         if "view" in param_json \

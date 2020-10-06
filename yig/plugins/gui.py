@@ -198,7 +198,7 @@ def gui_confirm_sanc(bot):
     block_content.append(build_input_content("Write the value of the SAN check", 'sanc'))
     view_content = {
         "type": "modal",
-        "callback_id": "modal-executed",
+        "callback_id": "modal-dispatch_in_sanc",
         "title": {
             "type": "plain_text",
             "text": "SAN CHECK MODAL"
