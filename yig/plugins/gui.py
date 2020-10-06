@@ -259,8 +259,7 @@ def build_mrkdwn_content(text):
 	"type": "section",
 	"text": {
 	    "type": "mrkdwn",
-	    "text": text,
-	    "emoji": True
+	    "text": text
 	}
     }
 
