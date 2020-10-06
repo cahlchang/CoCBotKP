@@ -43,7 +43,7 @@ def bootstrap(event: dict, _context) -> str:
 
         if "actions" in payload_json \
            and ("selected_option" in payload_json["actions"][0] \
-           or "modal-confirm_button_with_sanc" in payload_json["actions"][0]):
+           or "action_id" in payload_json["actions"][0]):
             bot.confirm_modal(payload_json)
             return None
 
