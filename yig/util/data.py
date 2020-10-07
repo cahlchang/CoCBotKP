@@ -116,6 +116,20 @@ def post_result(token,
         request(command_url, payload)
 
 
+def get_channel_name(channel_id, token):
+    command_url = "https://slack.com/api/chat.postMessage?"
+    payload = {
+        "token": token,
+        "username": data_user["profile"]["display_name"],
+        "icon_url": data_user["profile"]["image_72"],
+        "channel": channel_id,
+        "text": f"/cc {message}"
+    }
+    res = requests.get(command_url, params=payload)
+    res_json = json.loads(res.text).decode('utf-8')
+    return res_json['channel']['name']
+
+
 def get_pc_icon_url(team_id, user_id):
     url = f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/icon.png"
     response = requests.head(url)
