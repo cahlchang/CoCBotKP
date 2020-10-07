@@ -89,7 +89,7 @@ class Bot(object):
            and (payload_json["actions"][0]["action_id"] == "modal-confirm_button_with_session" \
                 or payload_json["actions"][0]["type"] == "users_select"):
             if payload_json["actions"][0]["type"] == "users_select":
-                bot.key = payload_json["actions"][0]["selected_user"]
+                self.key = payload_json["actions"][0]["selected_user"]
             modal = "VIEW_CONFIRM_SESSION_MODAL"
 
         if "action_id" in payload_json["actions"][0] and payload_json["actions"][0]["type"] == "radio_buttons":
