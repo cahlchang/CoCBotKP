@@ -301,7 +301,9 @@ def gui_confirm_session(bot):
     block_content = []
     block_content.append(build_mrkdwn_content(("KPから発行されるセッション参加コマンドを入力して下さい `join [KPのID]` \n"
                                                "セッションから抜ける場合、leaveコマンドを入力して下さい `leave [KPのID]`  \n")))
-    # Write the value of the SAN check
+
+    block_content.append(build_user_select_content("modal-button-select-user"))
+    block_content.append(build_plain_text_content("ユーザID | %s" % bot.key))
     block_content.append(build_input_content("参加コマンドを入力して下さい", 'join '))
     view_content = {
         "type": "modal",
@@ -510,5 +512,23 @@ def build_button_content(value, describe, action_id):
 		"emoji": True
 	    },
 	    "value": value
+	}
+    }
+
+
+def build_user_select_content(action_id):
+    return {
+	"type": "section",
+	"text": {
+	    "type": "mrkdwn",
+	    "text": "ユーザIDの確認"
+	},
+	"accessory": {
+	    "type": "users_select",
+	    "placeholder": {
+		"type": "plain_text",
+		"text": "Select a user",
+		"emoji": True
+	    }
 	}
     }
