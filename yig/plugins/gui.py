@@ -69,11 +69,12 @@ def gui_receiver(bot):
     block_content.append(divider_builder())
 
     # session join or leave.
-    block_content.append(build_button_content('join/leave session', 'セッションに参加/離脱します', "bym2"))
+    block_content.append(build_button_content('join/leave session', 'セッションに参加/離脱します', "modal-confirm_button_with_session"))
     # Save your icon image
     block_content.append(build_button_content('saveimg', 'アイコンの画像を保存します', "modal-dispatch_go_button_1"))
+    block_content.append(build_button_content('result', 'セッション中のロール結果を表示します\n（ゲーム終了後に押しましょう）', "modal-dispatch_go_button_2"))
     # More command
-    block_content.append(build_button_content('help', 'それ以外のコマンドを確認します', "modal-dispatch_go_button_2"))
+    block_content.append(build_button_content('help', 'それ以外のコマンドを確認します', "modal-dispatch_go_button_3"))
 
     block_content.append(divider_builder())
     now = datetime.now()
@@ -290,6 +291,50 @@ def gui_confirm_status(bot):
     print(res.text)
 
 
+@listener("VIEW_CONFIRM_SESSION_MODAL", KEY_MATCH_FLAG)
+def gui_confirm_session(bot):
+    """con"""
+    command_url = "https://slack.com/api/views.update"
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    view_id = map_id["view_id"]
+    channel_id = map_id["channel_id"]
+    block_content = []
+    block_content.append(build_mrkdwn_content(("KPから発行されるセッション参加コマンドを入力して下さい `join [KPのID]` \n"
+                                               "セッションから抜ける場合、leaveコマンドを入力して下さい `leave [KPのID]`  \n")))
+    # Write the value of the SAN check
+    block_content.append(build_input_content("参加コマンドを入力して下さい", 'join '))
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal-dispatch_in_session",
+        "title": {
+            "type": "plain_text",
+            "text": "SESSION MODAL"
+        },
+        "private_metadata": channel_id,
+        "submit": {
+	    "type": "plain_text",
+	    "text": "EXECUTE",
+	    "emoji": True
+	},
+	"close": {
+	    "type": "plain_text",
+	    "text": "CLOSE",
+	    "emoji": True
+	},
+        "blocks": block_content
+    }
+
+    payload = {
+        "token": bot.token,
+        "trigger_id": bot.trigger_id,
+        "view_id": view_id,
+        "response_action": "clear",
+        "view": json.dumps(view_content, ensure_ascii=False)
+    }
+    res = requests.post(command_url, data=payload)
+    print(res.text)
+
+
 def build_channel_select_content():
     return {
 	"type": "section",
@@ -371,7 +416,7 @@ def build_skill_content(user_param, hide = ''):
 	    },
 	    "value": f"{hide}{skill_name}" })
 
-    if hide != '':
+    if hide == '':
         text_section = "ロールを振りたい技能を選択して下さい"
     else:
         text_section = "秘匿でロールを振りたい技能を選択して下さい。結果はKPにのみ届きます。"
