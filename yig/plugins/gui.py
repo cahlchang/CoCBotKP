@@ -254,9 +254,9 @@ def gui_confirm_status(bot):
     block_content = []
     block_content.append(build_mrkdwn_content(("ステータスの変更を入力して下さい\n"
                                                "例)\n"
-                                               "2点ダメージを回復する場合。`u HP+2`\n"
-                                               "5点MPを払う場合。`u MP-5`\n"
-                                               "3点のSANを減らす場合。`u SAN-3`")))
+                                               "2点ダメージを回復する場合。 `u HP+2` \n"
+                                               "5点MPを払う場合。 `u MP-5` \n"
+                                               "3点のSANを減らす場合。 `u SAN-3` ")))
     block_content.append(build_input_content("変更を入力して下さい", 'u %s' % bot.key))
     view_content = {
         "type": "modal",
