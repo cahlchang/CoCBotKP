@@ -18,7 +18,7 @@ def session_start(bot):
     return "セッションを開始します。\n参加コマンド\n`/cc join %s`" % bot.user_id, color
 
 
-@listener("join+.*", RE_MATCH_FLAG)
+@listener("(join|JOIN)+.*", RE_MATCH_FLAG)
 def session_join(bot):
     """:+1: *join TRPG session*\n`/cc join [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
