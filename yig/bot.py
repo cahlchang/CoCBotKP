@@ -78,7 +78,7 @@ class Bot(object):
         self.api_app_id = payload_json["api_app_id"]
         self.get_token(self.team_id)
         modal = ""
-        if "selected_option" in payload_json["actions"][0]:
+        if "static_select" in payload_json["actions"][0]["type"]:
             self.key = self.message = payload_json["actions"][0]["selected_option"]["value"]
             modal = "VIEW_CONFIRM_SELECT_MODAL"
 
