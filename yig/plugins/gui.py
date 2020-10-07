@@ -206,7 +206,7 @@ def gui_confirm_sanc(bot):
     # "If you only want to check the SAN, just [GO!] ahead\n"
     # "For example\n"
     # "sanc 0/1, sanc 1/1d6, 1d20/1d100"
-    block_content.append(build_mrkdwn_content(("SANチェックの値を入力して下さい。`sanc [成功量]/[失敗量]\n`"
+    block_content.append(build_mrkdwn_content(("SANチェックの値を入力して下さい。`sanc [成功量]/[失敗量]`\n"
                                                "もしSANチェックのみを行う場合、そのまま「GO!」ボタンを押して下さい\n"
                                                "例)\n"
                                                "sanc 0/1, sanc 1/1d6, 1d20/1d100")))
@@ -227,7 +227,7 @@ def gui_confirm_sanc(bot):
 	},
 	"close": {
 	    "type": "plain_text",
-	    "text": "Close",
+	    "text": "CLOSE",
 	    "emoji": True
 	},
         "blocks": block_content
@@ -263,7 +263,7 @@ def gui_confirm_status(bot):
         "callback_id": "modal-confirm_button_with_status",
         "title": {
             "type": "plain_text",
-            "text": "STATUS UPDATE CHECK MODAL"
+            "text": "STATUS UPDATE MODAL"
         },
         "private_metadata": channel_id,
         "submit": {
@@ -273,7 +273,7 @@ def gui_confirm_status(bot):
 	},
 	"close": {
 	    "type": "plain_text",
-	    "text": "Close",
+	    "text": "CLOSE",
 	    "emoji": True
 	},
         "blocks": block_content
