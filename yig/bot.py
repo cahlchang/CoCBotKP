@@ -134,6 +134,11 @@ class Bot(object):
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
                     self.key = self.message = each["value"].replace("+", " ").upper()
+
+                    # bad hack
+                    if self.key.split(' ') and self.message.key(' ')[-1].isnumeric():
+                        self.key = ' '.join(self.key.split(' ')[:-1]) + "+" + self.key.split(' ')[-1]
+
                     self.dispatch()
                     return
 
