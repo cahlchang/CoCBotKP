@@ -260,7 +260,7 @@ def gui_confirm_status(bot):
     block_content.append(build_input_content("変更を入力して下さい", 'u %s' % bot.key))
     view_content = {
         "type": "modal",
-        "callback_id": "modal-dispatch_in_update",
+        "callback_id": "modal-confirm_button_with_sanc",
         "title": {
             "type": "plain_text",
             "text": "STATUS UPDATE CHECK MODAL"
