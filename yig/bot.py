@@ -133,12 +133,11 @@ class Bot(object):
             print("dispatch in block")
             for k, datum in param_json["view"]["state"]["values"].items():
                 for kk, each in datum.items():
-                    self.key = self.message = each["value"].replace("+", " ").upper()
-
+                    self.message = each["value"].replace("+", " ")
                     # bad hack
-                    if self.key.split(' ') and self.key(' ')[-1].isnumeric():
-                        self.key = ' '.join(self.key.split(' ')[:-1]) + "+" + self.key.split(' ')[-1]
-
+                    if self.message.split(' ') and self.message.split(' ')[-1].isnumeric():
+                        self.message = ' '.join(self.message.split(' ')[:-1]) + "+" + self.message.split(' ')[-1]
+                    self.key = format_as_command(self.message)
                     self.dispatch()
                     return
 
