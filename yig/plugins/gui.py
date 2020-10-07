@@ -51,10 +51,14 @@ def gui_receiver(bot):
 
     block_content = []
     block_content.append(build_channel_select_content())
-    block_content.append(build_input_content('Init your character sheet', "https://~"))
-    block_content.append(build_button_content('update', 'Update your character sheet', "modal-dispatch_go_button_0"))
-    block_content.append(build_button_content('SAN Check', 'Your Sanity check', "modal-confirm_button_with_sanc"))
-    block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'Change the ', ' of the character.'))
+    # 'Init your character sheet'
+    block_content.append(build_input_content('キャラクターシートのURLからデータを初期化します', "https://~"))
+    # Update your character sheet
+    block_content.append(build_button_content('update', 'キャラクターシートの変更点を反映させます', "modal-dispatch_go_button_0"))
+    # Your Sanity check
+    block_content.append(build_button_content('SAN Check', 'SANチェックを行います', "modal-confirm_button_with_sanc"))
+    # Change the , of the character.
+    block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'PCの', 'を変更します'))
 
     block_content.append(divider_builder())
 
@@ -64,9 +68,12 @@ def gui_receiver(bot):
 
     block_content.append(divider_builder())
 
-    block_content.append(build_button_content('join/leave session', 'session join or leave.', "bym2"))
-    block_content.append(build_button_content('saveimg', 'Save your icon image', "modal-dispatch_go_button_1"))
-    block_content.append(build_button_content('help', 'More command', "modal-dispatch_go_button_2"))
+    # session join or leave.
+    block_content.append(build_button_content('join/leave session', 'セッションに参加/離脱します', "bym2"))
+    # Save your icon image
+    block_content.append(build_button_content('saveimg', 'アイコンの画像を保存します', "modal-dispatch_go_button_1"))
+    # More command
+    block_content.append(build_button_content('help', 'それ以外のコマンドを確認します', "modal-dispatch_go_button_2"))
 
     block_content.append(divider_builder())
     now = datetime.now()
@@ -110,8 +117,11 @@ def gui_confirm_select_receiver(bot):
 
     block_content = []
     bot.key = bot.key.replace('+', ' ')
-    block_content.append(build_plain_text_content(("Do you want to add a correction value?\n"
-                                                   "For example\n"
+    # "Do you want to add a correction value?\n"
+    # "For example\n"
+    # "%s+10, %s-20, %s*2, %s/2" % (bot.key, bot.key, bot.key, bot.key)
+    block_content.append(build_plain_text_content(("ロールの補正値がある場合、補正値を入れて下さい\n"
+                                                   "例)\n"
                                                    "%s+10, %s-20, %s*2, %s/2" % (bot.key, bot.key, bot.key, bot.key))))
     block_content.append(build_input_content('Roll correction value', "%s" % bot.key))
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
@@ -191,11 +201,17 @@ def gui_confirm_sanc(bot):
     view_id = map_id["view_id"]
     channel_id = map_id["channel_id"]
     block_content = []
-    block_content.append(build_mrkdwn_content(("Enter the required SAN check value. `sanc [success]/[fail]`\n"
-                                               "If you only want to check the SAN, just [GO!] ahead\n"
-                                               "For example\n"
+    # EN
+    # "Enter the required SAN check value. `sanc [success]/[fail]`\n"
+    # "If you only want to check the SAN, just [GO!] ahead\n"
+    # "For example\n"
+    # "sanc 0/1, sanc 1/1d6, 1d20/1d100"
+    block_content.append(build_mrkdwn_content(("SANチェックの値を入力して下さい。`sanc [成功量]/[失敗量]\n`"
+                                               "もしSANチェックのみを行う場合、そのまま「GO!」ボタンを押して下さい\n"
+                                               "例)\n"
                                                "sanc 0/1, sanc 1/1d6, 1d20/1d100")))
-    block_content.append(build_input_content("Write the value of the SAN check", 'sanc'))
+    # Write the value of the SAN check
+    block_content.append(build_input_content("SANチェックの値を入力して下さい", 'sanc'))
     view_content = {
         "type": "modal",
         "callback_id": "modal-dispatch_in_sanc",
@@ -207,6 +223,52 @@ def gui_confirm_sanc(bot):
         "submit": {
 	    "type": "plain_text",
 	    "text": "GO!",
+	    "emoji": True
+	},
+	"close": {
+	    "type": "plain_text",
+	    "text": "Close",
+	    "emoji": True
+	},
+        "blocks": block_content
+    }
+
+    payload = {
+        "token": bot.token,
+        "trigger_id": bot.trigger_id,
+        "view_id": view_id,
+        "response_action": "clear",
+        "view": json.dumps(view_content, ensure_ascii=False)
+    }
+    res = requests.post(command_url, data=payload)
+    print(res.text)
+
+
+@listener("VIEW_CONFIRM_UPDATE_STATUS_MODAL", KEY_MATCH_FLAG)
+def gui_confirm_status(bot):
+    """con"""
+    command_url = "https://slack.com/api/views.update"
+    map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
+    view_id = map_id["view_id"]
+    channel_id = map_id["channel_id"]
+    block_content = []
+    block_content.append(build_mrkdwn_content(("ステータスの変更を入力して下さい\n",
+                                               "例)\n",
+                                               "2点ダメージを回復する場合。`u HP+2`\n",
+                                               "5点MPを払う場合。`u MP-5`\n"
+                                               "3点のSANを減らす場合。`u SAN-3`"))
+    block_content.append(build_input_content("変更を入力して下さい", 'u %s' % bot.key))
+    view_content = {
+        "type": "modal",
+        "callback_id": "modal-dispatch_in_update",
+        "title": {
+            "type": "plain_text",
+            "text": "STATUS UPDATE CHECK MODAL"
+        },
+        "private_metadata": channel_id,
+        "submit": {
+	    "type": "plain_text",
+	    "text": "UPDATE",
 	    "emoji": True
 	},
 	"close": {
@@ -308,17 +370,23 @@ def build_skill_content(user_param, hide = ''):
 		"emoji": True
 	    },
 	    "value": f"{hide}{skill_name}" })
+
+    if hide != '':
+        text_section = "ロールを振りたい技能を選択して下さい"
+    else:
+        text_section = "秘匿でロールを振りたい技能を選択して下さい。結果はKPにのみ届きます。"
+        #"List of skills you have"
     skill_content = {
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
-	    "text": f"Select the skill you want to {hide}roll"
+	    "text": text_section
 	},
 	"accessory": {
 	    "type": "static_select",
 	    "placeholder": {
 		"type": "plain_text",
-		"text": "List of skills you have",
+		"text": "所持技能リスト",
 		"emoji": True
 	    },
 	    "options": option_list
@@ -339,17 +407,19 @@ def build_param_content():
 	    },
 	    "value": f"{param}" })
 
+    # Select the param you want to roll
+    # List of params you have
     param_content = {
 	"type": "section",
 	"text": {
 	    "type": "plain_text",
-	    "text": "Select the param you want to roll"
+	    "text": "ロールを振りたいパラメータを選択して下さい"
 	},
 	"accessory": {
 	    "type": "static_select",
 	    "placeholder": {
 		"type": "plain_text",
-		"text": "List of params you have",
+		"text": "パラメータリスト",
 		"emoji": True
 	    },
 	    "options": param_list
@@ -377,7 +447,6 @@ def build_radio_button_content(lst_button, prefix, surfix):
             }
         ]
     }
-
 
 
 def build_button_content(value, describe, action_id):
