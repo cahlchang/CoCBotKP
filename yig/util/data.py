@@ -124,6 +124,7 @@ def get_channel_name(channel_id, token):
     }
     res = requests.get(command_url, params=payload)
     res_json = json.loads(res.text)
+    print(res_json)
     return res_json['channel']['name']
 
 
