@@ -85,7 +85,7 @@ class Bot(object):
         if "action_id" in payload_json["actions"][0] and payload_json["actions"][0]["action_id"] == "modal-confirm_button_with_sanc":
             modal = "VIEW_CONFIRM_SANC_MODAL"
 
-        if "action_id" in payload_json["actions"][0] and payload_json["actions"][0]["action_id"] == "modal-confirm_button_with_status":
+        if "action_id" in payload_json["actions"][0] and payload_json["actions"][0]["type"] == "radio_buttons":
             model = VIEW_CONFIRM_UPDATE_STATUS_MODAL
         view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
         view_function(self)
