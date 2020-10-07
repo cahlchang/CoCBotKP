@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.3.0] 2020-10-07
+- 🎉 GUI Mode complete.
+- Implement change status
+- Implement session mode
+
 ## [0.2.6] 2020-10-06
 - Implement sanity check
 
