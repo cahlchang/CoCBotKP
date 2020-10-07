@@ -44,8 +44,9 @@ def bootstrap(event: dict, _context) -> str:
 
         if "actions" in payload_json \
            and ("type" in payload_json["actions"][0] and "static_select" in  payload_json["actions"][0]["type"] \
-                or ("action_id" in payload_json["actions"][0]) and "modal-confirm_" in payload_json["actions"][0]["action_id"] \
-                or ("type" in payload_json["actions"][0] and "radio_buttons" in payload_json["actions"][0]["type"])):
+                or "action_id" in payload_json["actions"][0] and "modal-confirm_" in payload_json["actions"][0]["action_id"] \
+                or "type" in payload_json["actions"][0] and "radio_buttons" in payload_json["actions"][0]["type"] \
+                or "type" in payload_json["actions"][0] and "users_select" in payload_json["actions"][0]["type"]):
             bot.confirm_modal(payload_json)
             return None
 
