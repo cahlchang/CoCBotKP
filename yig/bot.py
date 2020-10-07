@@ -147,7 +147,11 @@ class Bot(object):
             modal = "VIEW_CONFIRM_EXECUTED_MODAL"
             view_function = list(filter(lambda x: x["command"] == modal, command_manager[KEY_MATCH_FLAG]))[0]["function"]
             view_function(self)
-            self.key = self.message = param_json["actions"][0]["value"].upper()
+            self.message = param_json["actions"][0]["value"]
+            # bad hack
+            if self.message.split(' ') and self.message.split(' ')[-1].isnumeric():
+                self.message = ' '.join(self.message.split(' ')[:-1]) + "+" + self.message.split(' ')[-1]
+            self.key = format_as_command(self.message)
             self.dispatch()
             return
 
