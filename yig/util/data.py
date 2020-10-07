@@ -120,10 +120,7 @@ def get_channel_name(channel_id, token):
     command_url = "https://slack.com/api/chat.postMessage?"
     payload = {
         "token": token,
-        "username": data_user["profile"]["display_name"],
-        "icon_url": data_user["profile"]["image_72"],
         "channel": channel_id,
-        "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)
     res_json = json.loads(res.text).decode('utf-8')
