@@ -123,7 +123,7 @@ def get_channel_name(channel_id, token):
         "channel": channel_id,
     }
     res = requests.get(command_url, params=payload)
-    res_json = json.loads(res.text).decode('utf-8')
+    res_json = json.loads(res.text)
     return res_json['channel']['name']
 
 
