@@ -1,5 +1,5 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
-from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status
+from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status, get_channel_name
 from yig.util.view import get_pc_image_url, divider_builder
 
 import yig.config
@@ -22,6 +22,8 @@ def session_start(bot):
 def session_join(bot):
     """:+1: *join TRPG session*\n`/cc join [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
+    if bot.channel_name == "":
+        bot.channel_name = get_channel_name(bot.channel_id, bot.token)
     state_data = get_state_data(bot.team_id, bot.user_id)
     user_param = get_user_param(bot.team_id, bot.user_id, state_data['pc_id'])
     kp_id = analyze_join_command(bot.key)
@@ -97,6 +99,8 @@ def session_result(bot):
 def session_leave(bot):
     """:wave: *leave TRPG session*\n`/cc leave [SESSION_ID]`"""
     color = yig.config.COLOR_ATTENTION
+    if bot.channel_name == "":
+        bot.channel_name = get_channel_name(bot.channel_id, bot.token)
     state_data = get_state_data(bot.team_id, bot.user_id)
     kp_id = analyze_join_command(bot.key)
     if kp_id:
@@ -194,7 +198,6 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, 
     dict_kp["lst_user"].append([user_id, pc_id])
     body_write = json.dumps(dict_kp, ensure_ascii=False).encode('utf-8')
     write_user_data(team_id, kp_id, KP_FILE_PATH, body_write)
-    print(channel_name)
     session_data = json.loads(read_session_data(team_id, f"{channel_name}/session.json"))
     session_data["PL"].append({"id": user_id,
                                "name": data_user["profile"]["display_name"],
