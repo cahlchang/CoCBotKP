@@ -136,7 +136,7 @@ class Bot(object):
                     self.key = self.message = each["value"].replace("+", " ").upper()
 
                     # bad hack
-                    if self.key.split(' ') and self.message.key(' ')[-1].isnumeric():
+                    if self.key.split(' ') and self.message.key(' ')[-1].isnumeric() and "sanc" not in key:
                         self.key = ' '.join(self.key.split(' ')[:-1]) + "+" + self.key.split(' ')[-1]
 
                     self.dispatch()
