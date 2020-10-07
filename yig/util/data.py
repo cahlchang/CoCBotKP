@@ -117,7 +117,7 @@ def post_result(token,
 
 
 def get_channel_name(channel_id, token):
-    command_url = "https://slack.com/api/chat.postMessage?"
+    command_url = "https://slack.com/api/conversations.info?"
     payload = {
         "token": token,
         "channel": channel_id,
