@@ -243,6 +243,12 @@ def build_channel_select_content():
 		"type": "plain_text",
 		"text": "text",
 		"emoji": True
+	    },
+	    "filter": {
+		"include": [
+		    "private",
+                    "public"
+		]
 	    }
         }
     }
