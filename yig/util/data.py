@@ -76,7 +76,6 @@ def post_command(message,
         "text": f"/cc {message}"
     }
     res = requests.get(command_url, params=payload)
-    print(res.text)
 
 
 def post_result(token,
