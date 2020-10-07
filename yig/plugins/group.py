@@ -194,7 +194,7 @@ def add_gamesession_user(team_id, kp_id, user_id, pc_name, pc_id, channel_name, 
     dict_kp["lst_user"].append([user_id, pc_id])
     body_write = json.dumps(dict_kp, ensure_ascii=False).encode('utf-8')
     write_user_data(team_id, kp_id, KP_FILE_PATH, body_write)
-
+    print(channel_name)
     session_data = json.loads(read_session_data(team_id, f"{channel_name}/session.json"))
     session_data["PL"].append({"id": user_id,
                                "name": data_user["profile"]["display_name"],
