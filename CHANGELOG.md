@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.1] 2020-11-20
+- Add `history` command.
+- charalist command fix.
+
 ## [0.3.0] 2020-10-07
 - 🎉 GUI Mode complete.
 - Implement change status
