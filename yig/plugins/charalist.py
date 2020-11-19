@@ -88,6 +88,10 @@ def get_all_chara_data(team_id, user_id):
 
     lst_chara = []
     for obj in lst_object:
+        filekey = str(obj.key)
+        if not filekey.endswith(".json") and not filekey.endswith("_param.json"):
+            continue
+
         response = obj.get()
         try:
             data_chara = json.loads(response['Body'].read().decode('utf-8'))
