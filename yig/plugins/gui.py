@@ -12,7 +12,7 @@ from yig.util.view import divider_builder
 
 @listener("", KEY_MATCH_FLAG)
 def gui_hook(bot):
-    """gui test"""
+    """gui not help string"""
     logger = logging.getLogger()
     block_content = [
         {
@@ -45,7 +45,7 @@ def gui_hook(bot):
 
 @listener("VIEW_MODAL", KEY_MATCH_FLAG)
 def gui_receiver(bot):
-    """dui"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.open"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
@@ -112,7 +112,7 @@ def gui_receiver(bot):
 
 @listener("VIEW_CONFIRM_SELECT_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_select_receiver(bot):
-    """con"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.update"
     user_param = get_user_param(bot.team_id, bot.user_id)
 
@@ -160,7 +160,7 @@ def gui_confirm_select_receiver(bot):
 
 @listener("VIEW_CONFIRM_EXECUTED_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_delete(bot):
-    """con"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.update"
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = map_id["view_id"]
@@ -196,7 +196,7 @@ def gui_confirm_delete(bot):
 
 @listener("VIEW_CONFIRM_SANC_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_sanc(bot):
-    """con"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.update"
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = map_id["view_id"]
@@ -247,7 +247,7 @@ def gui_confirm_sanc(bot):
 
 @listener("VIEW_CONFIRM_UPDATE_STATUS_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_status(bot):
-    """con"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.update"
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = map_id["view_id"]
@@ -293,7 +293,7 @@ def gui_confirm_status(bot):
 
 @listener("VIEW_CONFIRM_SESSION_MODAL", KEY_MATCH_FLAG)
 def gui_confirm_session(bot):
-    """con"""
+    """gui not help string"""
     command_url = "https://slack.com/api/views.update"
     map_id = json.loads(read_user_data(bot.team_id, bot.user_id, "key_id"))
     view_id = map_id["view_id"]

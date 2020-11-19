@@ -30,7 +30,9 @@ def help_content_builder(team_id, user_id, listener):
     dict_function = {}
     for list_function in listener.values():
         for datum in list_function:
-            if datum["function"].__name__ == "roll_skill" or datum["function"].__name__.startswith("easteregg"):
+            if datum["function"].__name__ == "roll_skill"\
+               or datum["function"].__name__.startswith("easteregg")\
+               or datum["function"].__name__.startswith("gui"):
                 continue
             dict_function[datum["function"].__name__] = datum["function"].__doc__
 
