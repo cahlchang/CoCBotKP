@@ -136,6 +136,17 @@ def get_pc_icon_url(team_id, user_id):
         return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/icon.png"
 
 
+def get_users_list(token):
+    command_url = "https://slack.com/api/users.list?"
+    payload = {
+        "token": token,
+        "limit": 200
+    }
+    res = requests.get(command_url, params=payload)
+    res_json = json.loads(res.text)
+    return res_json["members"]
+
+
 def get_state_data(team_id, user_id):
     """get_state_data function is get state file."""
     return json.loads(read_user_data(team_id, user_id, yig.config.STATE_FILE_PATH).decode('utf-8'))
