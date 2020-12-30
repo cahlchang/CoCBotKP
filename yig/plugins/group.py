@@ -1,5 +1,5 @@
 from yig.bot import listener, RE_MATCH_FLAG, KEY_MATCH_FLAG
-from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status, get_channel_name
+from yig.util.data import get_state_data, set_state_data, get_user_param, write_user_data, read_user_data, write_session_data, read_session_data, get_basic_status, get_channel_name, get_users_list
 from yig.util.view import get_pc_image_url, divider_builder
 
 import yig.config
@@ -16,6 +16,36 @@ def session_start(bot):
     color = yig.config.COLOR_ATTENTION
     set_start_session(bot.team_id, bot.user_id, bot.channel_name, bot.data_user)
     return "セッションを開始します。\n参加コマンド\n`/cc join %s`" % bot.user_id, color
+
+
+@listener("kp+.*end", RE_MATCH_FLAG)
+def session_end(bot):
+    """:crossed_flags: *TRPGのセッションを終わります*\n`/cc kp end`"""
+    target_status = "pc_id"
+    user_data = {}
+    lst_end_content = []
+    lst_player_data = get_lst_player_data(bot.team_id, bot.user_id, target_status)
+    msg_return = "| 名前 | PC | 備考 |\n|--|--|--|\n"
+    for player_data in lst_player_data:
+        name = player_data["name"]
+        user_id = player_data["user_id"]
+        url = player_data["user_param"]["url"]
+        user_data[user_id] = {"url": url,
+                              "name": name}
+
+    lst_users_list = get_users_list(bot.token)
+    for user_id, user_datum in user_data.items():
+        # N+! 誰がいい感じに
+        player_data = list(filter(lambda x: x["id"] == user_id , lst_users_list))
+        if player_data is None:
+            continue
+
+        pc_name = user_datum["name"]
+        url = user_datum["url"]
+        real_name = player_data[0]["real_name"]
+        msg_return += f"| @{real_name} | [{pc_name}]({url}) |  |\n"
+
+    return msg_return, None
 
 
 @listener("(join|JOIN)+.*", RE_MATCH_FLAG)

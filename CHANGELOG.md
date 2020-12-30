@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.3.2] 2020-12-30
+- Add `kp end` command.
+
 ## [0.3.1] 2020-11-20
 - Add `history` command.
 - charalist command fix.
