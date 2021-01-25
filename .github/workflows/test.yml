@@ -23,6 +23,7 @@ jobs:
 
       - name: pytest
         run: |
+          rm smoke_test.py
           python -m pytest
 
       - name: pylint(check only error)
