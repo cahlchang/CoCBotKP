@@ -21,7 +21,12 @@ def init_charasheet_with_vampire(bot):
     response = requests.get(url)
 
     request_json = json.loads(response.text)
-    user_param = format_param_json(bot, request_json)
+
+    if request_json["game"] == "coc":
+        user_param = format_param_json_with_6(bot, request_json)
+    elif request_json["game"] == "coc7":
+        user_param = format_param_json_with_7(bot, request_json)
+
     user_param["url"] = url_plane
 
     pc_id = user_param["pc_id"]
@@ -57,7 +62,11 @@ def update_charasheet_with_vampire(bot):
     url = state_data["url"]
     res = requests.get(url)
     request_json = json.loads(res.text)
-    user_param = format_param_json(bot, request_json)
+    if user_param_old["game"] == "coc":
+        user_param = format_param_json_with_6(bot, request_json)
+    elif user_param_old["game"] == "coc7":
+        user_param = format_param_json_with_7(bot, request_json)
+
     user_param["url"] = user_param_old["url"]
     pc_id = user_param["pc_id"]
     key = f"{pc_id}.json"
@@ -146,7 +155,6 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     }
     block_content.append(user_content)
 
-
     append_content = {
         "type": "section",
         "text": {
@@ -167,9 +175,9 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
 
 
 # todo 技能の定義なんとかならないか。。。
-def format_param_json(bot, request_json):
+def format_param_json_with_6(bot, request_json):
     param_json = {}
-
+    
     REPLACE_PARAMETER = {
         "NP1": "STR",
         "NP2": "CON",
@@ -250,7 +258,7 @@ def format_param_json(bot, request_json):
                    "歴史"]
 
     for key, param in REPLACE_PARAMETER.items():
-          param_json[param] = request_json[key]
+        param_json[param] = request_json[key]
 
     def replace_role_param(key, lst_key_roles):
         return_data = {}
@@ -286,6 +294,7 @@ def format_param_json(bot, request_json):
     param_json.update(add_spec_param("geijutu_bunya", "芸術"))
 
     param_json["現在SAN"] = request_json["SAN_Left"]
+    param_json["開始SAN"] = request_json["SAN_Left"]
     param_json["最大SAN"] = request_json["SAN_Max"]
 
     param_json["user_id"] = bot.user_id
@@ -296,6 +305,7 @@ def format_param_json(bot, request_json):
     param_json["job"] = request_json["shuzoku"]
     param_json["age"] = request_json["age"]
     param_json["sex"] = request_json["sex"]
+    param_json["game"] = request_json["game"]
     param_json["arms_name"] = request_json["arms_name"]
     param_json["arms_hit"] = request_json["arms_hit"]
     param_json["arms_damage"] = request_json["arms_damage"]
@@ -308,3 +318,19 @@ def format_param_json(bot, request_json):
     param_json["money"] = request_json["money"]
 
     return param_json
+
+def format_param_json_with_7(bot, request_json, param_json):
+    REPLACE_PARAMETER = {
+        "NP1": "STR",
+        "NP2": "CON",
+        "NP3": "DEX",
+        "NP4": "APP",
+        "NP5": "POW",
+        "NP6": "SIZ",
+        "NP7": "INT",
+        "NP8": "EDU",
+        "NP9": "MOV",
+        "NP10": "HP",
+        "NP11": "MP"}
+
+    pass
