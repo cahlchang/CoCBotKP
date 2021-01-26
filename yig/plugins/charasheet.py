@@ -87,9 +87,9 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     skill_data = {}
     for key, param in user_param.items():
         if isinstance(param, list) and len(param) == 6: # 保管庫のjson都合
-            if sum([int(s) for s in param][1:4]) == 0:
+            if sum([int(s) for s in param][1:4]) == 0 and user_param["game"] == "coc":
                 continue
-            if key in ("製作", "芸術", "母国語"):
+            if key in ("製作", "芸術", "母国語") and user_param["game"] == "coc":
                 continue
             skill_point = int(param[5])
             if skill_point != 0:
@@ -177,7 +177,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
 # todo 技能の定義なんとかならないか。。。
 def format_param_json_with_6(bot, request_json):
     param_json = {}
-    
+
     REPLACE_PARAMETER = {
         "NP1": "STR",
         "NP2": "CON",
@@ -319,7 +319,9 @@ def format_param_json_with_6(bot, request_json):
 
     return param_json
 
-def format_param_json_with_7(bot, request_json, param_json):
+def format_param_json_with_7(bot, request_json):
+    param_json = {}
+
     REPLACE_PARAMETER = {
         "NP1": "STR",
         "NP2": "CON",
@@ -333,4 +335,50 @@ def format_param_json_with_7(bot, request_json, param_json):
         "NP10": "HP",
         "NP11": "MP"}
 
-    pass
+
+    for key, param in REPLACE_PARAMETER.items():
+        param_json[param] = request_json[key]
+
+    for idx, skill_name in enumerate(request_json["SKAN"]):
+        fuki_name = request_json["SKAM"][idx]
+
+        if fuki_name == "*":
+            skill_name = f"{skill_name}【any】"
+        elif fuki_name != "":
+            skill_name = f"{skill_name}【{fuki_name}】"
+
+        lst = [request_json["SKAD"][idx],
+               request_json["SKAS"][idx],
+               request_json["SKAK"][idx],
+               request_json["SKAA"][idx],
+               request_json["SKAO"][idx],
+               request_json["SKAP"][idx]]
+
+        lst = [i if i != "" else "0" for i in lst]
+        param_json[skill_name] = lst
+
+    param_json["現在SAN"] = request_json["SAN_Left"]
+    param_json["開始SAN"] = request_json["SAN_start"]
+    param_json["最大SAN"] = request_json["SAN_Max"]
+
+    param_json["user_id"] = bot.user_id
+    param_json["name"] = request_json["pc_name"]
+    param_json["pc_id"] = request_json["data_id"]
+    param_json["DB"] = request_json["dmg_bonus"]
+    param_json["job"] = request_json["shuzoku"]
+    param_json["age"] = request_json["age"]
+    param_json["sex"] = request_json["sex"]
+    param_json["game"] = request_json["game"]
+    param_json["arms_name"] = request_json["arms_name"]
+    param_json["arms_hit"] = request_json["arms_hit"]
+    param_json["arms_damage"] = request_json["arms_damage"]
+    param_json["arms_attack_count"] = request_json["arms_attack_count"]
+    param_json["item_name"] = request_json["item_name"]
+    param_json["item_tanka"] = request_json["item_tanka"]
+    param_json["item_num"] = request_json["item_num"]
+    param_json["item_price"] = request_json["item_price"]
+    param_json["item_memo"] = request_json["item_memo"]
+    param_json["money"] = request_json["money"]
+
+
+    return param_json

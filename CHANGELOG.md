@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.4.0] 2021-01-27
+- Now supports the 7th version of CoC! (alpha)
+
 ## [0.3.2] 2020-12-30
 - Add `kp end` command.
 

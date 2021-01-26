@@ -69,14 +69,24 @@ def create_param_image(team_id, user_id, pc_id, user_param):
     draw.line(lst_coord,
               fill=black,
               width=3)
-    params = [float(user_param['POW'])/18,
-              float(user_param['DEX'])/18,
-              float(user_param['APP'])/18,
-              float(user_param['SIZ'])/18,
-              float(user_param['INT'])/18,
-              float(user_param['EDU'])/21,
-              float(user_param['STR'])/18,
-              float(user_param['CON'])/18]
+    if user_param["game"] == "coc":
+        params = [float(user_param['POW'])/18,
+                  float(user_param['DEX'])/18,
+                  float(user_param['APP'])/18,
+                  float(user_param['SIZ'])/18,
+                  float(user_param['INT'])/18,
+                  float(user_param['EDU'])/21,
+                  float(user_param['STR'])/18,
+                  float(user_param['CON'])/18]
+    elif user_param["game"] == "coc7":
+        params = [float(user_param['POW'])/100,
+                  float(user_param['DEX'])/100,
+                  float(user_param['APP'])/100,
+                  float(user_param['SIZ'])/100,
+                  float(user_param['INT'])/100,
+                  float(user_param['EDU'])/100,
+                  float(user_param['STR'])/100,
+                  float(user_param['CON'])/100]
 
     lst_param_cood = []
     for i in range(0, 8):
