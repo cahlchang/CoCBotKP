@@ -5,7 +5,7 @@ import unicodedata
 import datetime
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
+from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param, get_now_status
 from yig.util.view import create_param_image, get_pc_image_url, get_param_image_path, save_param_image, section_builder, divider_builder
 import yig.config
 
@@ -80,6 +80,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
     if user_param["game"] == "coc7":
+        now_luck = get_now_status("幸運", user_param, state_data) 
         luck_left = user_param["幸運"]
         luck_start = user_param["幸運開始時"]
 
@@ -147,7 +148,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     if user_param["game"] == "coc":
         line3 = f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n"
     elif user_param["game"] == "coc7":
-        line3 = f"*HP: * *{now_hp}*/{max_hp} *MP:* *{now_mp}*/{max_mp} *SAN:* *{now_san}*/{max_san} *DEX: * *{dex}* *DB:* *{db}* *Luck:* *{luck_left}*/*{luck_start}*/99\n"
+        line3 = f"*HP: * *{now_hp}*/{max_hp} *MP:* *{now_mp}*/{max_mp} *SAN:* *{now_san}*/{max_san} *DEX: * *{dex}* *DB:* *{db}* *Luck:* *{now_luck}*/*{luck_start}*/99\n"
 
     user_content = {
         "type": "section",
