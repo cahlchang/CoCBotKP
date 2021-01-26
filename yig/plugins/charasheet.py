@@ -78,6 +78,11 @@ def update_charasheet_with_vampire(bot):
 
 def build_chara_response(user_param, state_data, message, team_id, user_id, pc_id):
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
+
+    if user_param["game"] == "coc7":
+        luck_left = user_param["幸運"]
+        luck_start = user_param["幸運開始時"]
+
     pc_name = user_param["name"]
     dex = user_param["DEX"]
     chara_url = user_param["url"]
@@ -138,13 +143,19 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         else:
             param_message += "*%s:%s*" % (name, user_param[name])
 
+    line3 = ""
+    if user_param["game"] == "coc":
+        line3 = f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n"
+    elif user_param["game"] == "coc7":
+        line3 = f"*HP: * *{now_hp}*/{max_hp} *MP:* *{now_mp}*/{max_mp} *SAN:* *{now_san}*/{max_san} *DEX: * *{dex}* *DB:* *{db}* *Luck:* *{luck_left}*/*{luck_start}*/99\n"
+
     user_content = {
         "type": "section",
         "text": {
             "type": "mrkdwn",
             "text": (f"*{message}*\n*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
-                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n"
-                     f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n" +
+                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n" +
+                     line3 +
                      param_message)
         },
         "accessory": {
@@ -316,6 +327,7 @@ def format_param_json_with_6(bot, request_json):
     param_json["item_price"] = request_json["item_price"]
     param_json["item_memo"] = request_json["item_memo"]
     param_json["money"] = request_json["money"]
+    param_json["game"] = request_json["game"]
 
     return param_json
 
@@ -360,6 +372,9 @@ def format_param_json_with_7(bot, request_json):
     param_json["現在SAN"] = request_json["SAN_Left"]
     param_json["開始SAN"] = request_json["SAN_start"]
     param_json["最大SAN"] = request_json["SAN_Max"]
+
+    param_json["幸運"] = request_json["Luck_Left"]
+    param_json["幸運開始時"] = request_json["Luck_start"]
 
     param_json["user_id"] = bot.user_id
     param_json["name"] = request_json["pc_name"]
