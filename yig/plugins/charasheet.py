@@ -80,7 +80,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
 
     if user_param["game"] == "coc7":
-        now_luck = get_now_status("幸運", user_param, state_data) 
+        now_luck = get_now_status("幸運", user_param, state_data)
         luck_left = user_param["幸運"]
         luck_start = user_param["幸運開始時"]
 
@@ -93,7 +93,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     skill_data = {}
     for key, param in user_param.items():
         if isinstance(param, list) and len(param) == 6: # 保管庫のjson都合
-            if sum([int(s) for s in param][1:4]) == 0 and user_param["game"] == "coc":
+            if sum([int(s) for s in param][1:4]) == 0:
                 continue
             if key in ("製作", "芸術", "母国語") and user_param["game"] == "coc":
                 continue
@@ -185,9 +185,9 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     return [{'blocks': json.dumps(block_content, ensure_ascii=False)}]
 
 
-
 # todo 技能の定義なんとかならないか。。。
 def format_param_json_with_6(bot, request_json):
+
     param_json = {}
 
     REPLACE_PARAMETER = {
@@ -249,6 +249,7 @@ def format_param_json_with_6(bot, request_json):
                    "説得",
                    "値切り",
                    "母国語"]
+
     tka_replace = ["医学",
                    "オカルト",
                    "化学",
@@ -332,6 +333,7 @@ def format_param_json_with_6(bot, request_json):
 
     return param_json
 
+
 def format_param_json_with_7(bot, request_json):
     param_json = {}
 
@@ -347,7 +349,6 @@ def format_param_json_with_7(bot, request_json):
         "NP9": "MOV",
         "NP10": "HP",
         "NP11": "MP"}
-
 
     for key, param in REPLACE_PARAMETER.items():
         param_json[param] = request_json[key]
@@ -366,7 +367,6 @@ def format_param_json_with_7(bot, request_json):
                request_json["SKAA"][idx],
                request_json["SKAO"][idx],
                request_json["SKAP"][idx]]
-
         lst = [i if i != "" else "0" for i in lst]
         param_json[skill_name] = lst
 
@@ -395,6 +395,5 @@ def format_param_json_with_7(bot, request_json):
     param_json["item_price"] = request_json["item_price"]
     param_json["item_memo"] = request_json["item_memo"]
     param_json["money"] = request_json["money"]
-
 
     return param_json
