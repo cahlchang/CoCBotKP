@@ -10,7 +10,6 @@ from yig.util.data import get_user_param, get_state_data ,set_state_data, get_st
 from yig.util.view import get_pc_image_url
 import yig.config
 
-
 @listener(r"sanc.*", RE_MATCH_FLAG)
 def sanity_check(bot):
     """:ghost: *san check*\n`/cc sanc`\n`/cc sanc [safe_point]/[fail_point]`"""
@@ -61,7 +60,7 @@ def hide_roll(bot):
             color = "gray"
         else:
             hide_message = "".join(['' if v is None else v for v in m.groups()])
-            roll, operant, num_arg = analysis_roll_and_calculation(hide_message)
+            roll, operant, num_arg, difficult = analysis_roll_and_calculation(hide_message)
 
             alias_roll = {"こぶし": "こぶし（パンチ）"}
             if roll in alias_roll.keys():
@@ -76,7 +75,10 @@ def hide_roll(bot):
                 num = int(data[-1])
 
             num_targ = calculation(num, operant, num_arg)
-            result, color = judge_1d100(num_targ, num_rand)
+            if user_param["game"] == "coc":
+                result, color = judge_1d100_with_6_ver(num_targ, num_rand)
+            else:
+                result, color = judge_1d100_with_7_ver(num_targ, num_rand)
             raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
             if raw_session_data:
                 session_data = json.loads(raw_session_data)
@@ -125,7 +127,7 @@ def hide_roll(bot):
 def roll_skill(bot):
     state_data = get_state_data(bot.team_id, bot.user_id)
     user_param = get_user_param(bot.team_id, bot.user_id, state_data["pc_id"])
-    roll, operant, num_arg = analysis_roll_and_calculation(bot.message)
+    roll, operant, num_arg, difficult = analysis_roll_and_calculation(bot.message)
 
     alias_roll = {"こぶし": "こぶし（パンチ）"}
     if roll in alias_roll.keys():
@@ -142,7 +144,11 @@ def roll_skill(bot):
         num = int(data[-1])
 
     num_targ = calculation(num, operant, num_arg)
-    result, color = judge_1d100(num_targ, num_rand)
+
+    if user_param["game"] == "coc":
+        result, color = judge_1d100_with_6_ver(num_targ, num_rand)
+    else:
+        result, color = judge_1d100_with_7_ver(num_targ, num_rand, difficult)
 
     raw_session_data = read_session_data(bot.team_id, "%s/%s.json" % (bot.channel_name ,state_data["pc_id"]))
     if raw_session_data:
@@ -324,7 +330,8 @@ def create_post_message_rolls_result(key: str) -> Tuple[str, str, int]:
 
     return str_message, str_detail, sum_result
 
-def judge_1d100(target: int, dice: int):
+
+def judge_1d100_with_6_ver(target: int, dice: int):
     """
     Judge 1d100 dice result, and return text and color for message.
     Result is critical, success, failure or fumble.
@@ -345,7 +352,39 @@ def judge_1d100(target: int, dice: int):
     return "失敗", yig.config.COLOR_FAILURE
 
 
-def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int]:
+def judge_1d100_with_7_ver(target: int, dice: int, difficult: str):
+    """
+    Judge 1d100 dice result, and return text and color for message.
+    Result is critical, success, failure or fumble.
+    Arguments:
+        target {int} -- target value (ex. skill value)
+        dice {int} -- dice value
+    Returns:
+        message {string}
+        rgb_color {string}
+    """
+    if dice > target:
+        if dice >= 96:
+            return "ファンブル", yig.config.COLOR_FUMBLE
+        return "失敗", yig.config.COLOR_FAILURE
+    elif dice > math.floor(target / 2) and difficult == "H":
+        if dice >= 96:
+            return "ファンブル", yig.config.COLOR_FUMBLE
+        return "失敗", yig.config.COLOR_FAILURE
+    elif dice > math.floor(target / 5) and difficult == "E":
+        if dice >= 96:
+            return "ファンブル", yig.config.COLOR_FUMBLE
+        return "失敗", yig.config.COLOR_FAILURE
+
+    if dice <= math.floor(target / 5):
+        return "イクストリーム", yig.config.COLOR_CRITICAL
+    elif dice <= math.floor(target / 2):
+        return "ハード", yig.config.COLOR_SUCCESS
+
+    return "成功", yig.config.COLOR_NORMAL_SUCCESS
+
+
+def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int, str]:
     """
     Based on the given string, we analyze the object of the die
     and the supplementary formula.
@@ -356,10 +395,11 @@ def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int]:
         operant {str}
         number_argument {int}
     """
-    proc = r"^(.*)(\+|\-|\*|\/)(\d+)$"
+    proc = r"^(.*)(\+|\-|\*|\/)(\d+).*$"
     result_parse = re.match(proc, message)
     operant = "+"
     number = 0
+    difficult = "N"
     if result_parse:
         roll = result_parse.group(1)
         operant = result_parse.group(2)
@@ -367,7 +407,13 @@ def analysis_roll_and_calculation(message:str) -> Tuple[str, str, int]:
     else:
         roll = message
 
-    return roll, operant, number
+    proc = r"^(.*)\s(N|H|E)$"
+    result_parse = re.match(proc, roll)
+    if result_parse:
+        roll = result_parse.group(1)
+        difficult = result_parse.group(2)
+
+    return roll, operant, number, difficult
 
 
 def calculation(number_x:int, operant:str, number_y:int) -> int:
@@ -387,4 +433,4 @@ def calculation(number_x:int, operant:str, number_y:int) -> int:
     elif operant == '*':
         return number_x * number_y
     elif operant == '/':
-        return math.ceil(number_x / number_y)
+        return math.floor(number_x / number_y)
