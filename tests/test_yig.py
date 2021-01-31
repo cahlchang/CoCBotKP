@@ -10,12 +10,6 @@ from yig.util.data import get_status_message, format_as_command
 from yig.config import COLOR_CRITICAL, COLOR_SUCCESS, COLOR_FAILURE, COLOR_FUMBLE
 
 
-def test_judge_1d100(target, actual, exp_msg, exp_color):
-    msg, color = judge_1d100(target, actual)
-    assert msg == exp_msg
-    assert color == exp_color
-
-
 def test_2():
     msg = "【test_user】TEST\nHP 4/5\u3000\u3000MP 4/5\u3000\u3000DEX 8\u3000\u3000SAN 10/10"
     assert get_status_message("TEST",
