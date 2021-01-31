@@ -4,16 +4,10 @@ import re
 
 import pytest
 from yig.plugins.group import analyze_join_command, analyze_kp_order_command
-from yig.plugins.roll import judge_1d100, split_alternative_roll_or_value, create_post_message_rolls_result, get_sanc_result, eval_roll_or_value
+from yig.plugins.roll import judge_1d100_with_6_ver, split_alternative_roll_or_value, create_post_message_rolls_result, get_sanc_result, eval_roll_or_value
 from yig.plugins.user import analyze_update_command
 from yig.util.data import get_status_message, format_as_command
 from yig.config import COLOR_CRITICAL, COLOR_SUCCESS, COLOR_FAILURE, COLOR_FUMBLE
-
-
-def test_judge_1d100(target, actual, exp_msg, exp_color):
-    msg, color = judge_1d100(target, actual)
-    assert msg == exp_msg
-    assert color == exp_color
 
 
 def test_2():
@@ -40,8 +34,8 @@ def test_2():
     (95, 100, "ファンブル", COLOR_FUMBLE),
 ])
 
-def test_judge_1d100(target, actual, exp_msg, exp_color):
-    msg, color = judge_1d100(target, actual)
+def test_judge_1d100_with_6_ver(target, actual, exp_msg, exp_color):
+    msg, color = judge_1d100_with_6_ver(target, actual)
     assert msg == exp_msg
     assert color == exp_color
 

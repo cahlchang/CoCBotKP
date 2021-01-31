@@ -5,7 +5,7 @@ import unicodedata
 import datetime
 
 from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param
+from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param, get_now_status
 from yig.util.view import create_param_image, get_pc_image_url, get_param_image_path, save_param_image, section_builder, divider_builder
 import yig.config
 
@@ -78,6 +78,12 @@ def update_charasheet_with_vampire(bot):
 
 def build_chara_response(user_param, state_data, message, team_id, user_id, pc_id):
     now_hp, max_hp, now_mp, max_mp, now_san, max_san, db = get_basic_status(user_param, state_data)
+
+    if user_param["game"] == "coc7":
+        now_luck = get_now_status("幸運", user_param, state_data)
+        luck_left = user_param["幸運"]
+        luck_start = user_param["幸運開始時"]
+
     pc_name = user_param["name"]
     dex = user_param["DEX"]
     chara_url = user_param["url"]
@@ -87,7 +93,7 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     skill_data = {}
     for key, param in user_param.items():
         if isinstance(param, list) and len(param) == 6: # 保管庫のjson都合
-            if sum([int(s) for s in param][1:4]) == 0 and user_param["game"] == "coc":
+            if sum([int(s) for s in param][1:4]) == 0:
                 continue
             if key in ("製作", "芸術", "母国語") and user_param["game"] == "coc":
                 continue
@@ -138,13 +144,19 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
         else:
             param_message += "*%s:%s*" % (name, user_param[name])
 
+    line3 = ""
+    if user_param["game"] == "coc":
+        line3 = f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n"
+    elif user_param["game"] == "coc7":
+        line3 = f"*HP: * *{now_hp}*/{max_hp} *MP:* *{now_mp}*/{max_mp} *SAN:* *{now_san}*/{max_san} *DEX: * *{dex}* *DB:* *{db}* *Luck:* *{now_luck}*/*{luck_start}*/99\n"
+
     user_content = {
         "type": "section",
         "text": {
             "type": "mrkdwn",
             "text": (f"*{message}*\n*Name: * <{chara_url}|{pc_name}>　 *LINK: * <{image_url}|image>\n"
-                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n"
-                     f"*HP: * *{now_hp}*/{max_hp}　 *MP:* *{now_mp}*/{max_mp}　 *SAN:* *{now_san}*/{max_san}　 *DEX: * *{dex}*　  *DB:* *{db}*\n" +
+                     f"*JOB: * {job}　 *AGE: * {age}　 *SEX :* {sex}\n" +
+                     line3 +
                      param_message)
         },
         "accessory": {
@@ -173,9 +185,9 @@ def build_chara_response(user_param, state_data, message, team_id, user_id, pc_i
     return [{'blocks': json.dumps(block_content, ensure_ascii=False)}]
 
 
-
 # todo 技能の定義なんとかならないか。。。
 def format_param_json_with_6(bot, request_json):
+
     param_json = {}
 
     REPLACE_PARAMETER = {
@@ -237,6 +249,7 @@ def format_param_json_with_6(bot, request_json):
                    "説得",
                    "値切り",
                    "母国語"]
+
     tka_replace = ["医学",
                    "オカルト",
                    "化学",
@@ -316,8 +329,10 @@ def format_param_json_with_6(bot, request_json):
     param_json["item_price"] = request_json["item_price"]
     param_json["item_memo"] = request_json["item_memo"]
     param_json["money"] = request_json["money"]
+    param_json["game"] = request_json["game"]
 
     return param_json
+
 
 def format_param_json_with_7(bot, request_json):
     param_json = {}
@@ -334,7 +349,6 @@ def format_param_json_with_7(bot, request_json):
         "NP9": "MOV",
         "NP10": "HP",
         "NP11": "MP"}
-
 
     for key, param in REPLACE_PARAMETER.items():
         param_json[param] = request_json[key]
@@ -353,13 +367,15 @@ def format_param_json_with_7(bot, request_json):
                request_json["SKAA"][idx],
                request_json["SKAO"][idx],
                request_json["SKAP"][idx]]
-
         lst = [i if i != "" else "0" for i in lst]
         param_json[skill_name] = lst
 
     param_json["現在SAN"] = request_json["SAN_Left"]
     param_json["開始SAN"] = request_json["SAN_start"]
     param_json["最大SAN"] = request_json["SAN_Max"]
+
+    param_json["幸運"] = request_json["Luck_Left"]
+    param_json["幸運開始時"] = request_json["Luck_start"]
 
     param_json["user_id"] = bot.user_id
     param_json["name"] = request_json["pc_name"]
@@ -379,6 +395,5 @@ def format_param_json_with_7(bot, request_json):
     param_json["item_price"] = request_json["item_price"]
     param_json["item_memo"] = request_json["item_memo"]
     param_json["money"] = request_json["money"]
-
 
     return param_json
