@@ -48,7 +48,12 @@ command_list = ['init <https://charasheet.vampire-blood.net/2796211>',
                 'kp order DEX',
                 'help',
                 'openhelp',
-                'history <https://charasheet.vampire-blood.net/3395789>'
+                'history <https://charasheet.vampire-blood.net/3395789>',
+                'init <https://charasheet.vampire-blood.net/3668130>', # 7版のテスト
+                '威圧',
+                'ヒプノーシス',
+                '威圧 H',
+                '威圧 E'
 ]
 
 for command in command_list:
