@@ -22,6 +22,14 @@ def write_user_data(team_id, user_id, filename, content):
     )
 
 
+def remove_user_data(team_id, user_id, filename):
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    user_dir = f"{team_id}/{user_id}"
+    obj = bucket.Object(f"{user_dir}/{filename}")
+    obj.delete()
+
+
 def write_session_data(team_id, path, content):
     try:
         s3_client = boto3.resource('s3')
