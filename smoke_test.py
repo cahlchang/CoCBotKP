@@ -7,7 +7,8 @@ user_id = 'UE6P69HFH'
 response_url = "no"
 channel_name = "local"
 
-command_list = ['init <https://charasheet.vampire-blood.net/2796211>',
+command_list = ['init',
+                'init <https://charasheet.vampire-blood.net/2796211>',
                 '1D100',
                 'result',
                 's',
