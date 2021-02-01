@@ -22,6 +22,18 @@ def write_user_data(team_id, user_id, filename, content):
     )
 
 
+def read_user_data(team_id, user_id, filename):
+    s3_client = boto3.resource('s3')
+    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+    user_dir = f"{team_id}/{user_id}"
+    obj = bucket.Object(f"{user_dir}/{filename}")
+    try:
+        response = obj.get()
+    except ClientError as e:
+        return None
+    return response['Body'].read()
+
+
 def remove_user_data(team_id, user_id, filename):
     s3_client = boto3.resource('s3')
     bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
@@ -42,15 +54,6 @@ def write_session_data(team_id, path, content):
         )
     except ClientError as e:
         print(e)
-
-
-def read_user_data(team_id, user_id, filename):
-    s3_client = boto3.resource('s3')
-    bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
-    user_dir = f"{team_id}/{user_id}"
-    obj = bucket.Object(f"{user_dir}/{filename}")
-    response = obj.get()
-    return response['Body'].read()
 
 
 def read_session_data(team_id, path):
