@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.4.2] 2021-02-02
+- Add User Setting's remove command
+
+## [0.4.1] 2021-02-01
+- Add 7th version Skill Role.
+
 ## [0.4.0] 2021-01-27
 - Now supports the 7th version of CoC! (alpha)
 
