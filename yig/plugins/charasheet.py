@@ -4,10 +4,18 @@ import json
 import unicodedata
 import datetime
 
-from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG
-from yig.util.data import get_state_data, write_user_data, get_status_message, get_basic_status, get_user_param, get_now_status
+from yig.bot import listener, RE_MATCH_FLAG, KEY_IN_FLAG, KEY_MATCH_FLAG
+from yig.util.data import get_state_data, remove_state_data, write_user_data, get_status_message, get_basic_status, get_user_param, get_now_status
 from yig.util.view import create_param_image, get_pc_image_url, get_param_image_path, save_param_image, section_builder, divider_builder
 import yig.config
+
+@listener("INIT", KEY_MATCH_FLAG)
+def init_charasheet(bot):
+    """:soap: *init charasheet setting*
+`/cc init`
+    """
+    remove_state_data(bot.team_id, bot.user_id)
+    return "設定中のキャラクターデータの設定を初期化しました。", yig.config.COLOR_ATTENTION
 
 
 @listener(r"init.<https://charasheet.vampire-blood.net/.*", RE_MATCH_FLAG)
@@ -44,6 +52,7 @@ def init_charasheet_with_vampire(bot):
     }
 
     write_state_json = json.dumps(state_data, ensure_ascii=False).encode('utf-8')
+    #set_state_data(bot.team_id, bot.user_id, write_state_json)
     write_user_data(bot.team_id, bot.user_id, yig.config.STATE_FILE_PATH, write_state_json)
     return build_chara_response(user_param, state_data, "INIT CHARACTER", bot.team_id, bot.user_id, pc_id), None
 
