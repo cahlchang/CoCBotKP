@@ -147,6 +147,15 @@ def get_pc_icon_url(team_id, user_id):
         return f"https://d13xcuicr0q687.cloudfront.net/{team_id}/{user_id}/icon.png"
 
 
+def get_user_param(team_id, user_id, pc_id=None):
+    """get_user_params function is PC parameter from AWS S3"""
+    key_pc_id = pc_id
+    if pc_id is None:
+        key_pc_id = get_state_data(team_id, user_id)["pc_id"]
+
+    return json.loads(read_user_data(team_id, user_id, f"{key_pc_id}.json").decode('utf-8'))
+
+
 def get_users_list(token):
     command_url = "https://slack.com/api/users.list?"
     payload = {
@@ -158,23 +167,19 @@ def get_users_list(token):
     return res_json["members"]
 
 
-def get_state_data(team_id, user_id):
-    """get_state_data function is get state file."""
-    return json.loads(read_user_data(team_id, user_id, yig.config.STATE_FILE_PATH).decode('utf-8'))
-
-
 def set_state_data(team_id, user_id, state_data):
     """set_state function is update PC state param."""
     write_user_data(team_id, user_id, yig.config.STATE_FILE_PATH, json.dumps(state_data, ensure_ascii=False))
 
 
-def get_user_param(team_id, user_id, pc_id=None):
-    """get_user_params function is PC parameter from AWS S3"""
-    key_pc_id = pc_id
-    if pc_id is None:
-        key_pc_id = get_state_data(team_id, user_id)["pc_id"]
+def get_state_data(team_id, user_id):
+    """get_state_data function is get state file."""
+    data = read_user_data(team_id, user_id, yig.config.STATE_FILE_PATH)
+    if data is None:
+        return {}
+    else:
+        return json.loads(data.decode('utf-8'))
 
-    return json.loads(read_user_data(team_id, user_id, f"{key_pc_id}.json").decode('utf-8'))
 
 def remove_state_data(team_id, user_id):
     """set_state function is update PC state param."""
