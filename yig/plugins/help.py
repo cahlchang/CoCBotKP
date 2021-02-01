@@ -94,7 +94,8 @@ def help_content_builder(team_id, user_id, listener):
 
     block_content.append(divider_builder())
 
-    block_content.append(section_builder([dict_function.pop('init_charasheet_with_vampire'),
+    block_content.append(section_builder([dict_function.pop('init_charasheet'),
+                                          dict_function.pop('init_charasheet_with_vampire'),
                                           dict_function.pop('update_charasheet_with_vampire')]))
 
     block_content.append(section_builder([dict_function.pop('show_status'),
