@@ -176,6 +176,10 @@ def get_user_param(team_id, user_id, pc_id=None):
 
     return json.loads(read_user_data(team_id, user_id, f"{key_pc_id}.json").decode('utf-8'))
 
+def remove_state_data(team_id, user_id):
+    """set_state function is update PC state param."""
+    remove_user_data(team_id, user_id, yig.config.STATE_FILE_PATH)
+
 
 def get_now_status(status_name, user_param, state_data, status_name_alias=None):
     current_status = user_param[status_name] if status_name_alias is None else user_param[status_name_alias]
