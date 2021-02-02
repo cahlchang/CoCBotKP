@@ -151,7 +151,11 @@ def get_user_param(team_id, user_id, pc_id=None):
     """get_user_params function is PC parameter from AWS S3"""
     key_pc_id = pc_id
     if pc_id is None:
-        key_pc_id = get_state_data(team_id, user_id)["pc_id"]
+        state_data = get_state_data(team_id, user_id)
+        if state_data == {}:
+            return {}
+        key_pc_id = state_datab["pc_id"]
+
 
     return json.loads(read_user_data(team_id, user_id, f"{key_pc_id}.json").decode('utf-8'))
 
