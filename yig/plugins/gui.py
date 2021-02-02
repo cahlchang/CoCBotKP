@@ -55,14 +55,15 @@ def gui_receiver(bot):
     block_content.append(build_input_content('キャラクターシートのURLからデータを初期化します', "https://~"))
     # Update your character sheet
     block_content.append(build_button_content('update', 'キャラクターシートの変更点を反映させます', "modal-dispatch_go_button_0"))
-    # Your Sanity check
-    block_content.append(build_button_content('SAN Check', 'SANチェックを行います', "modal-confirm_button_with_sanc"))
-    # Change the , of the character.
-    block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'PCの', 'を変更します'))
-
-    block_content.append(divider_builder())
-
     if user_param != {}:
+
+        # Your Sanity check
+        block_content.append(build_button_content('SAN Check', 'SANチェックを行います', "modal-confirm_button_with_sanc"))
+        # Change the , of the character.
+        block_content.append(build_radio_button_content(['HP', 'MP', 'SAN'], 'PCの', 'を変更します'))
+
+        block_content.append(divider_builder())
+
         block_content.append(build_skill_content(user_param))
         block_content.append(build_skill_content(user_param, 'hide '))
         block_content.append(build_param_content())
