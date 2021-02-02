@@ -62,21 +62,22 @@ def gui_receiver(bot):
 
     block_content.append(divider_builder())
 
-    block_content.append(build_skill_content(user_param))
-    block_content.append(build_skill_content(user_param, 'hide '))
-    block_content.append(build_param_content())
+    if user_param != {}:
+        block_content.append(build_skill_content(user_param))
+        block_content.append(build_skill_content(user_param, 'hide '))
+        block_content.append(build_param_content())
 
-    block_content.append(divider_builder())
+        block_content.append(divider_builder())
 
-    # session join or leave.
-    block_content.append(build_button_content('join/leave session', 'セッションに参加/離脱します', "modal-confirm_button_with_session"))
-    # Save your icon image
-    block_content.append(build_button_content('saveimg', 'アイコンの画像を保存します', "modal-dispatch_go_button_1"))
-    block_content.append(build_button_content('result', 'セッション中のロール結果を表示します\n（ゲーム終了後に押しましょう）', "modal-dispatch_go_button_2"))
-    # More command
-    block_content.append(build_button_content('help', 'それ以外のコマンドを確認します', "modal-dispatch_go_button_3"))
+        # session join or leave.
+        block_content.append(build_button_content('join/leave session', 'セッションに参加/離脱します', "modal-confirm_button_with_session"))
+        # Save your icon image
+        block_content.append(build_button_content('saveimg', 'アイコンの画像を保存します', "modal-dispatch_go_button_1"))
+        block_content.append(build_button_content('result', 'セッション中のロール結果を表示します\n（ゲーム終了後に押しましょう）', "modal-dispatch_go_button_2"))
+        # More command
+        block_content.append(build_button_content('help', 'それ以外のコマンドを確認します', "modal-dispatch_go_button_3"))
 
-    block_content.append(divider_builder())
+        block_content.append(divider_builder())
     now = datetime.now()
     view_content = {
         "type": "modal",

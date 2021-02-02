@@ -35,11 +35,11 @@ def help_content_builder(team_id, user_id, listener):
                or datum["function"].__name__.startswith("gui"):
                 continue
             dict_function[datum["function"].__name__] = datum["function"].__doc__
-
     user_param = None
     try:
         state_data = get_state_data(team_id, user_id)
-        user_param = get_user_param(team_id, user_id, state_data["pc_id"])
+        if state_data != {}:
+            user_param = get_user_param(team_id, user_id, state_data["pc_id"])
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
             print('new_participant')
