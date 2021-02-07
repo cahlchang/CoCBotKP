@@ -26,6 +26,7 @@ def bootstrap(event: dict, _context) -> str:
     bot = Bot()
     if "params" in event and "path" in event["params"]:
         bot.install_bot(event)
+        print("lambda handler")
         return {
             'isBase64Encoded': False,
             'statusCode': 302,

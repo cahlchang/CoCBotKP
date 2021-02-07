@@ -195,7 +195,7 @@ class Bot(object):
                        'token': token}
             obj = bucket.Object(key_ws)
             body = json.dumps(data_ws, ensure_ascii=False)
-            response = obj.put(
+            obj.put(
                 Body=body.encode('utf-8'),
                 ContentEncoding='utf-8',
                 ContentType='text/plane'
