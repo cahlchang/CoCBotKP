@@ -26,8 +26,12 @@ def bootstrap(event: dict, _context) -> str:
     bot = Bot()
     if "params" in event and "path" in event["params"]:
         bot.install_bot(event)
-        # todo redirectでワークスペースに飛ぶようにリダイレクト入れる
-        return "ok"
+        return {
+            'isBase64Encoded': False,
+            'statusCode': 302,
+            'headers': {'Location': 'https://www.notion.so/mtrpg/CoC-Bot-Keeper-s-page-f8e225fd50814e46bfd82f3fb8fe1c1b'},
+            'body': '{}'
+        }
     random.seed()
     body = event["body"]
 
