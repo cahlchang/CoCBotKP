@@ -53,9 +53,10 @@ def gui_receiver(bot):
     block_content.append(build_channel_select_content())
     # 'Init your character sheet'
     block_content.append(build_input_content('キャラクターシートのURLからデータを初期化します', "https://~"))
-    # Update your character sheet
-    block_content.append(build_button_content('update', 'キャラクターシートの変更点を反映させます', "modal-dispatch_go_button_0"))
     if user_param != {}:
+
+        # Update your character sheet
+        block_content.append(build_button_content('update', 'キャラクターシートの変更点を反映させます', "modal-dispatch_go_button_0"))
 
         # Your Sanity check
         block_content.append(build_button_content('SAN Check', 'SANチェックを行います', "modal-confirm_button_with_sanc"))
