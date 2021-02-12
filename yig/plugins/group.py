@@ -107,24 +107,48 @@ def session_result(bot):
     block_content.append(user_content)
 
     result_message = ""
-    for data in session_data:
+    is_first = True
+    lst_result = []
+    cnt_msg = 60
+#    map_symbol = {"クリティカル": 0, "成功": 0
+    for idx, data in enumerate(session_data):
         symbols = {"クリティカル": ":sparkles:",
                    "成功": ":large_blue_circle:",
                    "失敗": ":x:",
                    "ファンブル": ":skull_and_crossbones:"}
 
         result_message += "%s *%s* *%s* *%s* (%s)\n" % (symbols[data["result"]], data["result"], data["roll"], data["num_rand"], data["num_targ"])
-    if len(result_message) == 0:
-        result_message = "No Result"
-    result_content = {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": result_message
-        }}
-    block_content.append(result_content)
+        if idx % cnt_msg == cnt_msg - 1:
+            lst_result.append(result_message)
+            result_message = ""
+        elif idx == len(session_data) - 1:
+            lst_result.append(result_message)
 
-    return [{'blocks': json.dumps(block_content, ensure_ascii=False)}], None
+    lst_content = []
+    if len(lst_result) == 0 and is_first == True:
+        result_message = "No Result"
+    else:
+        for idx, result in enumerate(lst_result):
+            if idx == 0:
+                block_content.append({
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": result
+                    }})
+
+                lst_content.append({'blocks': json.dumps(block_content, ensure_ascii=False)})
+            else:
+                other_content = [{
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": result
+                    }}]
+                lst_content.append({'blocks': json.dumps(other_content, ensure_ascii=False)})
+
+
+    return lst_content, None
 
 
 @listener("leave+.*", RE_MATCH_FLAG)
