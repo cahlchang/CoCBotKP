@@ -11,11 +11,11 @@ import yig.config
 
 @listener("INIT", KEY_MATCH_FLAG)
 def init_charasheet(bot):
-    """:soap: *init charasheet setting*
+    """:soap: *clear registration of charasheet*
 `/cc init`
     """
     remove_state_data(bot.team_id, bot.user_id)
-    return "設定中のキャラクターデータの設定を初期化しました。", yig.config.COLOR_ATTENTION
+    return "キャラクターデータの紐付けを解除しました。", yig.config.COLOR_ATTENTION
 
 
 @listener(r"init.<https://charasheet.vampire-blood.net/.*", RE_MATCH_FLAG)
