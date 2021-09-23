@@ -113,6 +113,8 @@ def session_result(bot):
 #    map_symbol = {"クリティカル": 0, "成功": 0
     for idx, data in enumerate(session_data):
         symbols = {"クリティカル": ":sparkles:",
+                   "イクストリーム": ":sparkles:",
+                   "ハード": ":large_blue_circle:",
                    "成功": ":large_blue_circle:",
                    "失敗": ":x:",
                    "ファンブル": ":skull_and_crossbones:"}
