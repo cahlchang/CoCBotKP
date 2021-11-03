@@ -60,6 +60,7 @@ def read_session_data(team_id, path):
     try:
         s3_client = boto3.resource('s3')
         bucket = s3_client.Bucket(yig.config.AWS_S3_BUCKET_NAME)
+        print(f"{team_id}/{path}")
         obj = bucket.Object(f"{team_id}/{path}")
         response = obj.get()
         return response['Body'].read()
