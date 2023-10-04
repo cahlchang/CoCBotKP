@@ -1,2 +1,2 @@
 requests >= 2.22.0
-pillow == 9.3.0
+pillow == 10.0.1
