@@ -55,7 +55,9 @@ def create_param_image(team_id, user_id, pc_id, user_param):
     gray = (127, 135, 143)
     light_sky_blue = (180, 235, 250)
 
-    font = ImageFont.truetype("font/04Takibi-Medium.otf", 48)
+#    font = ImageFont.truetype("font/04Takibi-Medium.otf", 48)
+    font = ImageFont.truetype("arial.ttf", 16)
+
     lst_param_name = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
 
     canvas = Image.new('RGB', (W, H), white)
