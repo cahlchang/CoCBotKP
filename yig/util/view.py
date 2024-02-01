@@ -55,9 +55,8 @@ def create_param_image(team_id, user_id, pc_id, user_param):
     gray = (127, 135, 143)
     light_sky_blue = (180, 235, 250)
 
-#    font = ImageFont.truetype("font/04Takibi-Medium.otf", 48)
-    font = ImageFont.truetype("arial.ttf", 16)
-
+    textsize = 48
+    font = ImageFont.truetype("font/04Takibi-Medium.otf", textsize)
     lst_param_name = ["STR", "CON", "POW", "DEX", "APP", "SIZ", "INT", "EDU"]
 
     canvas = Image.new('RGB', (W, H), white)
@@ -105,7 +104,8 @@ def create_param_image(team_id, user_id, pc_id, user_param):
                ((W-w)/2, H-h-h_o), (h_o, H-h_o*7-h), (0, (H-h)/2), (h_o*1, h_o*7), ((W-w)/2, h_o)][i]
 
     for i, name in enumerate(lst_param_name):
-        w, h = draw.textsize(name, font=font)
+        w = draw.textlength(name, font=font)
+        h = textsize
         draw.text(next(get_point(w, h, i)),
                   name,
                   dimgray,
